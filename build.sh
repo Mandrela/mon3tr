@@ -8,4 +8,4 @@ if [ ! -d target ]; then
 fi
 cd target
 
-javac @../options ../src/*.java
+javac -d . ../src/*.java
