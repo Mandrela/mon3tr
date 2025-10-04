@@ -19,6 +19,21 @@
 	</dependencies>
 
 	<build>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+
+		<resources>
+			<!--<resource></resource>-->
+		</resources>
+
+		<directory>target</directory>
+		<outputDirectory>target/classes</outputDirectory>
+		<testOutputDirectory>target/test-classes</testOutputDirectory>
+
+		<defaultGoal>test</defaultGoal>
+		<finalName>${project.artifactId}-v${project.version}</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -41,7 +56,7 @@
 			</plugin>
 		</plugins>
 	</build>
-<!--
+
 	<reporting>
 		<plugins>
 			<plugin>
@@ -58,5 +73,15 @@
 			</plugin>
 		</plugins>
 	</reporting>
--->
 </project>
+
+
+<!--
+https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html#Lifecycle_Reference
+Most used phases:
+	clean; validate, compile, test, package, intergation-test, verify
+-->
+
+<!--
+https://maven.apache.org/ref/3.9.11/maven-model/maven.html
+-->
