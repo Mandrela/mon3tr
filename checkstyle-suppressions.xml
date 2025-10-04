@@ -6,4 +6,7 @@
 
 <!-- https://checkstyle.org/filters/suppressionfilter.html -->
 <suppressions>
+	<suppress checks="JavadocVariable" files="Credentials.java"/>
+	<suppress files=".+\.(?:jar|zip|war|class|tar|bin)$" checks=".*"/>
+	<suppress files=".+\.(?:png|gif|jpg|jpeg)$" checks=".*"/>
 </suppressions>

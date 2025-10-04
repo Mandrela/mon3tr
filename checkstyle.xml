@@ -6,32 +6,33 @@
 	<property name="severity" value="error"/>
 	<property name="fileExtensions" value="java, properties, xml"/>
 
-	<!-- Excludes all 'module-info.java' files              -->
+	<!-- Excludes all 'module-info.java' files             -->
 	<!-- See https://checkstyle.org/filefilters/index.html -->
 	<module name="BeforeExecutionExclusionFileFilter">
 		<property name="fileNamePattern" value="module\-info\.java$"/>
 	</module>
 
-	<!-- https://checkstyle.org/filters/suppressionfilter.html -->
+	<!-- https://checkstyle.org/filters/suppressionfilter.html  -->
+	<!-- value="${org.checkstyle.sun.suppressionfilter.config}" -->
 	<module name="SuppressionFilter">
-		<property name="file" value="${org.checkstyle.sun.suppressionfilter.config}"
+		<property name="file" value="checkstyle-suppressions.xml"
 			default="checkstyle-suppressions.xml" />
 		<property name="optional" value="true"/>
 	</module>
 
-	<!-- Checks that a package-info.java file exists for each package.     -->
+	<!-- Checks that a package-info.java file exists for each package.                -->
 	<!-- See https://checkstyle.org/checks/javadoc/javadocpackage.html#JavadocPackage -->
 	<module name="JavadocPackage"/>
 
-	<!-- Checks whether files end with a new line.                        -->
+	<!-- Checks whether files end with a new line.                      -->
 	<!-- See https://checkstyle.org/checks/misc/newlineatendoffile.html -->
 	<module name="NewlineAtEndOfFile"/>
 
-	<!-- Checks that property files contain the same keys.         -->
+	<!-- Checks that property files contain the same keys.       -->
  	<!-- See https://checkstyle.org/checks/misc/translation.html -->
  	<module name="Translation"/>
 
-	<!-- Checks for Size Violations.                    -->
+	<!-- Checks for Size Violations.                        -->
 	<!-- See https://checkstyle.org/checks/sizes/index.html -->
 	<module name="FileLength">
 		<property name="max" value="1024"/>
@@ -42,11 +43,11 @@
 		<property name="max" value="100"/>
 	</module>
 
-	<!-- Checks for whitespace                               -->
+	<!-- Checks for whitespace                                   -->
 	<!-- See https://checkstyle.org/checks/whitespace/index.html -->
-	<module name="FileTabCharacter"/>
+	<!-- <module name="FileTabCharacter"/>                       -->
 
-	<!-- Miscellaneous other checks.                   -->
+	<!-- Miscellaneous other checks.                       -->
 	<!-- See https://checkstyle.org/checks/misc/index.html -->
 	<module name="RegexpSingleline">
 		<property name="format" value="\s+$"/>
@@ -55,16 +56,16 @@
 		<property name="message" value="Line has trailing spaces."/>
 	</module>
 
-	<!-- Checks for Headers                                -->
-	<!-- See https://checkstyle.org/checks/header/index.html   -->
-	<!-- <module name="Header"> -->
+	<!-- Checks for Headers                                                -->
+	<!-- See https://checkstyle.org/checks/header/index.html               -->
+	<!-- <module name="Header">                                            -->
 	<!--   <property name="headerFile" value="${checkstyle.header.file}"/> -->
-	<!--   <property name="fileExtensions" value="java"/> -->
-	<!-- </module> -->
+	<!--   <property name="fileExtensions" value="java"/>                  -->
+	<!-- </module>                                                         -->
 
 	<module name="TreeWalker">
 
-		<!-- Checks for Javadoc comments.                     -->
+		<!-- Checks for Javadoc comments.                         -->
 		<!-- See https://checkstyle.org/checks/javadoc/index.html -->
 		<module name="InvalidJavadocPosition"/>
 		<module name="JavadocMethod"/>
@@ -73,7 +74,7 @@
 		<module name="JavadocStyle"/>
 		<module name="MissingJavadocMethod"/>
 
-		<!-- Checks for Naming Conventions.                  -->
+		<!-- Checks for Naming Conventions.                      -->
 		<!-- See https://checkstyle.org/checks/naming/index.html -->
 		<module name="ConstantName"/>
 		<module name="LocalFinalVariableName"/>
@@ -85,7 +86,7 @@
 		<module name="StaticVariableName"/>
 		<module name="TypeName"/>
 
-		<!-- Checks for imports                              -->
+		<!-- Checks for imports                                   -->
 		<!-- See https://checkstyle.org/checks/imports/index.html -->
 		<module name="AvoidStarImport">
 			<property name="excludes" value=""/>
@@ -96,12 +97,12 @@
  			<property name="processJavadoc" value="false"/>
 		</module>
 
-		<!-- Checks for Size Violations.                    -->
+		<!-- Checks for Size Violations.                        -->
 		<!-- See https://checkstyle.org/checks/sizes/index.html -->
 		<module name="MethodLength"/>
 		<module name="ParameterNumber"/>
 
-		<!-- Checks for whitespace                               -->
+		<!-- Checks for whitespace                                   -->
 		<!-- See https://checkstyle.org/checks/whitespace/index.html -->
 		<module name="EmptyForIteratorPad"/>
 		<module name="GenericWhitespace"/>
@@ -114,12 +115,12 @@
 		<module name="WhitespaceAfter"/>
 		<module name="WhitespaceAround"/>
 
-		<!-- Modifier Checks                                    -->
+		<!-- Modifier Checks                                       -->
 		<!-- See https://checkstyle.org/checks/modifier/index.html -->
 		<module name="ModifierOrder"/>
 		<module name="RedundantModifier"/>
 
-		<!-- Checks for blocks. You know, those {}'s         -->
+		<!-- Checks for blocks. You know, those {}'s             -->
 		<!-- See https://checkstyle.org/checks/blocks/index.html -->
 		<module name="AvoidNestedBlocks"/>
 		<module name="EmptyBlock"/>
@@ -127,7 +128,7 @@
 		<module name="NeedBraces"/>
 		<module name="RightCurly"/>
 
-		<!-- Checks for common coding problems               -->
+		<!-- Checks for common coding problems                   -->
 		<!-- See https://checkstyle.org/checks/coding/index.html -->
 		<module name="EmptyStatement"/>
 		<module name="EqualsHashCode"/>
@@ -140,7 +141,7 @@
 		<module name="SimplifyBooleanExpression"/>
 		<module name="SimplifyBooleanReturn"/>
 
-		<!-- Checks for class design                         -->
+		<!-- Checks for class design                             -->
 		<!-- See https://checkstyle.org/checks/design/index.html -->
 		<module name="DesignForExtension"/>
 		<module name="FinalClass"/>
@@ -148,7 +149,7 @@
 		<module name="InterfaceIsType"/>
 		<module name="VisibilityModifier"/>
 
-		<!-- Miscellaneous other checks.                   -->
+		<!-- Miscellaneous other checks.                       -->
 		<!-- See https://checkstyle.org/checks/misc/index.html -->
 		<module name="ArrayTypeStyle"/>
 		<module name="FinalParameters"/>
