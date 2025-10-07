@@ -10,6 +10,7 @@ public class About
     public final String helpInfo = "Something about command about";
     private String informationAbout = "This bot will keep an eye on your deadlines and remind you of those that are coming," +
             " but it doesn't know how to do that yet, but it will try its best.";
+
     void execute(Long chatId, TelegramClient telegramClient)
     {
         SendMessage sendMessage = new SendMessage(chatId.toString(), informationAbout);

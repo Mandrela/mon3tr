@@ -10,6 +10,7 @@ public class Authors extends Command
     public final String helpInfo = "Something about command authors";
     private String taleOfAuthors = "The great Mandrela, beloved member of human race, father to all sons";
     void execute(Long chatId, TelegramClient telegramClient)
+
     {
         SendMessage sendMessage = new SendMessage(chatId.toString(), taleOfAuthors);
         try {
