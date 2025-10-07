@@ -41,7 +41,7 @@
 
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
-		<scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
+		<!--<scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>-->
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 
 		<resources>
