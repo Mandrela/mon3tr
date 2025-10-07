@@ -4,7 +4,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-public class Authors extends Command {
+public class AuthorsCommand extends Command {
     public final String name = "authors";
     public final String helpInfo = "Something about command authors";
 
