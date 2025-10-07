@@ -9,9 +9,9 @@ public final class Main {
 	*/
 	public static void main(final String[] args) {
 		try {
-			TelegramBotsLongPollingApplication botsApplication =
-				new TelegramBotsLongPollingApplication();
-			botsApplication.registerBot(Credentials.TOKEN, new TestBot());
+			TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
+			botsApplication.registerBot("", new Bot());
+            //Подкючение токена на тебе
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
