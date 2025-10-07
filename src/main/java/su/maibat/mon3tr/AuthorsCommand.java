@@ -9,7 +9,7 @@ public class AuthorsCommand extends Command {
     public final String helpInfo = "Something about command authors";
 
     // nothing
-    private String taleOfAuthors = "The great Mandrela, beloved member of human race, father to all sons";
+    private final String taleOfAuthors = "The great Mandrela, beloved member of human race, father to all sons";
 
     void execute(Long chatId, TelegramClient telegramClient) {
         SendMessage sendMessage = new SendMessage(chatId.toString(), taleOfAuthors);

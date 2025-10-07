@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 public class AboutCommand {
     public final String name = "about";
     public final String helpInfo = "Something about command about";
-    private String informationAbout = "This bot will keep an eye on your deadlines and remind you of those that are coming," +
+    private final String informationAbout = "This bot will keep an eye on your deadlines and remind you of those that are coming," +
             " but it doesn't know how to do that yet, but it will try its best.";
 
     void execute(Long chatId, TelegramClient telegramClient) {
