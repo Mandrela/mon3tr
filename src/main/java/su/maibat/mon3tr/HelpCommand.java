@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 
 public class HelpCommand implements Command {
-    private Command[] commands;
+    private Command[] commands = {};
 
     public final String getName() {
         return "help";
