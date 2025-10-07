@@ -10,24 +10,18 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 
 public class Bot implements LongPollingSingleThreadUpdateConsumer {
+    public static final String NAME = "mon3tr";
+    private TelegramClient telegramClient;
 
-    /*public static final String NAME = "mon3tr";
-    public static final String TOKEN = "";
-
-
-    public String getToken() {
-        return TOKEN;
+    public Bot(String token) {
+   	    telegramClient = new OkHttpTelegramClient(token);
     }
-    public String getName() {
-        return NAME;
-    }*/
-    private TelegramClient telegramClient = new OkHttpTelegramClient("");
-
 
     @Override
-    public void consume(Update update){
+    public void consume(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(), update.getMessage().getText());
+            SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),
+                                        update.getMessage().getText());
             try {
                 telegramClient.execute(sendMessage);
             } catch (TelegramApiException e){
@@ -35,5 +29,4 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
             }
         }
     }
-
 }
