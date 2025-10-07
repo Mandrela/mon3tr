@@ -1,5 +1,6 @@
 package su.maibat.mon3tr;
 
+import java.util.Optional;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 public final class Main {
@@ -10,8 +11,10 @@ public final class Main {
 	*/
 	public static void main(final String[] args) {
         String token = System.getenv("MON3TR_TOKEN");
-        System.out.println(token);
-        /*
+        if (token == null) {
+            System.err.println("Environmental variable MON3TR_TOKEN is not set");
+            System.exit(1);
+        }
 
     	try {
 		    TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
@@ -20,6 +23,6 @@ public final class Main {
 		    e.printStackTrace();
 	    	System.out.println(e.getMessage());
     		System.out.println(e.getCause());
-	    }*/
+	    }
     }
 }
