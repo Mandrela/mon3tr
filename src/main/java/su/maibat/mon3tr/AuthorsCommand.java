@@ -4,19 +4,21 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-public class AuthorsCommand extends Command {
-    public final String name = "authors";
-    public final String helpInfo = "Something about command authors";
+public class AuthorsCommand implements Command {
+    private String taleOfAuthors = "The great Mandrela, beloved member of human race, father to "
+            + "all sons";
 
-    // nothing
-    private String taleOfAuthors = "The great Mandrela, beloved member of human race, father to all sons";
+    public final String getName() {
+        return "authors";
+    }
 
-    void execute(Long chatId, TelegramClient telegramClient) {
+    public final String getHelp() {
+        return "Some help with that";
+    }
+
+    public final void execute(final Long chatId, final TelegramClient telegramClient)
+            throws TelegramApiException {
         SendMessage sendMessage = new SendMessage(chatId.toString(), taleOfAuthors);
-        try {
-            telegramClient.execute(sendMessage);
-        } catch (TelegramApiException e){
-            e.printStackTrace();
-        }
+        telegramClient.execute(sendMessage);
     }
 }

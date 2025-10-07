@@ -13,18 +13,18 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
     private TelegramClient telegramClient;
 
-    public Bot(String token) {
-   	    telegramClient = new OkHttpTelegramClient(token);
+    public Bot(final String token) {
+        telegramClient = new OkHttpTelegramClient(token);
     }
 
     @Override
-    public void consume(Update update) {
+    public final void consume(final Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),
                                         update.getMessage().getText());
             try {
                 telegramClient.execute(sendMessage);
-            } catch (TelegramApiException e){
+            } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
         }

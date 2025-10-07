@@ -1,11 +1,10 @@
 package su.maibat.mon3tr;
 
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-abstract class Command
-{
-    public final String name = "Name of command";
-    final String helpInfo = "Something about command";
-
-    abstract void execute(Long chatId, TelegramClient telegramClient);
+interface Command {
+    String getName();
+    String getHelp();
+    void execute(Long chatId, TelegramClient telegramClient) throws TelegramApiException;
 }
