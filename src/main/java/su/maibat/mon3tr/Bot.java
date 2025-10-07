@@ -12,9 +12,11 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 public class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
     private TelegramClient telegramClient;
+    private Command[] commands;
 
-    public Bot(final String token) {
+    public Bot(final String token, final Command[] commandsArgument) {
         telegramClient = new OkHttpTelegramClient(token);
+        commands = commandsArgument;
     }
 
     @Override

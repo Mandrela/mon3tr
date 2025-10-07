@@ -15,10 +15,15 @@ public final class Main {
             System.exit(1);
         }
 
+        TelegramBotsLongPollingApplication botsApplication =
+            new TelegramBotsLongPollingApplication();
+
+        Command[] commands = {new HelpCommand(), new AboutCommand(), new AuthorsCommand()};
+        commands[0].setCommandsList(commands);
+        Bot bot = new Bot(token, commands);
+
         try {
-            TelegramBotsLongPollingApplication botsApplication =
-                new TelegramBotsLongPollingApplication();
-            botsApplication.registerBot(token, new Bot(token));
+            botsApplication.registerBot(token, bot);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
