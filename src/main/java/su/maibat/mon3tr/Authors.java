@@ -11,6 +11,5 @@ public class Authors extends Command
     void execute(Long chatId, TelegramClient telegramClient)
     {
         SendMessage sendMessage = new SendMessage(chatId.toString(), taleOfAuthors);
-
     }
 }
