@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 public class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
+    private static final char prefix = '/';
     private TelegramClient telegramClient;
     private Command[] commands;
 
@@ -22,12 +23,26 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
     @Override
     public final void consume(final Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),
+            /*SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),
                                         update.getMessage().getText());
             try {
                 telegramClient.execute(sendMessage);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
+            }*/
+            String[] message = update.getMessage().getText().split(" ");
+            if (message[0].charAt(0) == prefix) {
+               String commandName = message[0].substring(1);
+               for (int i = 1; i < commands.length; i++) {
+                   if (commandName.equals(commands[i].getName())) {
+                       try {
+
+                           commands[i].execute(update.getMessage().getChatId(), telegramClient);
+                       } catch (TelegramApiException e) {
+                           throw new RuntimeException(e);
+                       }
+                   }
+               }
             }
         }
     }
