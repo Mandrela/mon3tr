@@ -18,8 +18,9 @@ public final class Main {
         TelegramBotsLongPollingApplication botsApplication =
             new TelegramBotsLongPollingApplication();
 
-        Command[] commands = {new HelpCommand(), new AboutCommand(), new AuthorsCommand()};
-        // commands[0].setCommandsList(commands);
+        HelpCommand help = new HelpCommand();
+        Command[] commands = {help, new AboutCommand(), new AuthorsCommand()};
+        help.setCommandsList(commands);
         Bot bot = new Bot(token, commands);
 
         try {
