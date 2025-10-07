@@ -19,7 +19,7 @@ public final class Main {
             new TelegramBotsLongPollingApplication();
 
         Command[] commands = {new HelpCommand(), new AboutCommand(), new AuthorsCommand()};
-        commands[0].setCommandsList(commands);
+        // commands[0].setCommandsList(commands);
         Bot bot = new Bot(token, commands);
 
         try {
