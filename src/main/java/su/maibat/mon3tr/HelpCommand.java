@@ -9,11 +9,11 @@ public class HelpCommand implements Command {
     private Command[] commands;
 
     public final String getName() {
-        return "";
+        return "help";
     }
 
     public final String getHelp() {
-        return "";
+        return "HELP ME";
     }
 
     public final void setCommandsList(final Command[] commandsArgument) {
