@@ -22,6 +22,8 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
         return NAME;
     }*/
     private TelegramClient telegramClient = new OkHttpTelegramClient("");
+
+
     @Override
     public void consume(Update update){
         if (update.hasMessage() && update.getMessage().hasText()) {
