@@ -40,10 +40,12 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
                         try {
                         // TODO:
                             if (message.length == 1) {
-                                commands[i].execute(update.getMessage().getChatId(), telegramClient);
+                                commands[i].execute(update.getMessage().getChatId(),
+                                                        telegramClient);
                             } else {
                                 System.out.println(message[1]);
-                                commands[i].executeWithArgs(update.getMessage().getChatId(), telegramClient, Arrays.copyOfRange(message,1,message.length));
+                                commands[i].executeWithArgs(update.getMessage().getChatId(),
+                                    telegramClient, Arrays.copyOfRange(message, 1, message.length));
                             }
                         } catch (TelegramApiException e) { // TODO CustomException with help handler
                            throw new RuntimeException(e);
