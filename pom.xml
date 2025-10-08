@@ -16,7 +16,7 @@
 	<url>http://mon3tr.maibat.su</url>
 
    	<dependencies>
-		<dependency>
+		    <dependency>
         	        <groupId>org.telegram</groupId>
 	                <artifactId>telegrambots-longpolling</artifactId>
                 	<version>[9.1.0]</version>
