@@ -34,7 +34,6 @@ public class HelpCommand implements Command {
 
     public final void executeWithArgs(final Long chatId, final TelegramClient telegramClient,
             final String[] arguments) throws TelegramApiException {
-        System.out.println("Point 2" + arguments[0]);
         String answer = "Command not found";
 
         for (int i = 0; i < commands.length; i++) {
