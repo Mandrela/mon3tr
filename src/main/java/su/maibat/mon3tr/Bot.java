@@ -19,7 +19,7 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
 
     public Bot(final String token, final Command[] commandsArgument) {
         telegramClient = new OkHttpTelegramClient(token);
-        commands = commandsArgument;
+        commands = commandsArgument; // TODO: hashmap
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
                 for (int i = 0; i < commands.length; i++) {
                     if (commandName.equals(commands[i].getName())) {
                         try {
-                        // TODO:
+                        // TODO: default help
                             if (message.length == 1) {
                                 commands[i].execute(update.getMessage().getChatId(),
                                                         telegramClient);
