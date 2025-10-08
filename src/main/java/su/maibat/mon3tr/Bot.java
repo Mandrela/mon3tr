@@ -33,7 +33,7 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
             String[] message = update.getMessage().getText().split(" ");
             if (message[0].charAt(0) == PREFIX) {
                 String commandName = message[0].substring(1);
-                for (int i = 1; i < commands.length; i++) {
+                for (int i = 0; i < commands.length; i++) {
                     if (commandName.equals(commands[i].getName())) {
                         try {
                         // TODO: Multithreading

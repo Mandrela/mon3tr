@@ -22,11 +22,11 @@ public class HelpCommand implements Command {
 
     public final void execute(final Long chatId, final TelegramClient telegramClient)
             throws TelegramApiException {
-        String answer = "Available commands:\n";
+        String answer = "Available commands:\n\n";
         for (int i = 0; i < commands.length; i++) {
             answer += commands[i].getName() + "\n"; // TODO: bytestring optimisation
         }
-        answer += "type help <command> to see information about specific command";
+        answer += "\nType help <command> to see information about specific command";
 
         SendMessage sendMessage = new SendMessage(chatId.toString(), answer);
         telegramClient.execute(sendMessage);
@@ -34,6 +34,7 @@ public class HelpCommand implements Command {
 
     public final void executeWithArguments(final Long chatId, final TelegramClient telegramClient,
             final String[] arguments) throws TelegramApiException {
+        System.out.println("Point 2" + arguments.toString());
         String answer = "Command not found";
 
         for (int i = 0; i < commands.length; i++) {
