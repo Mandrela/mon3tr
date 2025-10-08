@@ -24,7 +24,7 @@ public class HelpCommand implements Command {
             throws TelegramApiException {
         String answer = "Available commands:\n";
         for (int i = 0; i < commands.length; i++) {
-            answer += commands[i].getName() + "\n";
+            answer += commands[i].getName() + "\n"; // TODO: bytestring optimisation
         }
         answer += "type help <command> to see information about specific command";
 
