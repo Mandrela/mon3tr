@@ -3,7 +3,7 @@ package su.maibat.mon3tr;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-interface Command {
+public interface Command {
     String getName();
     String getHelp();
     void execute(Long chatId, TelegramClient telegramClient) throws TelegramApiException;

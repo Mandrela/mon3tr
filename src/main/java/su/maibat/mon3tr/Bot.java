@@ -8,6 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.util.Arrays;
+
 
 public class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
@@ -32,12 +34,17 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
             }*/
             String[] message = update.getMessage().getText().split(" ");
             if (message[0].charAt(0) == PREFIX) {
-                String commandName = message[0].substring(1);
+                String commandName = message[0].substring(1).toLowerCase();
                 for (int i = 0; i < commands.length; i++) {
                     if (commandName.equals(commands[i].getName())) {
                         try {
-                        // TODO: Multithreading
-                        commands[i].execute(update.getMessage().getChatId(), telegramClient);
+                        // TODO:
+                            if (message.length == 1) {
+                                commands[i].execute(update.getMessage().getChatId(), telegramClient);
+                            } else {
+                                System.out.println(message[1]);
+                                commands[i].executeWithArgs(update.getMessage().getChatId(), telegramClient, Arrays.copyOfRange(message,1,message.length));
+                            }
                         } catch (TelegramApiException e) { // TODO CustomException with help handler
                            throw new RuntimeException(e);
                         }

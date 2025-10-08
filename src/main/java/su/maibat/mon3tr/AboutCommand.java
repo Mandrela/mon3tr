@@ -15,7 +15,7 @@ public class AboutCommand implements Command {
     }
 
     public final String getHelp() {
-        return "No-no-no, mister fish, you won't go to your family, you go to yobani tazik";
+        return informationAbout;
     }
 
     // логику обработки исключений выносим за комманду, чтобы она была единой

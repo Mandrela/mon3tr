@@ -32,13 +32,13 @@ public class HelpCommand implements Command {
         telegramClient.execute(sendMessage);
     }
 
-    public final void executeWithArguments(final Long chatId, final TelegramClient telegramClient,
+    public final void executeWithArgs(final Long chatId, final TelegramClient telegramClient,
             final String[] arguments) throws TelegramApiException {
-        System.out.println("Point 2" + arguments.toString());
+        System.out.println("Point 2" + arguments[0]);
         String answer = "Command not found";
 
         for (int i = 0; i < commands.length; i++) {
-            if (commands[i].getName() == arguments[0]) {
+            if (commands[i].getName().equals(arguments[0])) {
                 answer = commands[i].getName() + "\t---\t" + commands[i].getHelp();
                 break;
             }

@@ -6,8 +6,8 @@ public final class Main {
     private Main() { }
 
     /**
-        @param args unused
-    */
+     @param args unused
+     */
     public static void main(final String[] args) {
         String token = System.getenv("MON3TR_TOKEN");
         if (token == null) {
@@ -16,7 +16,7 @@ public final class Main {
         }
 
         TelegramBotsLongPollingApplication botsApplication =
-            new TelegramBotsLongPollingApplication();
+                new TelegramBotsLongPollingApplication();
 
         HelpCommand help = new HelpCommand();
         Command[] commands = {help, new AboutCommand(), new AuthorsCommand()};
