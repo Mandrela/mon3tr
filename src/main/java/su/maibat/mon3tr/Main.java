@@ -21,6 +21,7 @@ public final class Main {
         HelpCommand help = new HelpCommand();
         Command[] commands = {help, new AboutCommand(), new AuthorsCommand()};
         help.setCommandsList(commands);
+
         Bot bot = new Bot(token, commands);
 
         try {
