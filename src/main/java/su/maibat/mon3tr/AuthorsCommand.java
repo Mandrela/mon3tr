@@ -16,9 +16,19 @@ public class AuthorsCommand implements Command {
         return "Some help with that";
     }
 
+    /**
+     * Just send message.
+    */
     public final void execute(final Long chatId, final TelegramClient telegramClient)
             throws TelegramApiException {
         SendMessage sendMessage = new SendMessage(chatId.toString(), taleOfAuthors);
         telegramClient.execute(sendMessage);
+    }
+
+    /**
+     * Set new tale, I intended only one use.
+    */
+    public setTale(final String newTale) {
+        taleOfAuthors = newTale;
     }
 }
