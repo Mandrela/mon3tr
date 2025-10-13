@@ -30,7 +30,6 @@ public final class Main {
         help.setCommandsList(commandMap);
 
         Bot bot = new Bot(token, commandMap);
-
         try {
             botsApplication.registerBot(token, bot);
         } catch (Exception e) {
