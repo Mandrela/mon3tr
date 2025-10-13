@@ -17,14 +17,11 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
     private static final char PREFIX = '/';
     private TelegramClient telegramClient;
-    private LinkedHashMap<String, Command> commands = new LinkedHashMap<String, Command>();
+    private LinkedHashMap<String, Command> commands;
 
-    public Bot(final String token, final Command[] commandsArgument) {
+    public Bot(final String token, final LinkedHashMap<String, Command> commandsArgument) {
         telegramClient = new OkHttpTelegramClient(token);
-         // TODO: hashmap
-        for (int i = 0; i < commandsArgument.length; i++) {
-            commands.put(commandsArgument[i].getName(), commandsArgument[i]);
-        }
+        commands = commandsArgument;
     }
 
     @Override
@@ -41,29 +38,13 @@ public class Bot implements LongPollingSingleThreadUpdateConsumer {
                         } else {
                             System.out.println(message[1]);
                             commands.get(commandName).executeWithArgs(update.getMessage().
-                                        getChatId(), telegramClient,
+                                            getChatId(), telegramClient,
                                             Arrays.copyOfRange(message, 1, message.length));
                         }
                     } catch (TelegramApiException e) { // TODO CustomException with help handler
                         throw new RuntimeException(e);
                     }
                 }
-                /*for (int i = 0; i < commands.length; i++) {
-                    if (commandName.equals(commands[i].getName())) {
-                        try {
-                            if (message.length == 1) {
-                                commands[i].execute(update.getMessage().getChatId(),
-                                                        telegramClient);
-                            } else {
-                                System.out.println(message[1]);
-                                commands[i].executeWithArgs(update.getMessage().getChatId(),
-                                    telegramClient, Arrays.copyOfRange(message, 1, message.length));
-                            }
-                        } catch (TelegramApiException e) { // TODO CustomException with help handler
-                           throw new RuntimeException(e);
-                        }
-                    }
-                }*/
             }
         }
     }

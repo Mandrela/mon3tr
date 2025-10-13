@@ -2,6 +2,8 @@ package su.maibat.mon3tr;
 
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
+import java.util.LinkedHashMap;
+
 public final class Main {
     private Main() { }
 
@@ -17,13 +19,17 @@ public final class Main {
 
         TelegramBotsLongPollingApplication botsApplication =
                 new TelegramBotsLongPollingApplication();
-
         HelpCommand help = new HelpCommand();
-        Command[] commands = {help, new AboutCommand(), new AuthorsCommand()};
-        help.setCommandsList(commands);
 
-        Bot bot = new Bot(token, commands);
+        Command[] commands = {help, new AboutCommand(), new AuthorsCommand()}; // Commands
 
+        LinkedHashMap<String, Command> commandMap = new LinkedHashMap<String, Command>();
+        for (int i = 0; i < commands.length; i++) {
+            commandMap.put(commands[i].getName(), commands[i]);
+        }
+        help.setCommandsList(commandMap);
+
+        Bot bot = new Bot(token, commandMap);
         try {
             botsApplication.registerBot(token, bot);
         } catch (Exception e) {
