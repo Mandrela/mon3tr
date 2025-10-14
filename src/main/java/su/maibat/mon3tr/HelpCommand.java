@@ -56,10 +56,10 @@ public class HelpCommand implements Command {
         String answer = "";
 
         for (int i = 0; i < arguments.length; i++) {
-            if (commands.containsKey(arguments[0])) {
-                answer += arguments[0] + "\t---\t" + commands.get(arguments[0]).getHelp() + "\n";
+            if (commands.containsKey(arguments[i])) {
+                answer += arguments[i] + "\t---\t" + commands.get(arguments[i]).getHelp() + "\n";
             } else {
-                answer += arguments[0] + "\t---\t" + notFoundStr + "\n";
+                answer += arguments[i] + "\t---\t" + notFoundStr + "\n";
             }
         }
 

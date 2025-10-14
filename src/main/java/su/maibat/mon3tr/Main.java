@@ -19,9 +19,16 @@ public final class Main {
 
         TelegramBotsLongPollingApplication botsApplication =
                 new TelegramBotsLongPollingApplication();
-        HelpCommand help = new HelpCommand();
 
-        Command[] commands = {help, new AboutCommand(), new AuthorsCommand()}; // Commands
+        HelpCommand help = new HelpCommand();
+        AuthorsCommand authors = new AuthorsCommand();
+
+        String customAuthors = System.getenv("AUTHORS");
+        if (customAuthors != null) {
+            authors.setInfo(customAuthors);
+        }
+
+        Command[] commands = {help, new AboutCommand(), authors}; // Commands
 
         LinkedHashMap<String, Command> commandMap = new LinkedHashMap<String, Command>();
         for (int i = 0; i < commands.length; i++) {
