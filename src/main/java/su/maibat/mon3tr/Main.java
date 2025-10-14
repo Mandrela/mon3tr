@@ -36,7 +36,7 @@ public final class Main {
         }
         help.setCommandsList(commandMap);
 
-        Bot bot = new Bot(token, commandMap);
+        Bot bot = new Bot(token, commandMap, help);
         try {
             botsApplication.registerBot(token, bot);
         } catch (Exception e) {
