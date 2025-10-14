@@ -18,35 +18,49 @@ public class HelpCommand implements Command {
         return "HELP ME";
     }
 
+    /**
+     * @param commandsArgument Map where key is a name of the command and value is Command
+     * instance.
+    */
     public final void setCommandsList(final LinkedHashMap<String, Command> commandsArgument) {
         commands = commandsArgument;
     }
 
+
+    /**
+     * Supposebly the default function for non valid Bot command. See Bot.java.
+     * @param chatId
+     * @param telegramClient
+    */
     public final void execute(final Long chatId, final TelegramClient telegramClient)
             throws TelegramApiException {
         String answer = "Available commands:\n\n";
         for (String i : commands.keySet()) {
-            answer += commands.get(i).getName() + "\n"; // TODO: bytestring optimisation
+            answer += "/" + i + "\n";
         }
         answer += "\nType help <command> to see information about specific command";
 
-        SendMessage sendMessage = new SendMessage(chatId.toString(), answer);
+        SendMessage sendMessage = new SendMessage(chatId.toString(), answer.toString());
         telegramClient.execute(sendMessage);
     }
 
+
+    /**
+     * @param chatId
+     * @param telegramClient
+     * @param arguments List of one-worded commands
+    */
     public final void executeWithArgs(final Long chatId, final TelegramClient telegramClient,
             final String[] arguments) throws TelegramApiException {
-        String answer = "Command not found";
-/*
-        for (int i = 0; i < commands.length; i++) {
-            if (commands[i].getName().equals(arguments[0])) {
-                answer = commands[i].getName() + "\t---\t" + commands[i].getHelp();
-                break;
+        String notFoundStr = "Command not found";
+        String answer = "";
+
+        for (int i = 0; i < arguments.length; i++) {
+            if (commands.containsKey(arguments[0])) {
+                answer += arguments[0] + "\t---\t" + commands.get(arguments[0]).getHelp() + "\n";
+            } else {
+                answer += arguments[0] + "\t---\t" + notFoundStr + "\n";
             }
-        }*/
-        if (commands.containsKey(arguments[0])) {
-            answer = commands.get(arguments[0]).getName() + "\t---\t"
-                    + commands.get(arguments[0]).getHelp();
         }
 
         SendMessage sendMessage = new SendMessage(chatId.toString(), answer);
