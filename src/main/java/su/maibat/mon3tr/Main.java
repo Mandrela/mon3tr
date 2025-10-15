@@ -4,6 +4,7 @@ import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 import java.util.LinkedHashMap;
 
+
 public final class Main {
     private Main() { }
 
@@ -34,7 +35,7 @@ public final class Main {
         for (int i = 0; i < commands.length; i++) {
             commandMap.put(commands[i].getName(), commands[i]);
         }
-        help.setCommandsList(commandMap);
+        help.setCommands(commandMap);
 
         Bot bot = new Bot(token, commandMap, help);
         try {

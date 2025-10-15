@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 
 
 public class HelpCommand implements Command {
+    private static final char PREFIX = '/';
     private LinkedHashMap<String, Command> commands = new LinkedHashMap<>();
 
     public final String getName() {
@@ -22,7 +23,7 @@ public class HelpCommand implements Command {
      * @param commandsArgument Map where key is a name of the command and value is Command
      * instance.
     */
-    public final void setCommandsList(final LinkedHashMap<String, Command> commandsArgument) {
+    public final void setCommands(final LinkedHashMap<String, Command> commandsArgument) {
         commands = commandsArgument;
     }
 
@@ -36,7 +37,7 @@ public class HelpCommand implements Command {
             throws TelegramApiException {
         String answer = "Available commands:\n\n";
         for (String i : commands.keySet()) {
-            answer += "/" + i + "\n";
+            answer += PREFIX + i + "\n";
         }
         answer += "\nType help <command> to see information about specific command";
 
@@ -63,7 +64,7 @@ public class HelpCommand implements Command {
             }
         }
 
-        SendMessage sendMessage = new SendMessage(chatId.toString(), answer);
+        SendMessage sendMessage = new SendMessage(chatId.toString(), answer.strip());
         telegramClient.execute(sendMessage);
     }
 }
