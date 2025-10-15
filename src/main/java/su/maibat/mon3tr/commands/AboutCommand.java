@@ -1,4 +1,4 @@
-package su.maibat.mon3tr;
+package su.maibat.mon3tr.commands;
 
 public final class AboutCommand extends InfoCommand {
     public AboutCommand() {

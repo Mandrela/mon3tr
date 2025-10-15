@@ -1,5 +1,8 @@
 package su.maibat.mon3tr;
 
+import su.maibat.mon3tr.commands.*;
+import su.maibat.mon3tr.db.*;
+
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 import java.util.LinkedHashMap;

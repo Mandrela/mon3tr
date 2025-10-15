@@ -1,4 +1,4 @@
-package su.maibat.mon3tr;
+package su.maibat.mon3tr.commands;
 
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;

@@ -1,5 +1,7 @@
 package su.maibat.mon3tr;
 
+import su.maibat.mon3tr.commands.*;
+
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;

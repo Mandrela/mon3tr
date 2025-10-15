@@ -1,5 +1,7 @@
 package su.maibat.mon3tr;
 
+import su.maibat.mon3tr.commands.*;
+
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;

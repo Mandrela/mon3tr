@@ -1,4 +1,4 @@
-package su.maibat.mon3tr;
+package su.maibat.mon3tr.commands;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
