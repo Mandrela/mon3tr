@@ -1,11 +1,25 @@
 package su.maibat.mon3tr.db;
 
-public interface DataBaseLinker { // interface is too wide, probably need to shrink methods
-    void addQuery(String tableName, DBQuery inputQuery);
-    void removeByID(String tableName, int id);
-    DBQuery get(String tableName, int id);
-    void updateQuery(String tableName, DBQuery inputQuery);
-    DBQuery find(String tableName, String fieldName, String value);
+public interface DataBaseLinker {
+    /*protected void addQuery(String tableName, DBQuery inputQuery);
+    protected void removeByID(String tableName, int id);
+    protected void updateQuery(String tableName, DBQuery inputQuery);
+    protected DBQuery get(String tableName, int id);
+    protected DBQuery[] find(String tableName, String fieldName, String value);*/
+
+    // Deadline
+    void addDeadline(DeadlineQuery inputQuery);
+    void removeDeadline(int id);
+    void updateQuery(DeadlineQuery inputQuery);
+    DeadlineQuery getDeadline(int id);
+    DeadlineQuery[] find(String fieldName, String value);
+
+    // User
+    void addUser(UserQuery inputQuery);
+    void removeUser(int id);
+    void updateUser(UserQuery inputQuery);
+    UserQuery getUser(int id);
+    UserQuery[] findUser(UserQuery searchQuery);
 }
 
 /**
