@@ -1,70 +1,57 @@
 package su.maibat.mon3tr.commands;
 
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.generics.TelegramClient;
-
 import java.util.LinkedHashMap;
 
+import su.maibat.mon3tr.chat.TelegramChat;
 
-public class HelpCommand implements Command {
+
+public final class HelpCommand implements Command {
     private static final char PREFIX = '/';
+    private static final String NOT_FOUND = "Command not found";
+
     private LinkedHashMap<String, Command> commands = new LinkedHashMap<>();
 
-    public final String getName() {
+    @Override
+    public String getName() {
         return "help";
     }
 
-    public final String getHelp() {
-        return "HELP ME";
+    @Override
+    public String getHelp() {
+        return "Shows list of all available commands or info about specific one";
     }
 
     /**
      * @param commandsArgument Map where key is a name of the command and value is Command
      * instance.
     */
-    public final void setCommands(final LinkedHashMap<String, Command> commandsArgument) {
+    public void setCommands(final LinkedHashMap<String, Command> commandsArgument) {
         commands = commandsArgument;
     }
 
 
-    /**
-     * Supposebly the default function for non valid Bot command. See Bot.java.
-     * @param chatId
-     * @param telegramClient
-    */
-    public final void execute(final Long chatId, final TelegramClient telegramClient)
-            throws TelegramApiException {
-        String answer = "Available commands:\n\n";
-        for (String i : commands.keySet()) {
-            answer += PREFIX + i + "\n";
-        }
-        answer += "\nType help <command> to see information about specific command";
-
-        SendMessage sendMessage = new SendMessage(chatId.toString(), answer.toString());
-        telegramClient.execute(sendMessage);
-    }
-
-
-    /**
-     * @param chatId
-     * @param telegramClient
-     * @param arguments List of one-worded commands
-    */
-    public final void executeWithArgs(final Long chatId, final TelegramClient telegramClient,
-            final String[] arguments) throws TelegramApiException {
-        String notFoundStr = "Command not found";
+    @Override
+    public void execute(final TelegramChat telegramChat) {
+        String[] args = telegramChat.getAllMessages();
         String answer = "";
-
-        for (int i = 0; i < arguments.length; i++) {
-            if (commands.containsKey(arguments[i])) {
-                answer += arguments[i] + "\t---\t" + commands.get(arguments[i]).getHelp() + "\n";
-            } else {
-                answer += arguments[i] + "\t---\t" + notFoundStr + "\n";
+        if (args.length == 0) {
+            answer += "Available commands:\n\n";
+            for (String i : commands.keySet()) {
+                answer += PREFIX + i + "\n";
+            }
+            answer += "\nType help <command> to see information about specific command";
+        } else {
+            for (String arg : args) { // Suppose args - one worded command names
+                answer += arg + " --- ";
+                if (commands.containsKey(arg)) {
+                    answer += commands.get(arg).getHelp();
+                } else {
+                    answer += NOT_FOUND;
+                }
+                answer += "\n";
             }
         }
 
-        SendMessage sendMessage = new SendMessage(chatId.toString(), answer.strip());
-        telegramClient.execute(sendMessage);
+        telegramChat.sendAnswer(answer);
     }
 }

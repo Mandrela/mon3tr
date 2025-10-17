@@ -6,10 +6,12 @@ public final class AboutCommand extends InfoCommand {
             + "coming, but it doesn't know how to do that yet, but it will try its best.";
     }
 
+    @Override
     public String getName() {
         return "about";
     }
 
+    @Override
     public String getHelp() {
         return "Show information about bot";
     }
