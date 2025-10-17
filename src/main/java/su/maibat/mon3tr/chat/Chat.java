@@ -6,4 +6,9 @@ public interface Chat {
     void sendAnswer(String answer);
 
     void addMessage(String message);
+    default void addMessages(String[] messages) {
+        for (String message : messages) {
+            addMessage(message);
+        }
+    }
 }

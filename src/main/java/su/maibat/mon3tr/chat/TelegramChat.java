@@ -13,7 +13,7 @@ public final class TelegramChat implements Chat {
     private final Long chatId;
     private final TelegramClient telegramClient;
 
-    private LinkedList<String> messages;
+    private final LinkedList<String> messages = new LinkedList<>();
 
     public TelegramChat(final Long chatIdArgument, final TelegramClient telegramClientArgument) {
         chatId = chatIdArgument;
@@ -30,7 +30,8 @@ public final class TelegramChat implements Chat {
 
     @Override
     public String[] getAllMessages() {
-        String[] result = (String[]) messages.toArray();
+        // https://stackoverflow.com/questions/44310226/what-does-stringnew-mean
+        String[] result = messages.toArray(String[]::new);
         messages.clear();
         return result;
     }

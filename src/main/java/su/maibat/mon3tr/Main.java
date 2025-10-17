@@ -1,13 +1,13 @@
 package su.maibat.mon3tr;
 
-import su.maibat.mon3tr.commands.Command;
-import su.maibat.mon3tr.commands.AboutCommand;
-import su.maibat.mon3tr.commands.AuthorsCommand;
-import su.maibat.mon3tr.commands.HelpCommand;
+import java.util.LinkedHashMap;
 
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
-import java.util.LinkedHashMap;
+import su.maibat.mon3tr.commands.AboutCommand;
+import su.maibat.mon3tr.commands.AuthorsCommand;
+import su.maibat.mon3tr.commands.Command;
+import su.maibat.mon3tr.commands.HelpCommand;
 
 
 public final class Main {
@@ -36,9 +36,9 @@ public final class Main {
 
         Command[] commands = {help, new AboutCommand(), authors}; // Commands
 
-        LinkedHashMap<String, Command> commandMap = new LinkedHashMap<String, Command>();
-        for (int i = 0; i < commands.length; i++) {
-            commandMap.put(commands[i].getName(), commands[i]);
+        LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
+        for (Command command : commands) {
+            commandMap.put(command.getName(), command);
         }
         help.setCommands(commandMap);
 
