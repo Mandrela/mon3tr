@@ -1,7 +1,9 @@
 package su.maibat.mon3tr;
 
-import su.maibat.mon3tr.commands.*;
-import su.maibat.mon3tr.db.*;
+import su.maibat.mon3tr.commands.Command;
+import su.maibat.mon3tr.commands.AboutCommand;
+import su.maibat.mon3tr.commands.AuthorsCommand;
+import su.maibat.mon3tr.commands.HelpCommand;
 
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 

@@ -1,6 +1,6 @@
 package su.maibat.mon3tr.db;
 
-public interface DataBaseLinker {
+public interface DataBaseLinker { // interface is too wide, probably need to shrink methods
     void addQuery(String tableName, DBQuery inputQuery);
     void removeByID(String tableName, int id);
     DBQuery get(String tableName, int id);
