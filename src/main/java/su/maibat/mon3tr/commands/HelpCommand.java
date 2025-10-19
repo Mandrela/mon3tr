@@ -2,7 +2,7 @@ package su.maibat.mon3tr.commands;
 
 import java.util.LinkedHashMap;
 
-import su.maibat.mon3tr.chat.TelegramChat;
+import su.maibat.mon3tr.chat.Chat;
 
 
 public final class HelpCommand implements Command {
@@ -31,8 +31,8 @@ public final class HelpCommand implements Command {
 
 
     @Override
-    public void execute(final TelegramChat telegramChat) {
-        String[] args = telegramChat.getAllMessages();
+    public void execute(final Chat chat) {
+        String[] args = chat.getAllMessages();
         String answer = "";
         if (args.length == 0) {
             answer += "Available commands:\n\n";
@@ -52,6 +52,6 @@ public final class HelpCommand implements Command {
             }
         }
 
-        telegramChat.sendAnswer(answer);
+        chat.sendAnswer(answer);
     }
 }
