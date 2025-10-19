@@ -1,14 +1,14 @@
 package su.maibat.mon3tr.commands;
 
-import su.maibat.mon3tr.chat.TelegramChat;
+import su.maibat.mon3tr.chat.Chat;
 
 
 public abstract class InfoCommand implements Command {
     protected String info = "";
 
     @Override
-    public final void execute(final TelegramChat telegramChat) {
-        telegramChat.sendAnswer(info);
+    public final void execute(final Chat chat) {
+        chat.sendAnswer(info);
     }
 
     /**
