@@ -1,55 +1,62 @@
 package su.maibat.mon3tr;
 
-import su.maibat.mon3tr.commands.*;
-
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import java.util.LinkedHashMap;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.junit.jupiter.api.Assertions.assert;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
-import java.util.LinkedHashMap;
-import java.util.stream.Stream;
+import su.maibat.mon3tr.chat.Chat;
+import su.maibat.mon3tr.commands.AboutCommand;
+import su.maibat.mon3tr.commands.AuthorsCommand;
+import su.maibat.mon3tr.commands.Command;
+import su.maibat.mon3tr.commands.HelpCommand;
 
 
 class HelpCommandTest {
-    private HelpCommand command;
-    private LinkedHashMap<String, Command> commandMap = new LinkedHashMap<String, Command>();
-    private SuppliedTelegramClient telegramClient;
+    private final HelpCommand helpCommand = new HelpCommand();
+    private final LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
+    private final Chat chat = Mockito.mock(Chat.class);
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setUp() {
-        command = new HelpCommand();
-        telegramClient = new SuppliedTelegramClient();
+        String[] data = {};
+        Mockito.when(chat.getAllMessages()).thenReturn(data);
 
-        Command[] commands = {command, new AboutCommand(), new AuthorsCommand()};
+        Command[] commands = {helpCommand, new AboutCommand(), new AuthorsCommand()};
 
-        for (int i = 0; i < commands.length; i++) {
-            commandMap.put(commands[i].getName(), commands[i]);
+        for (Command command1 : commands) {
+            commandMap.put(command1.getName(), command1);
         }
-        command.setCommands(commandMap);
-
+        helpCommand.setCommands(commandMap);
     }
 
     @Test
     @DisplayName("Shows all commands")
     void AllCommandTest() {
-        assertDoesNotThrow(() -> command.execute(123l, telegramClient), "Should not throw");
+        assertDoesNotThrow(() -> helpCommand.execute(chat), "Should not throw");
 
-        SendMessage result = (SendMessage) telegramClient.getLastMethod();
+        // Should read arguments only once
+        Mockito.verify(chat, Mockito.times(1)).getAllMessages();
 
-        assertEquals("123", result.getChatId(), "ChatId should be equal");
+        ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
+        
+        assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
+        String answer = answerCaptor.getValue();
 
         for (String commandName : commandMap.keySet()) {
-            assertTrue(result.getText().contains(commandName),
+            assertTrue(answer.contains(commandName),
                 "Text should contain all methods in correct order");
         }
     }
@@ -57,21 +64,9 @@ class HelpCommandTest {
     @Test
     @DisplayName("Empty command set")
     void EmptyCommandTest() {
-        command.setCommands(new LinkedHashMap<String, Command>());
+        helpCommand.setCommands(new LinkedHashMap<>());
 
-        assertDoesNotThrow(() -> command.execute(123l, telegramClient), "Should not throw");
-    }
-
-    @Test
-    @DisplayName("Execute with args withour args")
-    void YesNoArgs() {
-        assertDoesNotThrow(() -> command.executeWithArgs(123l, telegramClient, new String[]{}),
-            "Should not throw");
-
-        SendMessage result = (SendMessage) telegramClient.getLastMethod();
-        assertEquals("123", result.getChatId(), "ChatId should be equal");
-        assertEquals("", result.getText(), "Text should be empty");
-
+        assertDoesNotThrow(() -> helpCommand.execute(chat), "Should not throw");
     }
 
     @ParameterizedTest(name = "Test set {1}")
@@ -79,15 +74,20 @@ class HelpCommandTest {
     @DisplayName("Execution with args")
     void ExecWithArgsTest(String[] args, Boolean[] isFound) {
         assertEquals(args.length, isFound.length, "MALFORMED TEST DATA");
+        Mockito.when(chat.getAllMessages()).thenReturn(args);
 
-        assertDoesNotThrow(() -> command.executeWithArgs(123l, telegramClient, args),
+        assertDoesNotThrow(() -> helpCommand.execute(chat),
             "Should not throw");
 
-        SendMessage result = (SendMessage) telegramClient.getLastMethod();
-        assertEquals("123", result.getChatId(), "ChatId should be equal");
+        ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
 
-        String[] lines = result.getText().split("\n");
-        System.out.println(args.length * 10 + lines.length);
+        assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
+        String answer = answerCaptor.getValue();
+
+
+        String[] lines = answer.split("\n");
+        // System.out.println(args.length * 10 + lines.length);
         assertEquals(args.length, lines.length, "Amount of answer lines should match amount of args");
 
         for (int i = 0; i < lines.length; i++) {
@@ -96,8 +96,8 @@ class HelpCommandTest {
         }
     }
 
-//any amount of arguments - same amount of lines, on each line argument with Not Found or help message
 
+    @SuppressWarnings("unused")
     static Stream<Arguments> helpArgs() {
         return Stream.of(
             Arguments.of(new String[]{"authors", "about"}, new Boolean[]{true, true}),

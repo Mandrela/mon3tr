@@ -1,17 +1,14 @@
 package su.maibat.mon3tr.commands;
 
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.generics.TelegramClient;
+import su.maibat.mon3tr.chat.Chat;
 
 
 public abstract class InfoCommand implements Command {
     protected String info = "";
 
-    public final void execute(final Long chatId, final TelegramClient telegramClient)
-            throws TelegramApiException {
-        SendMessage sendMessage = new SendMessage(chatId.toString(), info);
-        telegramClient.execute(sendMessage);
+    @Override
+    public final void execute(final Chat chat) {
+        chat.sendAnswer(info);
     }
 
     /**
