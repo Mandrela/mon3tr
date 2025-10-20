@@ -19,9 +19,35 @@ public final class SQLiteLinker extends AbstractDataBaseLinker {
         }
     }
 
-     // Deadline
+    // User
     @Override
-    public void addDeadline(final DeadlineQuery inputQuery) {
+    public void addUser(final UserQuery inputQuery) throws MalformedQuery {
+
+    }
+
+    @Override
+    public void deactivateUser(final int id) {
+
+    }
+
+    @Override
+    public void updateUser(final UserQuery inputQuery) throws MalformedQuery {
+
+    }
+
+    @Override
+    public UserQuery getUserById(final int id) {
+        return new UserQuery(-1);
+    }
+
+    @Override
+    public UserQuery getUserByChatId(final long chatId) {
+        return new UserQuery(-1);
+    }
+
+    // Deadline
+    @Override
+    public void addDeadline(final DeadlineQuery inputQuery) throws MalformedQuery {
 
     }
 
@@ -31,43 +57,12 @@ public final class SQLiteLinker extends AbstractDataBaseLinker {
     }
 
     @Override
-    public void updateQuery(final DeadlineQuery inputQuery) {
+    public void updateDeadline(final DeadlineQuery inputQuery) throws MalformedQuery {
 
     }
 
     @Override
     public DeadlineQuery getDeadline(final int id) {
-        return new DeadlineQuery();
-    }
-
-    @Override
-    public DeadlineQuery[] find(final String fieldName, final String value) {
-        return new DeadlineQuery[1];
-    }
-
-    // User
-    @Override
-    public void addUser(final UserQuery inputQuery) {
-
-    }
-
-    @Override
-    public void removeUser(final int id) {
-
-    }
-
-    @Override
-    public void updateUser(final UserQuery inputQuery) {
-
-    }
-
-    @Override
-    public UserQuery getUser(final int id) {
-        return new UserQuery();
-    }
-
-    @Override
-    public UserQuery[] findUser(final UserQuery searchQuery) {
-        return new UserQuery[1];
+        return new DeadlineQuery(-1);
     }
 }

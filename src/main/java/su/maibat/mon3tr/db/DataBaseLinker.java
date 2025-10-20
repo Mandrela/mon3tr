@@ -1,48 +1,40 @@
 package su.maibat.mon3tr.db;
 
 public interface DataBaseLinker {
-    /*protected void addQuery(String tableName, DBQuery inputQuery);
-    protected void removeByID(String tableName, int id);
-    protected void updateQuery(String tableName, DBQuery inputQuery);
-    protected DBQuery get(String tableName, int id);
-    protected DBQuery[] find(String tableName, String fieldName, String value);*/
-
-    // Deadline
-    void addDeadline(DeadlineQuery inputQuery);
-    void removeDeadline(int id);
-    void updateDeadline(DeadlineQuery inputQuery);
-    DeadlineQuery getDeadline(int id);
-    //DeadlineQuery[] find(String fieldName, String value);
-
     // User
-    void addUser(UserQuery inputQuery);
+    /**
+     * @param inputQuery I do assume, that id field is -1, else I will shoot!
+     * @throws MalformedQuery when, for example, id != -1
+     */
+    void addUser(UserQuery inputQuery) throws MalformedQuery;
     void deactivateUser(int id);
-    void updateUser(UserQuery inputQuery);
+
+    /**
+     * @param inputQuery Query not only contains updated fields, but also and id by which
+     * correct database row will be found
+     * @throws MalformedQuery when, for example, id == -1
+     */
+    void updateUser(UserQuery inputQuery) throws MalformedQuery;
+
     UserQuery getUserById(int id);
     UserQuery getUserByChatId(long chatId);
     //UserQuery[] findUsersByQuery(UserQuery searchQuery);
+
+    // Deadline
+    /**
+     * @param inputQuery I do assume, that id field is -1, else I will shoot!
+     * @throws MalformedQuery when, for example, id != -1
+     */
+    void addDeadline(DeadlineQuery inputQuery) throws MalformedQuery;
+    void removeDeadline(int id);
+
+    /**
+     * @param inputQuery Query not only contains updated fields, but also and id by which
+     * correct database row will be found
+     * @throws MalformedQuery when, for example, id == -1
+     */
+    void updateDeadline(DeadlineQuery inputQuery) throws MalformedQuery;
+
+    DeadlineQuery getDeadline(int id);
+    //DeadlineQuery[] find(String fieldName, String value);
 }
-
-/**
-find("Deadline", "UserID", find("User", "ChatId", "123")[0].id);
-
-class DBQuery {
-    int ID = -1;
-    String Name;
-    int Remind offset;
-}
-
-
-Deadlines:
-ID  | Burn Date | Name  | Remind offset | UserID    | GroupID
-
-
-
-User:
-ID  | ChatId    | Deadline Query limit  | HPSFWN
-                  32
-
-
-Groups:
-ID  | List of UserIDs
-*/

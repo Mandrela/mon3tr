@@ -21,10 +21,15 @@ public final class TelegramChat implements Chat {
     }
 
     @Override
+    public boolean isEmpty() {
+        return messages.isEmpty();
+    }
+
+    @Override
     public String getMessage() {
-        while (messages.isEmpty()) {
-            messages.peek();
-        } // probably there is a way to give it up
+        if (isEmpty()) {
+            return "";
+        }
         return messages.poll();
     }
 

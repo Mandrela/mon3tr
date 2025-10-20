@@ -5,6 +5,8 @@ public interface Chat {
     String[] getAllMessages();
     void sendAnswer(String answer);
 
+    boolean isEmpty();
+
     void addMessage(String message);
     default void addMessages(String[] messages) {
         for (String message : messages) {
