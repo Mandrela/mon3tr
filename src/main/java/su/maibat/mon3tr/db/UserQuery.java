@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class UserQuery {
+public class UserQuery {
     private int id = -1;
     private long chatId = -1;
 }

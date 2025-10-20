@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class DeadlineQuery {
+public class DeadlineQuery {
     private int id = -1;
     private Time burns = new Time(0);
     private String name = "";
