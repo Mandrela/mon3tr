@@ -10,16 +10,17 @@ public interface DataBaseLinker {
     // Deadline
     void addDeadline(DeadlineQuery inputQuery);
     void removeDeadline(int id);
-    void updateQuery(DeadlineQuery inputQuery);
+    void updateDeadline(DeadlineQuery inputQuery);
     DeadlineQuery getDeadline(int id);
-    DeadlineQuery[] find(String fieldName, String value);
+    //DeadlineQuery[] find(String fieldName, String value);
 
     // User
     void addUser(UserQuery inputQuery);
-    void removeUser(int id);
+    void deactivateUser(int id);
     void updateUser(UserQuery inputQuery);
-    UserQuery getUser(int id);
-    UserQuery[] findUser(UserQuery searchQuery);
+    UserQuery getUserById(int id);
+    UserQuery getUserByChatId(long chatId);
+    //UserQuery[] findUsersByQuery(UserQuery searchQuery);
 }
 
 /**
