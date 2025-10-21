@@ -1,4 +1,4 @@
-package su.maibat.mon3tr;
+package su.maibat.mon3tr.commands;
 
 import java.util.LinkedHashMap;
 import java.util.stream.Stream;
@@ -16,10 +16,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import su.maibat.mon3tr.chat.Chat;
-import su.maibat.mon3tr.commands.AboutCommand;
-import su.maibat.mon3tr.commands.AuthorsCommand;
-import su.maibat.mon3tr.commands.Command;
-import su.maibat.mon3tr.commands.HelpCommand;
 
 
 class HelpCommandTest {
