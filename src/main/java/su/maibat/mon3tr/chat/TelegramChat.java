@@ -26,6 +26,11 @@ public final class TelegramChat implements Chat {
     }
 
     @Override
+    public long getChatId() {
+        return chatId;
+    }
+
+    @Override
     public String getMessage() {
         if (isEmpty()) {
             return "";

@@ -1,5 +1,9 @@
 package su.maibat.mon3tr.db;
 
+import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+import su.maibat.mon3tr.db.exceptions.MalformedQuery;
+import su.maibat.mon3tr.db.exceptions.UserNotFound;
+
 public interface DataBaseLinker {
     // User
     /**
@@ -16,8 +20,8 @@ public interface DataBaseLinker {
      */
     void updateUser(UserQuery inputQuery) throws MalformedQuery;
 
-    UserQuery getUserById(int id);
-    UserQuery getUserByChatId(long chatId);
+    UserQuery getUserById(int id) throws UserNotFound;
+    UserQuery getUserByChatId(long chatId) throws UserNotFound;
     //UserQuery[] findUsersByQuery(UserQuery searchQuery);
 
     // Deadline
@@ -35,6 +39,6 @@ public interface DataBaseLinker {
      */
     void updateDeadline(DeadlineQuery inputQuery) throws MalformedQuery;
 
-    DeadlineQuery getDeadline(int id);
+    DeadlineQuery getDeadline(int id) throws DeadlineNotFound;
     //DeadlineQuery[] find(String fieldName, String value);
 }

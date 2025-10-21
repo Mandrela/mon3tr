@@ -6,6 +6,7 @@ public interface Chat {
     void sendAnswer(String answer);
 
     boolean isEmpty();
+    long getChatId();
 
     void addMessage(String message);
     default void addMessages(String[] messages) {
