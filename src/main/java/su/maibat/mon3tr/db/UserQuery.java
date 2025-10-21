@@ -5,7 +5,19 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class UserQuery {
-    private int id = -1;
-    private long chatId = -1;
+public class UserQuery extends DBQuery {
+    private static final int STANDARD_LIMIT = 32;
+
+    private long chatId = 0;
+    private int limit = STANDARD_LIMIT;
+    private boolean hasPaidSubscribeForWeatherNews = false;
+
+    public UserQuery(final int idArg) {
+        super(idArg);
+    }
+
+    public UserQuery(final int idArg, final long targetChatId) {
+        super(idArg);
+        chatId = targetChatId;
+    }
 }
