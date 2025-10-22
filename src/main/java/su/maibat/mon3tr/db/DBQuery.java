@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter // Will generate getId() method automatically
 @Setter // Will generate setId(int) method automatically
 public abstract class DBQuery {
-    private int id = -1;
+    private final int id = -1;
 }
