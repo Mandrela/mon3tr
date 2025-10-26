@@ -12,8 +12,8 @@ public class UserQuery extends DBQuery {
     private int limit = STANDARD_LIMIT;
     private boolean hasPaidSubscribeForWeatherNews = false;
 
-    public UserQuery(final int idArg) {
-        super(idArg);
+    public UserQuery() {
+        super();
     }
 
     public UserQuery(final int idArg, final long targetChatId) {

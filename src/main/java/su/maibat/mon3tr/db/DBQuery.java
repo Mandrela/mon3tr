@@ -6,6 +6,10 @@ import lombok.Getter;
 public abstract class DBQuery {
     private final int id;
 
+    public DBQuery() {
+        id = -1;
+    }
+
     public DBQuery(final int idArg) {
         id = idArg;
     }

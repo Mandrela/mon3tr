@@ -67,12 +67,12 @@ public final class SQLiteLinker extends AbstractDataBaseLinker {
 
     @Override
     public UserQuery getUserById(final int id) throws UserNotFound {
-        return new UserQuery(-1);
+        return new UserQuery();
     }
 
     @Override
     public UserQuery getUserByChatId(final long chatId) throws UserNotFound {
-        return new UserQuery(-1);
+        return new UserQuery();
     }
 
     // Deadline
@@ -93,6 +93,6 @@ public final class SQLiteLinker extends AbstractDataBaseLinker {
 
     @Override
     public DeadlineQuery getDeadline(final int id) throws DeadlineNotFound {
-        return new DeadlineQuery(-1);
+        return new DeadlineQuery();
     }
 }
