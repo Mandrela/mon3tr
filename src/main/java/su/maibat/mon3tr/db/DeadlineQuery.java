@@ -15,8 +15,8 @@ public class DeadlineQuery extends DBQuery {
     private int userId = 0;
     private int groupId = 0;
 
-    public DeadlineQuery(final int idArg) {
-        super(idArg);
+    public DeadlineQuery() {
+        super();
     }
 
     /**
