@@ -95,4 +95,9 @@ public final class SQLiteLinker extends AbstractDataBaseLinker {
     public DeadlineQuery getDeadline(final int id) throws DeadlineNotFound {
         return new DeadlineQuery();
     }
+
+    @Override
+    public DeadlineQuery[] getDeadlinesForUser(final int userId) throws DeadlineNotFound {
+        return new DeadlineQuery[1];
+    }
 }
