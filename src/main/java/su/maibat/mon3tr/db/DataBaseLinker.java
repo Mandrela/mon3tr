@@ -40,5 +40,6 @@ public interface DataBaseLinker {
     void updateDeadline(DeadlineQuery inputQuery) throws MalformedQuery;
 
     DeadlineQuery getDeadline(int id) throws DeadlineNotFound;
+    DeadlineQuery[] getDeadlinesForUser(int userId) throws DeadlineNotFound;
     //DeadlineQuery[] find(String fieldName, String value);
 }
