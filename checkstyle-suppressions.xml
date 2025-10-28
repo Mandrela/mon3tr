@@ -7,6 +7,9 @@
 <!-- https://checkstyle.org/filters/suppressionfilter.html -->
 <suppressions>
 	<suppress checks="InvalidJavadocPosition" files="DataBaseLinker.java"/>
+	<suppress checks="MagicNumber" files="SQLiteLinker.java"/>
+	<suppress checks="MemberName" files="SQLiteLinker.java"/>
+	<suppress checks="LocalVariableName" files="SQLiteLinker.java"/>
 	<suppress files=".+\.(?:jar|zip|war|class|tar|bin)$" checks=".*"/>
 	<suppress files=".+\.(?:png|gif|jpg|jpeg)$" checks=".*"/>
 </suppressions>

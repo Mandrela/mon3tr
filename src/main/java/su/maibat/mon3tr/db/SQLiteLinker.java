@@ -1,21 +1,56 @@
 package su.maibat.mon3tr.db;
 
+import java.io.Closeable;
 import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static su.maibat.mon3tr.Main.INFO;
-import static su.maibat.mon3tr.Main.WARNING;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 
-public final class SQLiteLinker extends AbstractDataBaseLinker {
+public final class SQLiteLinker extends AbstractDataBaseLinker implements Closeable {
     private static final String URLPREFIX = "jdbc:sqlite:";
+
+    private static final String USER_SELECT_BY_ID = "SELECT* FROM users WHERE id = ?";
+    private static final String USER_SELECT_BY_CHAT_ID = "SELECT* FROM users WHERE chatID = ?";
+    private static final String USER_INSERT = "INSERT INTO users (chatId) VALUES (?)";
+    private static final String USER_UPDATE = "UPDATE users SET chatId = ?, queryLimit = ?, "
+        + "hpsfwn = ? WHERE id = ?";
+    private static final String USER_UPDATE_ACTIVE = "UPDATE users SET active = 0 WHERE id = ?";
+
+
+    private static final String DEADLINE_SELECT_BY_ID = "SELECT* FROM deadlines WHERE id = ?";
+    private static final String DEADLINE_SELECT_BY_USER_ID = "SELECT* FROM deadlines WHERE "
+        + "userId = ? AND active = 1";
+    private static final String DEADLINE_INSERT = "INSERT INTO deadlines (name, burns, "
+        + "offsetValue, userId) VALUES (?, ?, ?, ?)";
+    private static final String DEADLINE_UPDATE = "UPDATE deadlines SET name = ?, burns = ?, "
+        + "offsetValue = ?, userId = ? WHERE id = ?";
+    private static final String DEADLINE_UPDATE_ACTIVE = "UPDATE deadlines SET active = 0 "
+        + "WHERE id = ?";
+
+
     private final String dbName;
+
+    private final PreparedStatement user_get_by_id;
+    private final PreparedStatement user_get_by_chat_id;
+    private final PreparedStatement user_add;
+    private final PreparedStatement user_update;
+    private final PreparedStatement user_deactivate;
+
+    private final PreparedStatement deadline_get_by_id;
+    private final PreparedStatement deadline_get_by_user_id;
+    private final PreparedStatement deadline_add;
+    private final PreparedStatement deadline_update;
+    private final PreparedStatement deadline_remove;
 
     private Connection conn = null;
 
@@ -34,65 +69,206 @@ public final class SQLiteLinker extends AbstractDataBaseLinker {
 
         File f = new File(dbName);
         if (f.isDirectory()) {
-            throw new FileAlreadyExistsException("Desired Database name collide with directory");
+            throw new FileAlreadyExistsException("Database name collide with directory");
         }
 
         if (!f.exists()) {
-            System.out.println(WARNING + " Database file wasn't found, will create...");
+            System.out.println(INFO + " Database file wasn't found, will create...");
         }
 
         try {
             conn = DriverManager.getConnection(URLPREFIX + dbName);
             System.out.println(INFO + " Database connection established.");
+
+            String create_deadlines = "CREATE TABLE IF NOT EXISTS deadlines "
+                + "(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, "
+                + "burns INTEGER NOT NULL, offsetValue INTEGER DEFAULT 10000, "
+                + "userId INTEGER NOT NULL, groupId INTEGER, active INTEGER DEFAULT 1);";
+            String create_users = "CREATE TABLE IF NOT EXISTS users "
+                + "(id INTEGER PRIMARY KEY AUTOINCREMENT, chatId REAL NOT NULL, "
+                + "queryLimit INTEGER DEFAULT 32, hpsfwn INTEGER DEFAULT 0, "
+                + "active INTEGER DEFAULT 1);";
+            Statement statement = conn.createStatement();
+            statement.execute(create_deadlines);
+            statement.execute(create_users);
+
+            user_get_by_id = conn.prepareStatement(USER_SELECT_BY_ID);
+            user_get_by_chat_id = conn.prepareStatement(USER_SELECT_BY_CHAT_ID);
+            user_add = conn.prepareStatement(USER_INSERT);
+            user_update = conn.prepareStatement(USER_UPDATE);
+            user_deactivate = conn.prepareStatement(USER_UPDATE_ACTIVE);
+
+            deadline_get_by_id = conn.prepareStatement(DEADLINE_SELECT_BY_ID);
+            deadline_get_by_user_id = conn.prepareStatement(DEADLINE_SELECT_BY_USER_ID);
+            deadline_add = conn.prepareStatement(DEADLINE_INSERT);
+            deadline_update = conn.prepareStatement(DEADLINE_UPDATE);
+            deadline_remove = conn.prepareStatement(DEADLINE_UPDATE_ACTIVE);
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     // User
     @Override
     public void addUser(final UserQuery inputQuery) throws MalformedQuery {
-
+        if (inputQuery.getId() != -1) {
+            throw new MalformedQuery("Id should be -1");
+        }
+        try {
+            user_add.setLong(1, inputQuery.getChatId());
+            user_add.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     @Override
     public void deactivateUser(final int id) {
-
+        try {
+            user_deactivate.setInt(1, id);
+            user_deactivate.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     @Override
     public void updateUser(final UserQuery inputQuery) throws MalformedQuery {
-
+        try {
+            user_update.setLong(1, inputQuery.getChatId());
+            user_update.setInt(2, inputQuery.getLimit());
+            user_update.setBoolean(3, inputQuery.isHasPaidSubscribeForWeatherNews());
+            user_update.setInt(4, inputQuery.getId());
+            user_update.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
+
+
+    /**
+     * @param result Result set, assuming not toched
+     * @return UserQuery parsed from result, @throws UserNotFound if result is empty
+     */
+    private UserQuery parseUserFromResult(final ResultSet result)
+            throws UserNotFound, SQLException {
+        if (!result.next()) {
+            throw new UserNotFound("User not found, dunno id");
+        }
+        return new UserQuery(result.getInt("id"), result.getLong("chatId"));
+    }
+
 
     @Override
     public UserQuery getUserById(final int id) throws UserNotFound {
-        return new UserQuery();
+        try {
+            user_get_by_id.setInt(1, id);
+            return parseUserFromResult(user_get_by_id.executeQuery());
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } catch (UserNotFound e) {
+            throw new UserNotFound("User not found, id: " + id);
+        }
     }
 
     @Override
     public UserQuery getUserByChatId(final long chatId) throws UserNotFound {
-        return new UserQuery();
+        try {
+            user_get_by_chat_id.setLong(1, chatId);
+            return parseUserFromResult(user_get_by_chat_id.executeQuery());
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } catch (UserNotFound e) {
+            throw new UserNotFound("User not found, chatId: " + chatId);
+        }
     }
 
     // Deadline
     @Override
     public void addDeadline(final DeadlineQuery inputQuery) throws MalformedQuery {
-
+        try {
+            if (inputQuery.getId() != -1) {
+                throw new MalformedQuery("Id should be -1");
+            }
+            deadline_add.setString(1, inputQuery.getName());
+            deadline_add.setBigDecimal(2, inputQuery.getBurnTime());
+            deadline_add.setBigDecimal(3, inputQuery.getOffset());
+            deadline_add.setInt(4, inputQuery.getUserId());
+            deadline_add.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     @Override
     public void removeDeadline(final int id) {
-
+        try {
+            deadline_remove.setInt(1, id);
+            deadline_remove.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     @Override
     public void updateDeadline(final DeadlineQuery inputQuery) throws MalformedQuery {
+        try {
+            deadline_update.setString(1, inputQuery.getName());
+            deadline_update.setBigDecimal(2, inputQuery.getBurnTime());
+            deadline_update.setBigDecimal(3, inputQuery.getOffset());
+            deadline_update.setInt(4, inputQuery.getUserId());
+            deadline_update.setInt(5, inputQuery.getId());
+            deadline_update.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 
+    private DeadlineQuery parseDeadlineFromResult(final ResultSet result) throws SQLException {
+        return new DeadlineQuery(result.getInt("id"), result.getString("name"),
+            result.getBigDecimal("burns"), result.getBigDecimal("offsetValue"),
+            result.getInt("userId"));
     }
 
     @Override
     public DeadlineQuery getDeadline(final int id) throws DeadlineNotFound {
-        return new DeadlineQuery();
+        try {
+            deadline_get_by_id.setInt(1, id);
+            ResultSet result = deadline_get_by_id.executeQuery();
+            if (!result.next()) {
+                throw new DeadlineNotFound("Requested id: " + id);
+            }
+            return parseDeadlineFromResult(result);
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public DeadlineQuery[] getDeadlinesForUser(final int userId) throws DeadlineNotFound {
+        try {
+            deadline_get_by_user_id.setInt(1, userId);
+            ResultSet result = deadline_get_by_user_id.executeQuery();
+            if (!result.next()) {
+                throw new DeadlineNotFound("Requested userId: " + userId);
+            }
+            java.util.ArrayList<DeadlineQuery> deadlineQuerys = new java.util.ArrayList<>();
+            do {
+                deadlineQuerys.add(parseDeadlineFromResult(result));
+            } while (result.next());
+
+            return deadlineQuerys.toArray(DeadlineQuery[]::new);
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 }

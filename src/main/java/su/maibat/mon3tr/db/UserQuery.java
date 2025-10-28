@@ -16,6 +16,10 @@ public class UserQuery extends DBQuery {
         super();
     }
 
+    /**
+     * @param idArg
+     * @param targetChatId
+     */
     public UserQuery(final int idArg, final long targetChatId) {
         super(idArg);
         chatId = targetChatId;
