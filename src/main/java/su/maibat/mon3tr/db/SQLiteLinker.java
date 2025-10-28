@@ -4,7 +4,9 @@ import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static su.maibat.mon3tr.Main.INFO;
 import static su.maibat.mon3tr.Main.WARNING;
@@ -44,6 +46,21 @@ public final class SQLiteLinker extends AbstractDataBaseLinker {
         try {
             conn = DriverManager.getConnection(URLPREFIX + dbName);
             System.out.println(INFO + " Database connection established.");
+
+            String create_deadlines = "CREATE TABLE IF NOT EXISTS deadlines "
+                + "(id INTEGER PRIMARY KEY, burns text NOT NULL, name text NOT NULL);";
+            Statement statement = conn.createStatement();
+            statement.execute(create_deadlines);
+            statement.execute(create_users);
+            statement.execute(create_groups);
+            
+
+            ResultSet tables = conn.getMetaData().getTables(null, null, "deadlines", null);
+            while (tables.next()) {
+                for (int i = 1; i <= 10; i++) {
+                    System.out.println((tables.getString(i)));
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
