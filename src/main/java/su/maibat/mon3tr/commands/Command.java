@@ -11,10 +11,6 @@ public interface Command {
     String getName();
     String getHelp();
 
-    default boolean isDate(String argument){
-        Pattern pattern = compile("^\\d{1,2}\\.\\d{1,2}\\.\\d{2,4}$");
-        Matcher matcher = pattern.matcher(argument);
-        return matcher.find();
-    }
+
     void execute(Chat chat);
 }

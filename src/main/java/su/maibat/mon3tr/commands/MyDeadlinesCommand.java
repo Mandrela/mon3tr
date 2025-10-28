@@ -3,14 +3,18 @@ package su.maibat.mon3tr.commands;
 import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
+import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;
+import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+import su.maibat.mon3tr.db.exceptions.MalformedQuery;
+import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 ;
 
 public class MyDeadlinesCommand implements Command {
 
     DataBaseLinker linker;
-    MyDeadlinesCommand(DataBaseLinker linker) {
+    MyDeadlinesCommand(SQLiteLinker linker) {
         this.linker = linker;
     }
 
@@ -19,18 +23,29 @@ public class MyDeadlinesCommand implements Command {
 
     public void execute(Chat chat) {
 
+        try {
+            UserQuery user = linker.getUserByChatId(chat.getChatId());
+            try {
+                DeadlineQuery[] queryList = linker.getDeadlinesForUser(user.getId());
 
-        UserQuery user = new UserQuery(-1, chat.getChatId());
-        DeadlineQuery findQuery = new DeadlineQuery();
-        findQuery.setUserId(user.getId());
-        DeadlineQuery[] queryList = linker.findDeadline(findQuery);
+                String answer = "";
 
-        String answer = "";
+                for (DeadlineQuery query : queryList) {
+                    answer = answer.concat(query.getId() + " : " + query.getName() + " : " +
+                            query.getBurnTime() + "\n");
+                }
+                chat.sendAnswer(answer);
+            } catch (DeadlineNotFound dnf) {
+                chat.sendAnswer("You have not any deadlines");
+            }
 
-        for (DeadlineQuery query : queryList){
-            answer = answer.concat(query.getId() + " : " + query.getName() + " : " +
-                    query.getBurnTime() + "\n");
+        } catch (UserNotFound unf) {
+            UserQuery userQuery = new UserQuery(-1, chat.getChatId());
+            try {
+                linker.addUser(userQuery);
+            } catch (MalformedQuery me) {}
+            chat.sendAnswer("You have not any deadlines");
+
         }
-        chat.sendAnswer(answer);
     }
 }
