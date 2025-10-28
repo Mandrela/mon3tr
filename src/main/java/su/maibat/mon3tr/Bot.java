@@ -45,6 +45,7 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
                 TelegramChat telegramChat = new TelegramChat(
                     update.getMessage().getChatId(), telegramClient);
                 telegramChat.addMessages(Arrays.copyOfRange(message, 1, message.length));
+                telegramChat.froze();
 
                 // multithreading I want here
                 commands.getOrDefault(commandName, defaultCommand).execute(telegramChat);
