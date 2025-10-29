@@ -1,12 +1,6 @@
 package su.maibat.mon3tr.commands;
 
-import su.maibat.mon3tr.chat.Chat;
-import su.maibat.mon3tr.db.DataBaseLinker;
-import su.maibat.mon3tr.db.DeadlineQuery;
-import su.maibat.mon3tr.db.UserQuery;
-import su.maibat.mon3tr.db.exceptions.UserNotFound;
-
-import java.sql.Time;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -14,22 +8,33 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static java.util.regex.Pattern.compile;
 
-public class DeadlineAddCommand implements Command {
+import su.maibat.mon3tr.chat.Chat;
+import su.maibat.mon3tr.db.DataBaseLinker;
+import su.maibat.mon3tr.db.DeadlineQuery;
+import su.maibat.mon3tr.db.UserQuery;
+import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-    DataBaseLinker linker;
+public final class DeadlineAddCommand implements Command {
+    private final DataBaseLinker linker;
 
-    DeadlineAddCommand(DataBaseLinker inputLinker) {
+    public DeadlineAddCommand(final DataBaseLinker inputLinker) {
         this.linker = inputLinker;
     }
 
-    public final String getName() {return "add";}
+    @Override
+    public String getName() {
+        return "add";
+    }
 
-    public final String getHelp() {return "this command add your deadline";}
+    @Override
+    public String getHelp() {
+        return "this command add your deadline";
+    }
 
-    public void execute(Chat chat){
+    @Override
+    public void execute(final Chat chat) {
         String[] arguments = chat.getAllMessages();
 
         if (arguments.length == 0) {
@@ -46,8 +51,7 @@ public class DeadlineAddCommand implements Command {
                 }*/
                 try {
                     linker.getUserByChatId(chat.getChatId());
-                }
-                catch (UserNotFound e) {
+                } catch (UserNotFound e) {
                     UserQuery userQuery = new UserQuery(-1, chat.getChatId());
                     linker.addUser(userQuery);
                 }
@@ -57,7 +61,7 @@ public class DeadlineAddCommand implements Command {
                 if (isDate(arguments[0])) {
                     inputQuery.setName(arguments[1]);
                     try {
-                        Long burnTime = StringToTime(arguments[0]);
+                        BigDecimal burnTime = new BigDecimal(stringToTime(arguments[0]));
                         inputQuery.setBurnTime(burnTime);
                     } catch (DateTimeParseException e) {
                         throw new RuntimeException(e);
@@ -65,7 +69,7 @@ public class DeadlineAddCommand implements Command {
                 } else {
                     inputQuery.setName(arguments[0]);
                     try {
-                        Long burnTime = StringToTime(arguments[1]);
+                        BigDecimal burnTime = new BigDecimal(stringToTime(arguments[1]));
                         inputQuery.setBurnTime(burnTime);
                     } catch (DateTimeParseException e) {
                         throw new RuntimeException(e);
@@ -77,8 +81,7 @@ public class DeadlineAddCommand implements Command {
 
                 linker.addDeadline(inputQuery);
                 chat.sendAnswer("Deadline added successfully");
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Arguments not found");
             }
         }
@@ -86,13 +89,13 @@ public class DeadlineAddCommand implements Command {
 
     }
 
-    boolean isDate(String argument){
+    private boolean isDate(final String argument) {
         Pattern pattern = compile("^\\d{1,2}\\.\\d{1,2}\\.\\d{2,4}$");
         Matcher matcher = pattern.matcher(argument);
         return matcher.find();
     }
 
-    private Long StringToTime(String dateString) throws DateTimeParseException {
+    private Long stringToTime(final String dateString) throws DateTimeParseException {
         String normalStringDate = normalizeDate(dateString);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -102,10 +105,10 @@ public class DeadlineAddCommand implements Command {
         java.time.LocalDateTime localDateTime = date.atTime(timeToAdd);
 
         java.time.ZonedDateTime zoneDateTime = localDateTime.atZone(ZoneId.of("UTC+5"));
-        return zoneDateTime.toInstant().toEpochMilli()/1000;
+        return zoneDateTime.toInstant().toEpochMilli() / 1000;
     }
 
-    private String normalizeDate (String dateArg) {
+    private String normalizeDate(final String dateArg) {
 
         int[] maxDayInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
@@ -116,7 +119,7 @@ public class DeadlineAddCommand implements Command {
         } else {
 
             int month = Integer.parseInt(dateFragments[1]);
-            if (month < 1){
+            if (month < 1) {
                 month = 1;
                 dateFragments[1] = "01";
             } else if (month > 12) {
@@ -127,18 +130,22 @@ public class DeadlineAddCommand implements Command {
             int day = Integer.parseInt(dateFragments[0]);
             if (day < 1) {
                 dateFragments[0] = "01";
-            } else if (day > maxDayInMonth[month-1]) {
-                dateFragments[0] = Integer.toString(maxDayInMonth[month-1]);
+            } else if (day > maxDayInMonth[month - 1]) {
+                dateFragments[0] = Integer.toString(maxDayInMonth[month - 1]);
             }
 
             String year = dateFragments[2];
-            if (year.length() < 4){
-                if (year.length() == 2) {
-                    dateFragments[2] = "20".concat(year);
-                } else if (year.length() == 3) {
-                    dateFragments[2] = "2".concat(year);
-                } else {
-                    dateFragments[2] = "300".concat(year);
+            if (year.length() < 4) {
+                switch (year.length()) {
+                    case 2:
+                        dateFragments[2] = "20".concat(year);
+                        break;
+                    case 3:
+                        dateFragments[2] = "2".concat(year);
+                        break;
+                    default:
+                        dateFragments[2] = "300".concat(year);
+                        break;
                 }
             }
 

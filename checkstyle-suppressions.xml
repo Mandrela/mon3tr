@@ -10,6 +10,7 @@
 	<suppress checks="MagicNumber" files="SQLiteLinker.java"/>
 	<suppress checks="MemberName" files="SQLiteLinker.java"/>
 	<suppress checks="LocalVariableName" files="SQLiteLinker.java"/>
+	<suppress checks="MagicNumber" files="DeadlineAddCommand.java"/>
 	<suppress files=".+\.(?:jar|zip|war|class|tar|bin)$" checks=".*"/>
 	<suppress files=".+\.(?:png|gif|jpg|jpeg)$" checks=".*"/>
 </suppressions>

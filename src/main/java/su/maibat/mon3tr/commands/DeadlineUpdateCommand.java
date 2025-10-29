@@ -2,13 +2,19 @@ package su.maibat.mon3tr.commands;
 
 import su.maibat.mon3tr.chat.Chat;
 
-public class DeadlineUpdateCommand implements Command {
+public final class DeadlineUpdateCommand implements Command {
+    @Override
+    public String getName() {
+        return "update";
+    }
 
-    public final String getName() {return "update";}
+    @Override
+    public String getHelp() {
+        return "This command update your deadline";
+    }
 
-    public final String getHelp() {return "This command update your deadline";}
-
-    public void execute(Chat chat) {
+    @Override
+    public void execute(final Chat chat) {
         String[] arguments = chat.getAllMessages();
 
         if (arguments.length == 0) {
