@@ -16,6 +16,7 @@ public class UserQuery extends DBQuery {
         super();
     }
 
+
     /**
      * @param idArg
      * @param targetChatId
