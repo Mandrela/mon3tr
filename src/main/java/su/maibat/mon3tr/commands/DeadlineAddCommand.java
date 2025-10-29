@@ -108,6 +108,8 @@ public class DeadlineAddCommand implements Command {
     private String normalizeDate (String dateArg) {
 
         int[] maxDayInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        String[] stringMaxDayInMonth = {"31", "28", "31", "30", "31", "30", "31",
+                "31", "30", "31", "30", "31"};
 
         String[] dateFragments = dateArg.split("[./]");
 
@@ -118,17 +120,23 @@ public class DeadlineAddCommand implements Command {
             int month = Integer.parseInt(dateFragments[1]);
             if (month < 1){
                 month = 1;
-                dateFragments[1] = "01";
+                dateFragments[1] = "1";
             } else if (month > 12) {
                 month = 12;
                 dateFragments[1] = "12";
+            }
+            if (month <= 9) {
+                dateFragments[1] = "0" + dateFragments[1];
             }
 
             int day = Integer.parseInt(dateFragments[0]);
             if (day < 1) {
                 dateFragments[0] = "01";
             } else if (day > maxDayInMonth[month-1]) {
-                dateFragments[0] = Integer.toString(maxDayInMonth[month-1]);
+                dateFragments[0] = stringMaxDayInMonth[month-1];
+            }
+            if (day <= 9) {
+                dateFragments[0] = "0" + dateFragments[0];
             }
 
             String year = dateFragments[2];
