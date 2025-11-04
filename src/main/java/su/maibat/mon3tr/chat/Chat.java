@@ -7,11 +7,4 @@ public interface Chat {
 
     boolean isEmpty();
     long getChatId();
-
-    void addMessage(String message);
-    default void addMessages(String[] messages) {
-        for (String message : messages) {
-            addMessage(message);
-        }
-    }
 }

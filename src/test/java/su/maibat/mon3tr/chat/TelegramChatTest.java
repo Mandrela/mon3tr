@@ -12,7 +12,6 @@ import org.mockito.Mockito;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 
-// TelegramChat.sendAnswer is out of 
 class TelegramChatTest {
     private TelegramClient tgClient;
     private TelegramChat chat;
@@ -26,7 +25,7 @@ class TelegramChatTest {
 
     @Test
     @DisplayName("Base test")
-    void BaseTest() {
+    void baseTest() {
         assertEquals(123L, chat.getChatId(), "Passed id and fetched should match");
         assertTrue(chat.isEmpty(), "Inner buffer should be empty");
 
@@ -57,7 +56,7 @@ class TelegramChatTest {
 
     @Test
     @DisplayName("Frozing test")
-    void FrozingTest() {
+    void frozingTest() {
         assertTrue(!chat.isFrozen(), "Should not be frozen after initialization");
         chat.froze();
         assertTrue(chat.isFrozen(), "Should froze if told to");
@@ -73,7 +72,7 @@ class TelegramChatTest {
         assertEquals(testMessages.length, result.length);
         assertTrue(!chat.isFrozen(), "Should unfroze automatically");
         assertTrue(!chat.isEmpty(), "Should have left one message");
-        
+
         assertEquals("This message should not be displayed", chat.getMessage());
         assertTrue(chat.isEmpty(), "Finally, should not have anything");
 

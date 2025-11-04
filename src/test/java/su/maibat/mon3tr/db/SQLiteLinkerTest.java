@@ -19,7 +19,7 @@ import su.maibat.mon3tr.db.exceptions.UserNotFound;
 public class SQLiteLinkerTest {
     @Test
     @DisplayName("Constructor test")
-    void ConstructorTest() throws IOException {
+    void constructorTest() throws IOException {
         String coolName = "totally cool database name";
 
         new File(coolName).delete();
@@ -33,7 +33,7 @@ public class SQLiteLinkerTest {
         try {
             assertTrue(!new File(coolName).exists());
             assertTrue(new File(coolName + ".db").exists());
-            
+
             linker.close();
             linker = new SQLiteLinker(coolName + ".db");
 
@@ -41,7 +41,8 @@ public class SQLiteLinkerTest {
             assertTrue(!new File(coolName + ".db.db").exists());
 
             new File("dir.db").mkdir();
-            assertThrows(FileAlreadyExistsException.class, () -> new SQLiteLinker("dir"));
+            assertThrows(FileAlreadyExistsException.class,
+                () -> new SQLiteLinker("dir"));
         } finally {
             linker.close();
         }
@@ -49,7 +50,7 @@ public class SQLiteLinkerTest {
 
     @Test
     @DisplayName("User interactions test")
-    void UserInteractionsTest() throws FileAlreadyExistsException {
+    void userInteractionsTest() throws FileAlreadyExistsException {
         try (SQLiteLinker linker = new SQLiteLinker("user-test")) {
             assertThrows(UserNotFound.class, () -> linker.getUserById(100000));
             assertThrows(UserNotFound.class, () -> linker.getUserByChatId(200202020));
@@ -82,7 +83,7 @@ public class SQLiteLinkerTest {
 
     @Test
     @DisplayName("Deadline interactions test")
-    void DeadlineInteractionsTest() throws FileAlreadyExistsException {
+    void deadlineInteractionsTest() throws FileAlreadyExistsException {
         new File("deadline-test.db").delete();
         try (SQLiteLinker linker = new SQLiteLinker("deadline-test")) {
             assertThrows(UserNotFound.class, () -> linker.getUserById(100000));
@@ -91,7 +92,8 @@ public class SQLiteLinkerTest {
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadline(100000));
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadlinesForUser(12345678));
 
-            DeadlineQuery query = new DeadlineQuery(-1, "testname", new BigDecimal(123), new BigDecimal(123), 2020);
+            DeadlineQuery query = new DeadlineQuery(-1, "testname", new BigDecimal(123),
+                new BigDecimal(123), 2020);
             assertDoesNotThrow(() -> linker.addDeadline(query));
 
             int id = 0;
@@ -121,9 +123,10 @@ public class SQLiteLinkerTest {
             }
 
             try {
-                DeadlineQuery query2 = new DeadlineQuery(-1, "testname 2", new BigDecimal(133), new BigDecimal(23), 2020);
+                DeadlineQuery query2 = new DeadlineQuery(-1, "testname 2", new BigDecimal(133),
+                    new BigDecimal(23), 2020);
                 assertDoesNotThrow(() -> linker.addDeadline(query2));
-                
+
                 DeadlineQuery[] output = linker.getDeadlinesForUser(2020);
                 assertEquals(2, output.length, "Should have two deadlines by now");
 

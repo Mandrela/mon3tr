@@ -1,6 +1,7 @@
 package su.maibat.mon3tr.db;
 
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+import su.maibat.mon3tr.db.exceptions.LinkerException;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
@@ -10,18 +11,18 @@ public interface DataBaseLinker {
      * @param inputQuery I do assume, that id field is -1, else I will shoot!
      * @throws MalformedQuery when, for example, id != -1
      */
-    void addUser(UserQuery inputQuery) throws MalformedQuery;
-    void deactivateUser(int id);
+    void addUser(UserQuery inputQuery) throws MalformedQuery, LinkerException;
+    void deactivateUser(int id) throws LinkerException;
 
     /**
      * @param inputQuery Query not only contains updated fields, but also and id by which
      * correct database row will be found
      * @throws MalformedQuery when, for example, id == -1
      */
-    void updateUser(UserQuery inputQuery) throws MalformedQuery;
+    void updateUser(UserQuery inputQuery) throws MalformedQuery, LinkerException;
 
-    UserQuery getUserById(int id) throws UserNotFound;
-    UserQuery getUserByChatId(long chatId) throws UserNotFound;
+    UserQuery getUserById(int id) throws UserNotFound, LinkerException;
+    UserQuery getUserByChatId(long chatId) throws UserNotFound, LinkerException;
     //UserQuery[] findUsersByQuery(UserQuery searchQuery);
 
     // Deadline
@@ -29,17 +30,17 @@ public interface DataBaseLinker {
      * @param inputQuery I do assume, that id field is -1, else I will shoot!
      * @throws MalformedQuery when, for example, id != -1
      */
-    void addDeadline(DeadlineQuery inputQuery) throws MalformedQuery;
-    void removeDeadline(int id);
+    void addDeadline(DeadlineQuery inputQuery) throws MalformedQuery, LinkerException;
+    void removeDeadline(int id) throws LinkerException;
 
     /**
      * @param inputQuery Query not only contains updated fields, but also and id by which
      * correct database row will be found
      * @throws MalformedQuery when, for example, id == -1
      */
-    void updateDeadline(DeadlineQuery inputQuery) throws MalformedQuery;
+    void updateDeadline(DeadlineQuery inputQuery) throws MalformedQuery, LinkerException;
 
-    DeadlineQuery getDeadline(int id) throws DeadlineNotFound;
-    DeadlineQuery[] getDeadlinesForUser(int userId) throws DeadlineNotFound;
+    DeadlineQuery getDeadline(int id) throws DeadlineNotFound, LinkerException;
+    DeadlineQuery[] getDeadlinesForUser(int userId) throws DeadlineNotFound, LinkerException;
     //DeadlineQuery[] find(String fieldName, String value);
 }

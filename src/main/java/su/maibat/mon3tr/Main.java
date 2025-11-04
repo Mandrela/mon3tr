@@ -34,8 +34,13 @@ public final class Main {
             System.exit(1);
         }
 
+        String dbName = System.getenv("DB_NAME");
+        if (dbName == null) {
+            dbName = "mon3tr-database.db";
+        }
+
         try {
-            SQLiteLinker dataBase = new SQLiteLinker("database");
+            SQLiteLinker dataBase = new SQLiteLinker(dbName);
             TelegramBotsLongPollingApplication botsApplication =
                     new TelegramBotsLongPollingApplication();
 
@@ -61,10 +66,11 @@ public final class Main {
             }
             help.setCommands(commandMap);
 
+
             Bot bot = new Bot(token, commandMap, help);
             botsApplication.registerBot(token, bot);
         } catch (FileAlreadyExistsException e) {
-            System.out.println(CRITICAL + " File 'database.db' already exists.");
+            System.out.println(CRITICAL + dbName + " is a directory");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

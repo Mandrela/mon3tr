@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
  * and can be frozen - meaning no new messages can be available for
  * chat reader while old aren't read.
  */
-public final class TelegramChat implements Chat {
+public final class TelegramChat implements Chat, MessageSink {
     private static final int REPLY_AMOUNT = 3;
 
     private final Long chatId;

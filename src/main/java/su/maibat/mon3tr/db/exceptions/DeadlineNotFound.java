@@ -1,7 +1,13 @@
 package su.maibat.mon3tr.db.exceptions;
 
+import lombok.Getter;
+
+
+@Getter
 public class DeadlineNotFound extends Exception {
-    public DeadlineNotFound(final String message) {
-        super(message);
+    private final int userId;
+
+    public DeadlineNotFound(final int userIdArg) {
+        userId = userIdArg;
     }
 }
