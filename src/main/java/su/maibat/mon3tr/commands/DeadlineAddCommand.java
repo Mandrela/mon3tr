@@ -1,12 +1,12 @@
 package su.maibat.mon3tr.commands;
 
+import org.telegram.telegrambots.meta.api.objects.User;
 import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -44,6 +44,7 @@ public class DeadlineAddCommand implements Command {
                     userQuery.setChatId(chat.getChatId());
                     linker.addUser(userQuery);
                 }*/
+
                 try {
                     linker.getUserByChatId(chat.getChatId());
                 }
@@ -51,28 +52,39 @@ public class DeadlineAddCommand implements Command {
                     UserQuery userQuery = new UserQuery(-1, chat.getChatId());
                     linker.addUser(userQuery);
                 }
+                UserQuery user = linker.getUserByChatId(chat.getChatId());
+
+                if (user.getLimit() == 0) {
+                    chat.sendAnswer("You have used up all your deadline cells, " +
+                            "please close one or more deadlines before add a new one.");
+                    return;
+                } else {
+                    user.setLimit(user.getLimit() - 1);
+                }
 
                 DeadlineQuery inputQuery = new DeadlineQuery();
 
                 if (isDate(arguments[0])) {
                     inputQuery.setName(arguments[1]);
                     try {
-                        Long burnTime = StringToTime(arguments[0]);
+                        Long burnTime = stringToTime(arguments[0]);
                         inputQuery.setBurnTime(burnTime);
-                    } catch (DateTimeParseException e) {
-                        throw new RuntimeException(e);
+                    } catch (DateTimeParseException | IllegalArgumentException e) {
+                        chat.sendAnswer("Please enter correct date");
+                        return;
                     }
                 } else {
                     inputQuery.setName(arguments[0]);
                     try {
-                        Long burnTime = StringToTime(arguments[1]);
+                        Long burnTime = stringToTime(arguments[1]);
                         inputQuery.setBurnTime(burnTime);
-                    } catch (DateTimeParseException e) {
-                        throw new RuntimeException(e);
+                    } catch (DateTimeParseException | IllegalArgumentException e) {
+                        chat.sendAnswer("Please enter correct date");
+                        return;
                     }
                 }
 
-                inputQuery.setUserId(linker.getUserByChatId(chat.getChatId()).getId());
+                inputQuery.setUserId(user.getId());
                 //Заполнение запроса для добавления
 
                 linker.addDeadline(inputQuery);
@@ -92,9 +104,13 @@ public class DeadlineAddCommand implements Command {
         return matcher.find();
     }
 
-    private Long StringToTime(String dateString) throws DateTimeParseException {
-        String normalStringDate = normalizeDate(dateString);
-
+    private Long stringToTime(String dateString) throws DateTimeParseException {
+        String normalStringDate;
+        try {
+            normalStringDate = normalizeDate(dateString);
+        } catch (IllegalArgumentException iae) {
+            throw new IllegalArgumentException(iae.getMessage());
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         LocalDate date = LocalDate.parse(normalStringDate, formatter);
@@ -114,7 +130,7 @@ public class DeadlineAddCommand implements Command {
         String[] dateFragments = dateArg.split("[./]");
 
         if (dateFragments.length != 3) {
-            throw new IllegalArgumentException("Неверно заданная дата");
+            throw new IllegalArgumentException("Incorrect input date");
         } else {
 
             int month = Integer.parseInt(dateFragments[1]);
