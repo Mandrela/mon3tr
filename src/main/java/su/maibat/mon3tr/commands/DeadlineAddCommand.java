@@ -1,7 +1,8 @@
 package su.maibat.mon3tr.commands;
 
-import org.telegram.telegrambots.meta.api.objects.User;
 import su.maibat.mon3tr.chat.Chat;
+import su.maibat.mon3tr.commands.exceptions.EmptyDeadlineArgumentException;
+import su.maibat.mon3tr.commands.exceptions.IllegalDeadlineNameException;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.UserQuery;
@@ -32,12 +33,11 @@ public class DeadlineAddCommand implements Command {
     public void execute(Chat chat){
         String[] arguments = chat.getAllMessages();
 
-        if (arguments.length == 0) {
+        if (arguments.length < 2) {
             chat.sendAnswer("Something went wrong, try again with input some arguments");
 
         } else {
             try {
-
                 /*
                 if (linker.getUserByChatId(chat.getChatId())).getId() == -1) { //try - catch
                     UserQuery userQuery = new UserQuery();
@@ -65,23 +65,22 @@ public class DeadlineAddCommand implements Command {
                 DeadlineQuery inputQuery = new DeadlineQuery();
 
                 if (isDate(arguments[0])) {
+                    Long burnTime = stringToTime(arguments[0]);
+                    if (isDate(arguments[1]) || arguments[1].isEmpty()) {
+                        throw new IllegalDeadlineNameException();
+                    }
                     inputQuery.setName(arguments[1]);
-                    try {
-                        Long burnTime = stringToTime(arguments[0]);
-                        inputQuery.setBurnTime(burnTime);
-                    } catch (DateTimeParseException | IllegalArgumentException e) {
-                        chat.sendAnswer("Please enter correct date");
-                        return;
-                    }
+                    inputQuery.setBurnTime(burnTime);
+
                 } else {
-                    inputQuery.setName(arguments[0]);
-                    try {
-                        Long burnTime = stringToTime(arguments[1]);
-                        inputQuery.setBurnTime(burnTime);
-                    } catch (DateTimeParseException | IllegalArgumentException e) {
-                        chat.sendAnswer("Please enter correct date");
-                        return;
+                    Long burnTime = stringToTime(arguments[1]);
+                    if (arguments[0].isEmpty()) {
+                        throw new IllegalDeadlineNameException();
                     }
+
+                    inputQuery.setName(arguments[0]);
+                    inputQuery.setBurnTime(burnTime);
+
                 }
 
                 inputQuery.setUserId(user.getId());
@@ -89,8 +88,13 @@ public class DeadlineAddCommand implements Command {
 
                 linker.addDeadline(inputQuery);
                 chat.sendAnswer("Deadline added successfully");
-            }
-            catch (Exception e) {
+
+            } catch (DateTimeParseException | IllegalArgumentException e) {
+                chat.sendAnswer("Please enter correct date");
+            } catch (IllegalDeadlineNameException idne) {
+                chat.sendAnswer("Please enter valid name for your deadline " +
+                        "(not 'Empty', not date)");
+            } catch (Exception e) {
                 throw new RuntimeException("Arguments not found");
             }
         }
@@ -99,12 +103,13 @@ public class DeadlineAddCommand implements Command {
     }
 
     boolean isDate(String argument){
-        Pattern pattern = compile("^\\d{1,2}\\.\\d{1,2}\\.\\d{2,4}$");
+        Pattern pattern = compile("^\\d{1,2}\\.\\d{1,2}\\.\\d{1,4}$");
         Matcher matcher = pattern.matcher(argument);
         return matcher.find();
     }
 
-    private Long stringToTime(String dateString) throws DateTimeParseException {
+    private Long stringToTime(String dateString) throws DateTimeParseException,
+            IllegalArgumentException {
         String normalStringDate;
         try {
             normalStringDate = normalizeDate(dateString);
