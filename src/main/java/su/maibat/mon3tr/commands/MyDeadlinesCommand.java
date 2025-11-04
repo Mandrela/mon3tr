@@ -9,25 +9,20 @@ import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
+;
 
-public final class MyDeadlinesCommand implements Command {
-    private final DataBaseLinker linker;
-    public MyDeadlinesCommand(final SQLiteLinker linkerArgument) {
-        this.linker = linkerArgument;
+public class MyDeadlinesCommand implements Command {
+
+    DataBaseLinker linker;
+    MyDeadlinesCommand(SQLiteLinker linker) {
+        this.linker = linker;
     }
 
-    @Override
-    public String getName() {
-        return "mydeadlines";
-    }
+    public final String getName() {return "mydeadlines";}
+    public final String getHelp() {return "This command show list of your deadlines";}
 
-    @Override
-    public String getHelp() {
-        return "This command show list of your deadlines";
-    }
+    public void execute(Chat chat) {
 
-    @Override
-    public void execute(final Chat chat) {
         try {
             UserQuery user = linker.getUserByChatId(chat.getChatId());
             try {
@@ -36,8 +31,8 @@ public final class MyDeadlinesCommand implements Command {
                 String answer = "";
 
                 for (DeadlineQuery query : queryList) {
-                    answer = answer.concat(query.getId() + " : " + query.getName() + " : "
-                            + query.getBurnTime() + "\n");
+                    answer = answer.concat(query.getId() + " : " + query.getName() + " : " +
+                            query.getBurnTime() + "\n");
                 }
                 chat.sendAnswer(answer);
             } catch (DeadlineNotFound dnf) {
@@ -48,8 +43,12 @@ public final class MyDeadlinesCommand implements Command {
             UserQuery userQuery = new UserQuery(-1, chat.getChatId());
             try {
                 linker.addUser(userQuery);
-            } catch (MalformedQuery me) { }
-            chat.sendAnswer("You have not any deadlines");
+                chat.sendAnswer("You have not any deadlines");
+            } catch (MalformedQuery me) {
+                chat.sendAnswer("Something went wrong");
+            }
+
+
         }
     }
 }

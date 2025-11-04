@@ -34,9 +34,22 @@ public final class Main {
             System.exit(1);
         }
 
+<<<<<<< HEAD
         String dbName = System.getenv("DB_NAME");
         if (dbName == null) {
             dbName = "mon3tr-database.db";
+=======
+        TelegramBotsLongPollingApplication botsApplication =
+                new TelegramBotsLongPollingApplication();
+
+        HelpCommand help = new HelpCommand();
+        AuthorsCommand authors = new AuthorsCommand();
+
+        String customAuthors = System.getenv("AUTHORS");
+        if (customAuthors != null) {
+            authors.setInfo(customAuthors);
+            System.out.println(INFO + " Using custom authors info.");
+>>>>>>> Feature-1
         }
 
         try {

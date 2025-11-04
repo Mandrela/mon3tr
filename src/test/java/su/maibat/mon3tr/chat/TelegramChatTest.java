@@ -72,7 +72,6 @@ class TelegramChatTest {
         assertEquals(testMessages.length, result.length);
         assertTrue(!chat.isFrozen(), "Should unfroze automatically");
         assertTrue(!chat.isEmpty(), "Should have left one message");
-
         assertEquals("This message should not be displayed", chat.getMessage());
         assertTrue(chat.isEmpty(), "Finally, should not have anything");
 
