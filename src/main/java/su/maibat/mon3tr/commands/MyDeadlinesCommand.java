@@ -43,8 +43,11 @@ public class MyDeadlinesCommand implements Command {
             UserQuery userQuery = new UserQuery(-1, chat.getChatId());
             try {
                 linker.addUser(userQuery);
-            } catch (MalformedQuery me) {}
-            chat.sendAnswer("You have not any deadlines");
+                chat.sendAnswer("You have not any deadlines");
+            } catch (MalformedQuery me) {
+                chat.sendAnswer("Something went wrong");
+            }
+
 
         }
     }

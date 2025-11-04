@@ -25,29 +25,30 @@ public class DeadlineRemoveCommand implements Command{
         if (arguments.length == 0) {
             chat.sendAnswer("Something went wrong, try again with input some arguments");
         } else  if (arguments.length == 1){
-
-            int id = Integer.parseInt(arguments[0]);
-
             try {
+                int id = Integer.parseInt(arguments[0]);
+
                 if (linker.getUserById(linker.getDeadline(id).getUserId()).getChatId() !=
                         chat.getChatId()) {
                     chat.sendAnswer("You do not have this deadline " +
                             "(do not take on more than you need to)");
                     return;
                 }
+                linker.removeDeadline(id);
+                chat.sendAnswer("You have closed this gestalt!!!");
             } catch (DeadlineNotFound dnf) {
                 chat.sendAnswer("Deadline not found");
-                return;
             } catch (UserNotFound unf) {
                 UserQuery userQuery = new UserQuery(-1, chat.getChatId());
                 try {
                     linker.addUser(userQuery);
-                } catch (MalformedQuery me) {}
+                } catch (MalformedQuery me) {
+                    chat.sendAnswer("Something went wrong");
+                }
                 chat.sendAnswer("You have not any deadlines");
-                return;
+            } catch (NumberFormatException nfe) {
+                chat.sendAnswer("Please enter a valid deadline id (number)");
             }
-
-            linker.removeDeadline(id);
 
 
             /*
