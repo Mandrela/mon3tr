@@ -86,6 +86,7 @@
 					<configLocation>checkstyle.xml</configLocation>
 					<consoleOutput>true</consoleOutput>
 					<failsOnError>false</failsOnError>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
 				</configuration>
 				<executions>
 					<execution>
@@ -132,23 +133,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.6.0</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>checkstyle</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-		</plugins>
-	</reporting>
 </project>
 
 
@@ -160,4 +144,12 @@ Most used phases:
 
 <!--
 https://maven.apache.org/ref/3.9.11/maven-model/maven.html
+-->
+
+<!--
+<configuration>
+	<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+	<includeTestSourceDirectory>true</includeTestSourceDirectory>
+	<configLocation>checkstyle.xml</configLocation>
+</configuration>
 -->

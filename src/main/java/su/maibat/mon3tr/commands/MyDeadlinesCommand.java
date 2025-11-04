@@ -28,7 +28,6 @@ public final class MyDeadlinesCommand implements Command {
 
     @Override
     public void execute(final Chat chat) {
-
         try {
             UserQuery user = linker.getUserByChatId(chat.getChatId());
             try {

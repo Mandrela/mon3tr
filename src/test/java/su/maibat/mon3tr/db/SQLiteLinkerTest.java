@@ -54,12 +54,12 @@ public class SQLiteLinkerTest {
             assertThrows(UserNotFound.class, () -> linker.getUserById(100000));
             assertThrows(UserNotFound.class, () -> linker.getUserByChatId(200202020));
 
-            UserQuery query = new UserQuery(-1, 123L);
+            UserQuery query = new UserQuery(-1, 1238388182L);
             assertDoesNotThrow(() -> linker.addUser(query));
 
             int id = 0;
             try {
-                UserQuery output = linker.getUserByChatId(123L);
+                UserQuery output = linker.getUserByChatId(1238388182L);
                 assertEquals(query.getChatId(), output.getChatId());
                 id = output.getId();
             } catch (UserNotFound e) {
@@ -85,6 +85,9 @@ public class SQLiteLinkerTest {
     void DeadlineInteractionsTest() throws FileAlreadyExistsException {
         new File("deadline-test.db").delete();
         try (SQLiteLinker linker = new SQLiteLinker("deadline-test")) {
+            assertThrows(UserNotFound.class, () -> linker.getUserById(100000));
+            assertThrows(UserNotFound.class, () -> linker.getUserByChatId(200202020));
+
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadline(100000));
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadlinesForUser(12345678));
 

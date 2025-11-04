@@ -57,7 +57,7 @@ class HelpCommandTest {
         }
     }
 
-    @Test
+    @Test // TODO: Names, checkstyle, readme, UX date, tests, Fixture
     @DisplayName("Empty command set")
     void EmptyCommandTest() {
         helpCommand.setCommands(new LinkedHashMap<>());

@@ -174,7 +174,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             user_get_by_id.setInt(1, id);
             return parseUserFromResult(user_get_by_id.executeQuery());
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException("Id: " + id + "\n" + e.getMessage(), e);
         } catch (UserNotFound e) {
             throw new UserNotFound("User not found, id: " + id);
         }
@@ -186,7 +186,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             user_get_by_chat_id.setLong(1, chatId);
             return parseUserFromResult(user_get_by_chat_id.executeQuery());
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            e.printStackTrace();
+            throw new RuntimeException("ChatId: " + chatId + "\n" + e.getMessage(), e);
         } catch (UserNotFound e) {
             throw new UserNotFound("User not found, chatId: " + chatId);
         }

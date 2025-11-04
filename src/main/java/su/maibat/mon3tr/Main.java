@@ -1,5 +1,6 @@
 package su.maibat.mon3tr;
 
+import java.nio.file.FileAlreadyExistsException;
 import java.util.LinkedHashMap;
 
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
@@ -7,7 +8,11 @@ import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import su.maibat.mon3tr.commands.AboutCommand;
 import su.maibat.mon3tr.commands.AuthorsCommand;
 import su.maibat.mon3tr.commands.Command;
+import su.maibat.mon3tr.commands.DeadlineAddCommand;
+import su.maibat.mon3tr.commands.DeadlineRemoveCommand;
 import su.maibat.mon3tr.commands.HelpCommand;
+import su.maibat.mon3tr.commands.MyDeadlinesCommand;
+import su.maibat.mon3tr.db.SQLiteLinker;
 
 
 public final class Main {
@@ -29,33 +34,39 @@ public final class Main {
             System.exit(1);
         }
 
-        TelegramBotsLongPollingApplication botsApplication =
-                new TelegramBotsLongPollingApplication();
-
-        HelpCommand help = new HelpCommand();
-        AuthorsCommand authors = new AuthorsCommand();
-
-        String customAuthors = System.getenv("AUTHORS");
-        if (customAuthors != null) {
-            authors.setInfo(customAuthors);
-            System.out.println(INFO + " Using custom authors info.");
-        }
-
-        Command[] commands = {help, new AboutCommand(), authors}; // Commands
-
-        LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
-        for (Command command : commands) {
-            commandMap.put(command.getName(), command);
-        }
-        help.setCommands(commandMap);
-
-        Bot bot = new Bot(token, commandMap, help);
         try {
+            SQLiteLinker dataBase = new SQLiteLinker("database");
+            TelegramBotsLongPollingApplication botsApplication =
+                    new TelegramBotsLongPollingApplication();
+
+            HelpCommand help = new HelpCommand();
+            AuthorsCommand authors = new AuthorsCommand();
+
+            String customAuthors = System.getenv("AUTHORS");
+            if (customAuthors != null) {
+                authors.setInfo(customAuthors);
+                System.out.println(INFO + " Using custom authors info.");
+            }
+
+            DeadlineAddCommand deadlineAddCommand = new DeadlineAddCommand(dataBase);
+            MyDeadlinesCommand deadlineGetCommand = new MyDeadlinesCommand(dataBase);
+            DeadlineRemoveCommand deadlineRemoveCommand = new DeadlineRemoveCommand(dataBase);
+
+            Command[] commands = {help, new AboutCommand(), authors, deadlineAddCommand,
+                deadlineGetCommand, deadlineRemoveCommand}; // Commands
+
+            LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
+            for (Command command : commands) {
+                commandMap.put(command.getName(), command);
+            }
+            help.setCommands(commandMap);
+
+            Bot bot = new Bot(token, commandMap, help);
             botsApplication.registerBot(token, bot);
+        } catch (FileAlreadyExistsException e) {
+            System.out.println(CRITICAL + " File 'database.db' already exists.");
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println(e.getMessage());
-            System.out.println(e.getCause());
         }
     }
 }
