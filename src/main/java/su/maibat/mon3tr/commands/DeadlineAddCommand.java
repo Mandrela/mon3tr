@@ -1,5 +1,7 @@
 package su.maibat.mon3tr.commands;
 
+import java.math.BigDecimal;
+
 import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.commands.exceptions.EmptyDeadlineArgumentException;
 import su.maibat.mon3tr.commands.exceptions.IllegalDeadlineNameException;
@@ -22,7 +24,7 @@ public class DeadlineAddCommand implements Command {
 
     DataBaseLinker linker;
 
-    DeadlineAddCommand(DataBaseLinker inputLinker) {
+    public DeadlineAddCommand(DataBaseLinker inputLinker) {
         this.linker = inputLinker;
     }
 
@@ -65,7 +67,7 @@ public class DeadlineAddCommand implements Command {
                 DeadlineQuery inputQuery = new DeadlineQuery();
 
                 if (isDate(arguments[0])) {
-                    Long burnTime = stringToTime(arguments[0]);
+                    BigDecimal burnTime = new BigDecimal(stringToTime(arguments[0]));
                     if (isDate(arguments[1]) || arguments[1].isEmpty()) {
                         throw new IllegalDeadlineNameException();
                     }
@@ -73,7 +75,7 @@ public class DeadlineAddCommand implements Command {
                     inputQuery.setBurnTime(burnTime);
 
                 } else {
-                    Long burnTime = stringToTime(arguments[1]);
+                    BigDecimal burnTime = new BigDecimal(stringToTime(arguments[1]));
                     if (arguments[0].isEmpty()) {
                         throw new IllegalDeadlineNameException();
                     }

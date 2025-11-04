@@ -14,7 +14,7 @@ import su.maibat.mon3tr.db.exceptions.UserNotFound;
 public class MyDeadlinesCommand implements Command {
 
     DataBaseLinker linker;
-    MyDeadlinesCommand(SQLiteLinker linker) {
+    public MyDeadlinesCommand(SQLiteLinker linker) {
         this.linker = linker;
     }
 

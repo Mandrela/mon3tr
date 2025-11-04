@@ -11,7 +11,7 @@ public class DeadlineRemoveCommand implements Command{
 
     SQLiteLinker linker;
 
-    DeadlineRemoveCommand(SQLiteLinker inputLinker) {
+    public DeadlineRemoveCommand(SQLiteLinker inputLinker) {
         this.linker = inputLinker;
     }
 
