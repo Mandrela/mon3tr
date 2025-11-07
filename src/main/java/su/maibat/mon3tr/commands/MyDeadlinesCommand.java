@@ -29,6 +29,10 @@ public final class MyDeadlinesCommand implements Command {
             UserQuery user = linker.getUserByChatId(chat.getChatId());
             try {
                 DeadlineQuery[] queryList = linker.getDeadlinesForUser(user.getId());
+                if (queryList.length == 0) {
+                    chat.sendAnswer("You have not any deadlines");
+                    return;
+                }
 
                 String answer = "";
 
