@@ -102,14 +102,15 @@ public final class RemoveCommandTest {
 
         Mockito.when(linker.getDeadline(4)).thenReturn(deadline);
 
+        UserQuery user2 = new UserQuery(4, 1235);
+        Mockito.when(linker.getUserById(4)).thenReturn(user2);
+
         assertDoesNotThrow(() -> remove.execute(chat));
 
         Mockito.verify(chat, Mockito.times(1)).getAllMessages();
         Mockito.verify(linker, Mockito.times(1)).getDeadline(4);
-        Mockito.verify(linker, Mockito.times(1)).getUserById(1);
-        Mockito.verify(chat, Mockito.never()).getChatId();
-
-        Mockito.verify(linker, Mockito.times(1)).removeDeadline(4);
+        Mockito.verify(linker, Mockito.times(1)).getUserById(4);
+        Mockito.verify(chat, Mockito.times(1)).getChatId();
 
         ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());

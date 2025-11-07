@@ -18,7 +18,12 @@ import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-public final class MyDeadlinesCommandTest {
+import java.math.BigDecimal;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+
+public final class MyDeadlinesCommandTest{
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
     private final Chat chat = Mockito.mock(Chat.class);
     private final MyDeadlinesCommand show = new MyDeadlinesCommand(linker);
@@ -114,9 +119,9 @@ public final class MyDeadlinesCommandTest {
 
         assertDoesNotThrow(() -> show.execute(chat), "Should not throw");
 
-        Mockito.verify(chat, Mockito.times(Mockito.any())).getChatId();
-        Mockito.verify(linker, Mockito.times(Mockito.any())).getUserByChatId(chatId);
-        Mockito.verify(linker, Mockito.never()).getDeadlinesForUser(any());
+        Mockito.verify(chat, Mockito.times(2)).getChatId();
+        Mockito.verify(linker, Mockito.times(1)).getUserByChatId(chatId);
+        Mockito.verify(linker, Mockito.never()).getDeadlinesForUser(anyInt());
 
         ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(chat, Mockito.times(Mockito.any())).sendAnswer(answerCaptor.capture());
