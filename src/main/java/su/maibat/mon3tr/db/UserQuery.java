@@ -2,7 +2,7 @@ package su.maibat.mon3tr.db;
 
 
 
-public class UserQuery extends DBQuery {
+public final class UserQuery extends DBQuery {
     private static final int STANDARD_LIMIT = 32;
 
     private long chatId = 0;
@@ -36,10 +36,7 @@ public class UserQuery extends DBQuery {
         this.limit = arg;
     }
 
-    @Override
-    public int getId() {
-        return super.getId();
-    }
+
 
     public boolean isHasPaidSubscribeForWeatherNews() {
         return hasPaidSubscribeForWeatherNews;

@@ -2,7 +2,7 @@ package su.maibat.mon3tr.db;
 
 import java.math.BigDecimal;
 
-public class DeadlineQuery extends DBQuery {
+public final class DeadlineQuery extends DBQuery {
     private String name = "";
     private BigDecimal burnTime = new BigDecimal(0);
     private BigDecimal offset = new BigDecimal(0);

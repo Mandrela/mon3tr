@@ -12,7 +12,7 @@ public abstract class DBQuery {
         id = idArg;
     }
 
-    public int getId() {
+    public final int getId() {
         return id;
     }
 }
