@@ -2,11 +2,6 @@ package su.maibat.mon3tr.db;
 
 import java.math.BigDecimal;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class DeadlineQuery extends DBQuery {
     private String name = "";
     private BigDecimal burnTime = new BigDecimal(0);
@@ -33,5 +28,30 @@ public class DeadlineQuery extends DBQuery {
             burnTime = burnAtTime;
             offset = triggerOffset;
             userId = ownerUserId;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public void setName(final String arg) {
+        this.name = arg;
+    }
+
+    public BigDecimal getBurnTime() {
+        return burnTime;
+    }
+    public void setBurnTime(final BigDecimal arg) {
+        this.burnTime = arg;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+    public void setUserId(final int arg) {
+        this.userId = arg;
+    }
+
+    public BigDecimal getOffset() {
+        return offset;
     }
 }

@@ -1,7 +1,7 @@
 package su.maibat.mon3tr.db.exceptions;
 
-import lombok.Getter;
 
+import lombok.Getter;
 
 @Getter
 public class DeadlineNotFound extends Exception {

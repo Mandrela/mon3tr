@@ -30,12 +30,17 @@ public class AddCommandTest {
         Mockito.when(chat.getChatId()).thenReturn(chatId);
 
         UserQuery user = new UserQuery(1, 1234);
+        user.setLimit(32);
         Mockito.when(linker.getUserByChatId(1234)).thenReturn(user);
+
+
     }
 
     @Test
     @DisplayName("Add without arguments")
-    void incorrectAddTest() {
+    void incorrectAddTest()  {
+        Mockito.when(chat.getAllMessages()).thenReturn(new String[] {});
+
         assertDoesNotThrow(() -> add.execute(chat), "Should not throw");
 
         Mockito.verify(chat, Mockito.times(1)).getAllMessages();
@@ -59,8 +64,6 @@ public class AddCommandTest {
 
         Mockito.verify(chat, Mockito.times(1)).getAllMessages();
 
-        Mockito.verify(add, Mockito.times(1)).isDate("20.12.2025");
-
         ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
 
@@ -79,8 +82,6 @@ public class AddCommandTest {
         assertDoesNotThrow(() -> add.execute(chat), "Should not throw");
 
         Mockito.verify(chat, Mockito.times(1)).getAllMessages();
-
-        Mockito.verify(add, Mockito.times(1)).isDate("20.12.2025");
 
         ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());

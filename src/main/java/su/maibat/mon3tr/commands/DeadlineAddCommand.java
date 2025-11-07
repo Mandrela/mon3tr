@@ -3,7 +3,6 @@ package su.maibat.mon3tr.commands;
 import java.math.BigDecimal;
 
 import su.maibat.mon3tr.chat.Chat;
-import su.maibat.mon3tr.commands.exceptions.EmptyDeadlineArgumentException;
 import su.maibat.mon3tr.commands.exceptions.IllegalDeadlineNameException;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
@@ -20,19 +19,23 @@ import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
 
-public class DeadlineAddCommand implements Command {
+public final class DeadlineAddCommand implements Command {
 
-    DataBaseLinker linker;
+    private final DataBaseLinker linker;
 
-    public DeadlineAddCommand(DataBaseLinker inputLinker) {
+    public DeadlineAddCommand(final DataBaseLinker inputLinker) {
         this.linker = inputLinker;
     }
 
-    public final String getName() {return "add";}
+    public String getName() {
+        return "add";
+    }
 
-    public final String getHelp() {return "this command add your deadline";}
+    public String getHelp() {
+        return "this command add your deadline";
+    }
 
-    public void execute(Chat chat){
+    public void execute(final Chat chat) {
         String[] arguments = chat.getAllMessages();
 
         if (arguments.length < 2) {
@@ -40,25 +43,18 @@ public class DeadlineAddCommand implements Command {
 
         } else {
             try {
-                /*
-                if (linker.getUserByChatId(chat.getChatId())).getId() == -1) { //try - catch
-                    UserQuery userQuery = new UserQuery();
-                    userQuery.setChatId(chat.getChatId());
-                    linker.addUser(userQuery);
-                }*/
 
                 try {
                     linker.getUserByChatId(chat.getChatId());
-                }
-                catch (UserNotFound e) {
+                } catch (UserNotFound e) {
                     UserQuery userQuery = new UserQuery(-1, chat.getChatId());
                     linker.addUser(userQuery);
                 }
                 UserQuery user = linker.getUserByChatId(chat.getChatId());
 
                 if (user.getLimit() == 0) {
-                    chat.sendAnswer("You have used up all your deadline cells, " +
-                            "please close one or more deadlines before add a new one.");
+                    chat.sendAnswer("You have used up all your deadline cells, "
+                            + "please close one or more deadlines before add a new one.");
                     return;
                 } else {
                     user.setLimit(user.getLimit() - 1);
@@ -94,8 +90,8 @@ public class DeadlineAddCommand implements Command {
             } catch (DateTimeParseException | IllegalArgumentException e) {
                 chat.sendAnswer("Please enter correct date");
             } catch (IllegalDeadlineNameException idne) {
-                chat.sendAnswer("Please enter valid name for your deadline " +
-                        "(not 'Empty', not date)");
+                chat.sendAnswer("Please enter valid name for your deadline "
+                        + "(not 'Empty', not date)");
             } catch (Exception e) {
                 throw new RuntimeException("Arguments not found");
             }
@@ -104,13 +100,13 @@ public class DeadlineAddCommand implements Command {
 
     }
 
-    boolean isDate(String argument){
-        Pattern pattern = compile("^\\d{1,2}\\.\\d{1,2}\\.\\d{1,4}$");
+    private boolean isDate(final String argument) {
+        final Pattern pattern = compile("^\\d{1,2}\\.\\d{1,2}\\.\\d{1,4}$");
         Matcher matcher = pattern.matcher(argument);
         return matcher.find();
     }
 
-    private Long stringToTime(String dateString) throws DateTimeParseException,
+    private Long stringToTime(final String dateString) throws DateTimeParseException,
             IllegalArgumentException {
         String normalStringDate;
         try {
@@ -125,10 +121,10 @@ public class DeadlineAddCommand implements Command {
         java.time.LocalDateTime localDateTime = date.atTime(timeToAdd);
 
         java.time.ZonedDateTime zoneDateTime = localDateTime.atZone(ZoneId.of("UTC+5"));
-        return zoneDateTime.toInstant().toEpochMilli()/1000;
+        return zoneDateTime.toInstant().toEpochMilli() / 1000;
     }
 
-    private String normalizeDate (String dateArg) {
+    private String normalizeDate(final String dateArg) {
 
         int[] maxDayInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
         String[] stringMaxDayInMonth = {"31", "28", "31", "30", "31", "30", "31",
@@ -141,7 +137,7 @@ public class DeadlineAddCommand implements Command {
         } else {
 
             int month = Integer.parseInt(dateFragments[1]);
-            if (month < 1){
+            if (month < 1) {
                 month = 1;
                 dateFragments[1] = "1";
             } else if (month > 12) {
@@ -155,15 +151,15 @@ public class DeadlineAddCommand implements Command {
             int day = Integer.parseInt(dateFragments[0]);
             if (day < 1) {
                 dateFragments[0] = "01";
-            } else if (day > maxDayInMonth[month-1]) {
-                dateFragments[0] = stringMaxDayInMonth[month-1];
+            } else if (day > maxDayInMonth[month - 1]) {
+                dateFragments[0] = stringMaxDayInMonth[month - 1];
             }
             if (day <= 9) {
                 dateFragments[0] = "0" + dateFragments[0];
             }
 
             String year = dateFragments[2];
-            if (year.length() < 4){
+            if (year.length() < 4) {
                 if (year.length() == 2) {
                     dateFragments[2] = "20".concat(year);
                 } else if (year.length() == 3) {

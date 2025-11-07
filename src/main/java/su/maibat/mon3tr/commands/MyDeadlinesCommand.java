@@ -3,25 +3,27 @@ package su.maibat.mon3tr.commands;
 import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
-import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-;
+public final class MyDeadlinesCommand implements Command {
 
-public class MyDeadlinesCommand implements Command {
+    private final DataBaseLinker linker;
 
-    DataBaseLinker linker;
-    public MyDeadlinesCommand(SQLiteLinker linker) {
-        this.linker = linker;
+    public MyDeadlinesCommand(final DataBaseLinker inputLinker) {
+        this.linker = inputLinker;
     }
 
-    public final String getName() {return "mydeadlines";}
-    public final String getHelp() {return "This command show list of your deadlines";}
+    public String getName() {
+        return "mydeadlines";
+    }
+    public String getHelp() {
+        return "This command show list of your deadlines";
+    }
 
-    public void execute(Chat chat) {
+    public void execute(final Chat chat) {
 
         try {
             UserQuery user = linker.getUserByChatId(chat.getChatId());
@@ -31,8 +33,8 @@ public class MyDeadlinesCommand implements Command {
                 String answer = "";
 
                 for (DeadlineQuery query : queryList) {
-                    answer = answer.concat(query.getId() + " : " + query.getName() + " : " +
-                            query.getBurnTime() + "\n");
+                    answer = answer.concat(query.getId() + " : " + query.getName() + " : "
+                            + query.getBurnTime() + "\n");
                 }
                 chat.sendAnswer(answer);
             } catch (DeadlineNotFound dnf) {
