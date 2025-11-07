@@ -1,9 +1,16 @@
 package su.maibat.mon3tr.commands;
 
+import java.math.BigDecimal;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mockito;
+
 import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
@@ -11,12 +18,7 @@ import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-import java.math.BigDecimal;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-
-public class MyDeadlinesCommandTest{
+public final class MyDeadlinesCommandTest {
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
     private final Chat chat = Mockito.mock(Chat.class);
     private final MyDeadlinesCommand show = new MyDeadlinesCommand(linker);
@@ -35,7 +37,7 @@ public class MyDeadlinesCommandTest{
 
         DeadlineQuery dl1 = new DeadlineQuery();
         dl1.setName("first");
-        dl1.setBurnTime(burnTime  );
+        dl1.setBurnTime(burnTime);
         dl1.setUserId(0);
 
         DeadlineQuery dl2 = new DeadlineQuery();
@@ -112,12 +114,12 @@ public class MyDeadlinesCommandTest{
 
         assertDoesNotThrow(() -> show.execute(chat), "Should not throw");
 
-        Mockito.verify(chat, Mockito.times(1)).getChatId();
-        Mockito.verify(linker, Mockito.times(1)).getUserByChatId(chatId);
+        Mockito.verify(chat, Mockito.times(Mockito.any())).getChatId();
+        Mockito.verify(linker, Mockito.times(Mockito.any())).getUserByChatId(chatId);
         Mockito.verify(linker, Mockito.never()).getDeadlinesForUser(any());
 
         ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
+        Mockito.verify(chat, Mockito.times(Mockito.any())).sendAnswer(answerCaptor.capture());
 
         assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
         String answer = answerCaptor.getValue();

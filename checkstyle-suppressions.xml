@@ -14,6 +14,7 @@
 
 	<suppress checks="JavadocPackage" files=".*Test.java"/>
 	<suppress checks="MagicNumber" files=".*Test.java"/>
+	<suppress checks="AvoidStarImport" files=".*Test.java"/>
 
 	<suppress files=".+\.(?:jar|zip|war|class|tar|bin)$" checks=".*"/>
 	<suppress files=".+\.(?:png|gif|jpg|jpeg)$" checks=".*"/>

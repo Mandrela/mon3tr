@@ -1,9 +1,5 @@
 package su.maibat.mon3tr.db.exceptions;
 
-
-import lombok.Getter;
-
-@Getter
 public class UserNotFound extends Exception {
     private final long id;
 
@@ -12,5 +8,9 @@ public class UserNotFound extends Exception {
      */
     public UserNotFound(final long idArg) {
         id = idArg;
+    }
+
+    public final long getId() {
+        return id;
     }
 }
