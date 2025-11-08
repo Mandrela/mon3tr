@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mockito;
 
 import su.maibat.mon3tr.chat.Chat;
@@ -17,13 +16,9 @@ import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
-
-import java.math.BigDecimal;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 
-public final class MyDeadlinesCommandTest{
+public final class MyDeadlinesCommandTest {
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
     private final Chat chat = Mockito.mock(Chat.class);
     private final MyDeadlinesCommand show = new MyDeadlinesCommand(linker);

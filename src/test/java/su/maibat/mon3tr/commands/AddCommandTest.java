@@ -136,7 +136,7 @@ public final class AddCommandTest {
     @ParameterizedTest(name = "Name set")
     @MethodSource("nameArgs")
     @DisplayName("Add with incorrect deadline name")
-    void incorrectNameTest(String arg, Boolean isValid) {
+    void incorrectNameTest(final String arg, final Boolean isValid) {
 
         String[] data = {arg, "20.12.2025"};
         Mockito.when(chat.getAllMessages()).thenReturn(data);

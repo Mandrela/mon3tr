@@ -187,7 +187,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     @Override
     public void updateUser(final UserQuery inputQuery) throws MalformedQuery, LinkerException {
         try {
-            checkUserQuery(inputQuery);
+            //checkUserQuery(inputQuery);
             user_update.setLong(1, inputQuery.getChatId());
             user_update.setInt(2, inputQuery.getLimit());
             user_update.setBoolean(3, inputQuery.isHasPaidSubscribeForWeatherNews());
@@ -267,7 +267,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     public void updateDeadline(final DeadlineQuery inputQuery)
             throws MalformedQuery, LinkerException {
         try {
-            checkDeadlineQuery(inputQuery);
+            //checkDeadlineQuery(inputQuery);
             deadline_update.setString(1, inputQuery.getName());
             deadline_update.setBigDecimal(2, inputQuery.getBurnTime());
             deadline_update.setBigDecimal(3, inputQuery.getOffset());
