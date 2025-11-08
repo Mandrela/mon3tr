@@ -101,7 +101,7 @@ public final class DeadlineAddCommand implements Command {
     }
 
     private boolean isDate(final String argument) {
-        final Pattern pattern = compile("^\\d{1,2}\\.\\d{1,2}\\.\\d{1,4}$");
+        final Pattern pattern = compile("^\\d{1,2}[./]\\d{1,2}[./]\\d{1,4}$");
         Matcher matcher = pattern.matcher(argument);
         return matcher.find();
     }
@@ -144,7 +144,7 @@ public final class DeadlineAddCommand implements Command {
                 month = 12;
                 dateFragments[1] = "12";
             }
-            if (month <= 9) {
+            if (month <= 9 && dateFragments[1].length() == 1) {
                 dateFragments[1] = "0" + dateFragments[1];
             }
 
@@ -154,7 +154,7 @@ public final class DeadlineAddCommand implements Command {
             } else if (day > maxDayInMonth[month - 1]) {
                 dateFragments[0] = stringMaxDayInMonth[month - 1];
             }
-            if (day <= 9) {
+            if (day <= 9 && dateFragments[1].length() == 1) {
                 dateFragments[0] = "0" + dateFragments[0];
             }
 

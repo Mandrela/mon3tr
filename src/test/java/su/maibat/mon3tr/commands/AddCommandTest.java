@@ -95,67 +95,73 @@ public final class AddCommandTest {
     @ParameterizedTest(name = "Date set")
     @MethodSource("dateArgs")
     @DisplayName("Add with incorrect date")
-    void incorrectDateTest(final String[] args, final Boolean[] isValid) {
+    void incorrectDateTest(final String arg, final Boolean isValid) {
         //Возможен второй аргумент
-        assertEquals(args.length, isValid.length, "MALFORMED TEST DATA");
-        for (int i = 0; i < args.length; i++) {
-            String[] data = {"SecondDeadline", args[i]};
-            Mockito.when(chat.getAllMessages()).thenReturn(data);
 
-            assertDoesNotThrow(() -> add.execute(chat), "Should not throw");
 
-            ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
+        String[] data = {"SecondDeadline", arg};
+        Mockito.when(chat.getAllMessages()).thenReturn(data);
 
-            Mockito.verify(chat, Mockito.times(Mockito.any())).sendAnswer(answerCaptor.capture());
+        assertDoesNotThrow(() -> add.execute(chat), "Should not throw");
 
-            assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
-            String answer = answerCaptor.getValue();
+        ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
 
-            assertEquals(!isValid[i], answer.contains("Please enter correct date"),
-                    "Date " + args[i] + "is not valid");
+        Mockito.verify(chat, Mockito.atLeastOnce()).sendAnswer(answerCaptor.capture());
 
-        }
+        assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
+        String answer = answerCaptor.getValue();
+
+        assertEquals(!isValid, answer.contains("Please enter correct date"),
+                "Date " + arg + " is not valid");
+
+
     }
 
     @SuppressWarnings("unused")
     static Stream<Arguments> dateArgs() {
         return Stream.of(
-            Arguments.of(new String[]{"20.12.2025", "20/12/2025", "20;12;2025"},
-                    new Boolean[]{true, true, false}),
-            Arguments.of(new String[]{"20.12.2025", "31.02.2025", "0.12.2025"},
-                    new Boolean[]{true, true, true}),
-            Arguments.of(new String[]{"20.12.2025", "20.15.2025", "20.0.2025"},
-                    new Boolean[]{true, true, true}),
-            Arguments.of(new String[]{"20.12.2025", "20.12", "20.12."},
-                    new Boolean[]{true, false, false}),
-            Arguments.of(new String[]{"31.12.2025", "abracadabra", ""},
-                        new Boolean[]{true, false, false})
+            Arguments.of("17/8/2025", true),
+                Arguments.of("20;12;2025", false),
+                Arguments.of("31.02.2025", true),
+                Arguments.of("0/12/2025", true),
+                Arguments.of("20.15.2025", true),
+                Arguments.of("20.0.2025", true),
+                Arguments.of("20.12", false),
+                Arguments.of("20.12.", false),
+                Arguments.of("abracadabra", false),
+                Arguments.of("", false)
         );
     }
 
-    @Test
+    @ParameterizedTest(name = "Name set")
+    @MethodSource("nameArgs")
     @DisplayName("Add with incorrect deadline name")
-    void incorrectNameTest() {
-        String[] arguments = {"deadline", "Al6ed0_was_here", "", "17.08.2000"};
-        Boolean[] isValid = {true, true, false, false};
+    void incorrectNameTest(String arg, Boolean isValid) {
 
-        for (int i = 0; i < arguments.length; i++) {
-            String[] data = {arguments[i], "20.12.2025"};
-            Mockito.when(chat.getAllMessages()).thenReturn(data);
+        String[] data = {arg, "20.12.2025"};
+        Mockito.when(chat.getAllMessages()).thenReturn(data);
 
-            assertDoesNotThrow(() -> add.execute(chat), "Should not throw");
+        assertDoesNotThrow(() -> add.execute(chat), "Should not throw");
 
-            ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
 
-            Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
+        Mockito.verify(chat, Mockito.atLeastOnce()).sendAnswer(answerCaptor.capture());
 
-            assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
-            String answer = answerCaptor.getValue();
+        assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
+        String answer = answerCaptor.getValue();
 
-            assertEquals(!isValid[i], answer.contains("Please enter valid name"),
-                    "Name " + arguments[i] + "is not valid");
-        }
+        assertEquals(!isValid, answer.contains("Please enter valid name"),
+                "Name " + arg + "is not valid");
+
     }
+    @SuppressWarnings("unused")
+    static Stream<Arguments> nameArgs() {
+        return Stream.of(
+            Arguments.of("Al6ed0_was_here", true),
+            Arguments.of("20.12.2025", false),
+            Arguments.of("", false)
+    );
+}
 
 
 

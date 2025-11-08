@@ -124,7 +124,7 @@ public final class MyDeadlinesCommandTest{
         Mockito.verify(linker, Mockito.never()).getDeadlinesForUser(anyInt());
 
         ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(chat, Mockito.times(Mockito.any())).sendAnswer(answerCaptor.capture());
+        Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
 
         assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
         String answer = answerCaptor.getValue();
