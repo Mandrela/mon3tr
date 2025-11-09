@@ -10,7 +10,7 @@
 
 	<groupId>su.maibat.mon3tr</groupId>
 	<artifactId>mon3tr</artifactId>
-	<version>0.1</version>
+	<version>0.2</version>
 
 	<name>mon3tr system</name>
 	<url>http://mon3tr.maibat.su</url>
@@ -21,12 +21,7 @@
 	                <artifactId>telegrambots-longpolling</artifactId>
                 	<version>[9.1.0]</version>
 	        </dependency>
-<!--		<dependency>
-        	        <groupId>org.telegram</groupId>
-	                <artifactId>telegrambots</artifactId>
-			        <version>[6.9.0]</version>
-	        </dependency>
--->		<dependency>
+		<dependency>
         	        <groupId>org.telegram</groupId>
 	                <artifactId>telegrambots-client</artifactId>
                 	<version>[9.1.0]</version>
