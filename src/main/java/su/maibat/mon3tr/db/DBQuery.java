@@ -1,10 +1,18 @@
 package su.maibat.mon3tr.db;
 
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter // Will generate getId() method automatically
-@Setter // Will generate setId(int) method automatically
 public abstract class DBQuery {
-    private final int id = -1;
+    private final int id;
+
+    public DBQuery() {
+        id = -1;
+    }
+
+    public DBQuery(final int idArg) {
+        id = idArg;
+    }
+
+    public final int getId() {
+        return id;
+    }
 }

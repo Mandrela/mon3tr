@@ -10,7 +10,7 @@
 
 	<groupId>su.maibat.mon3tr</groupId>
 	<artifactId>mon3tr</artifactId>
-	<version>0.1</version>
+	<version>0.2</version>
 
 	<name>mon3tr system</name>
 	<url>http://mon3tr.maibat.su</url>
@@ -21,12 +21,7 @@
 	                <artifactId>telegrambots-longpolling</artifactId>
                 	<version>[9.1.0]</version>
 	        </dependency>
-<!--		<dependency>
-        	        <groupId>org.telegram</groupId>
-	                <artifactId>telegrambots</artifactId>
-			        <version>[6.9.0]</version>
-	        </dependency>
--->		<dependency>
+		<dependency>
         	        <groupId>org.telegram</groupId>
 	                <artifactId>telegrambots-client</artifactId>
                 	<version>[9.1.0]</version>
@@ -50,9 +45,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>[1.18.42]</version>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>[3.50.3.0]</version>
 		</dependency>
 	</dependencies>
 
@@ -81,6 +76,7 @@
 					<configLocation>checkstyle.xml</configLocation>
 					<consoleOutput>true</consoleOutput>
 					<failsOnError>false</failsOnError>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
 				</configuration>
 				<executions>
 					<execution>
@@ -117,25 +113,16 @@
 					</execution>
 				</executions>
 			</plugin>
-		</plugins>
-	</build>
-
-	<reporting>
-		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.6.0</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>checkstyle</report>
-						</reports>
-					</reportSet>
-				</reportSets>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.4</version>
+				<configuration>
+					<workingDirectory>${project.build.directory}/runtime</workingDirectory>
+				</configuration>
 			</plugin>
 		</plugins>
-	</reporting>
+	</build>
 </project>
 
 
@@ -147,4 +134,12 @@ Most used phases:
 
 <!--
 https://maven.apache.org/ref/3.9.11/maven-model/maven.html
+-->
+
+<!--
+<configuration>
+	<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+	<includeTestSourceDirectory>true</includeTestSourceDirectory>
+	<configLocation>checkstyle.xml</configLocation>
+</configuration>
 -->
