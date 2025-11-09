@@ -61,7 +61,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
      * If not exists - will be created
      * @throws FileAlreadyExistsException if databaseName equals to some directory name
      */
-    public SQLiteLinker(final String databaseName) throws FileAlreadyExistsException {
+    public SQLiteLinker(final String databaseName)
+            throws FileAlreadyExistsException, LinkerException {
         String postfix = "";
         if (!databaseName.endsWith(".db")) {
             postfix = ".db";
@@ -74,12 +75,12 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         }
 
         if (!f.exists()) {
-            System.out.println(INFO + " Database file wasn't found, will create...");
+            System.out.println(INFO + "Database file wasn't found, will create...");
         }
 
         try {
             conn = DriverManager.getConnection(URLPREFIX + dbName);
-            System.out.println(INFO + " Database connection established.");
+            System.out.println(INFO + "Database connection established.");
 
             String create_deadlines = "CREATE TABLE IF NOT EXISTS deadlines "
                 + "(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, "
@@ -105,7 +106,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             deadline_update = conn.prepareStatement(DEADLINE_UPDATE);
             deadline_remove = conn.prepareStatement(DEADLINE_UPDATE_ACTIVE);
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new LinkerException(collectInfo("constr") + e.getMessage());
         }
     }
 
@@ -126,8 +127,9 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             + "\nMethod name: " + methodName + "\n";
     }
 
-    private void checkUserQuery(final UserQuery inputQuery) throws MalformedQuery {
-        if (inputQuery.getId() != -1) {
+    private void checkUserQuery(final UserQuery inputQuery, final boolean anyId)
+            throws MalformedQuery {
+        if (!anyId && inputQuery.getId() != -1) {
             throw new MalformedQuery("Id field of input UserQuery should be -1");
         } else if (inputQuery.getChatId() == 0) {
             throw new MalformedQuery(
@@ -135,10 +137,11 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         }
     }
 
-    private void checkDeadlineQuery(final DeadlineQuery inputQuery) throws MalformedQuery {
+    private void checkDeadlineQuery(final DeadlineQuery inputQuery, final boolean anyId)
+            throws MalformedQuery {
         String reason = "";
 
-        if (inputQuery.getId() != -1) {
+        if (!anyId && inputQuery.getId() != -1) {
             reason = "Id field of input DeadlineQuery should be -1";
         } else if (inputQuery.getName().equals("")) {
             reason = "Name field of input DeadlineQuery should not be empty";
@@ -154,7 +157,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
     @Override
-    public void close() {
+    public void close() throws LinkerException {
         try {
             conn.close();
         } catch (SQLException e) {
@@ -165,7 +168,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     // User
     @Override
     public void addUser(final UserQuery inputQuery) throws MalformedQuery, LinkerException {
-        checkUserQuery(inputQuery);
+        checkUserQuery(inputQuery, false);
         try {
             user_add.setLong(1, inputQuery.getChatId());
             user_add.executeUpdate();
@@ -187,7 +190,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     @Override
     public void updateUser(final UserQuery inputQuery) throws MalformedQuery, LinkerException {
         try {
-            //checkUserQuery(inputQuery);
+            checkUserQuery(inputQuery, true);
             user_update.setLong(1, inputQuery.getChatId());
             user_update.setInt(2, inputQuery.getLimit());
             user_update.setBoolean(3, inputQuery.isHasPaidSubscribeForWeatherNews());
@@ -242,7 +245,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     @Override
     public void addDeadline(final DeadlineQuery inputQuery) throws MalformedQuery, LinkerException {
         try {
-            checkDeadlineQuery(inputQuery);
+            checkDeadlineQuery(inputQuery, false);
             deadline_add.setString(1, inputQuery.getName());
             deadline_add.setBigDecimal(2, inputQuery.getBurnTime());
             deadline_add.setBigDecimal(3, inputQuery.getOffset());
@@ -267,7 +270,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     public void updateDeadline(final DeadlineQuery inputQuery)
             throws MalformedQuery, LinkerException {
         try {
-            //checkDeadlineQuery(inputQuery);
+            checkDeadlineQuery(inputQuery, true);
             deadline_update.setString(1, inputQuery.getName());
             deadline_update.setBigDecimal(2, inputQuery.getBurnTime());
             deadline_update.setBigDecimal(3, inputQuery.getOffset());

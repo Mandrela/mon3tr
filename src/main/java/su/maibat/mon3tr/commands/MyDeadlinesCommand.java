@@ -1,5 +1,8 @@
 package su.maibat.mon3tr.commands;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
@@ -9,7 +12,7 @@ import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 public final class MyDeadlinesCommand implements Command {
-
+    private static final int OFFSET = 1000;
     private final DataBaseLinker linker;
 
     public MyDeadlinesCommand(final DataBaseLinker inputLinker) {
@@ -38,8 +41,9 @@ public final class MyDeadlinesCommand implements Command {
 
                 for (DeadlineQuery query : queryList) {
                     answer = answer.concat(query.getId() + " : " + query.getName() + " : "
-                            + query.getBurnTime() + "\n");
-                }
+                            + new SimpleDateFormat("dd/MM/yyyy").
+                            format(new Date(query.getBurnTime().longValue() * OFFSET)) + "\n");
+                } // TODO: ADEQUATUS TIME PARSING
                 chat.sendAnswer(answer);
             } catch (DeadlineNotFound dnf) {
                 chat.sendAnswer("You have not any deadlines");
