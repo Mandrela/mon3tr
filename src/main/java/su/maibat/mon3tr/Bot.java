@@ -1,58 +1,60 @@
 package su.maibat.mon3tr;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-//import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.util.Arrays;
+import su.maibat.mon3tr.chat.MessageSink;
+import su.maibat.mon3tr.chat.TelegramChat;
+import su.maibat.mon3tr.commands.Command;
 
 
-public class Bot implements LongPollingSingleThreadUpdateConsumer {
+public final class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
     private static final char PREFIX = '/';
-    private TelegramClient telegramClient;
-    private Command[] commands;
 
-    public Bot(final String token, final Command[] commandsArgument) {
+    private final HashMap<Long, MessageSink> chatMap = new HashMap<>();
+    private final TelegramClient telegramClient;
+    private final LinkedHashMap<String, Command> commands;
+    private final Command defaultCommand;
+
+    /**
+     * @param token Telegram token -- KEEP SAFE, DO NOT SHARE IT
+     * @param commandsArgument Map were key is a name of a command in bot's interface
+     * and value is an instance of Command implementing class
+     * @param defaultCommandArgument The default command which will be executed if incorrect
+     * command supplied
+     */
+    public Bot(final String token, final LinkedHashMap<String, Command> commandsArgument,
+                final Command defaultCommandArgument) {
         telegramClient = new OkHttpTelegramClient(token);
         commands = commandsArgument;
+        defaultCommand = defaultCommandArgument;
     }
 
     @Override
-    public final void consume(final Update update) {
+    public void consume(final Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            /*SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),
-                                        update.getMessage().getText());
-            try {
-                telegramClient.execute(sendMessage);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }*/
             String[] message = update.getMessage().getText().split(" ");
+
             if (message[0].charAt(0) == PREFIX) {
                 String commandName = message[0].substring(1).toLowerCase();
-                for (int i = 0; i < commands.length; i++) {
-                    if (commandName.equals(commands[i].getName())) {
-                        try {
-                        // TODO:
-                            if (message.length == 1) {
-                                commands[i].execute(update.getMessage().getChatId(),
-                                                        telegramClient);
-                            } else {
-                                System.out.println(message[1]);
-                                commands[i].executeWithArgs(update.getMessage().getChatId(),
-                                    telegramClient, Arrays.copyOfRange(message, 1, message.length));
-                            }
-                        } catch (TelegramApiException e) { // TODO CustomException with help handler
-                           throw new RuntimeException(e);
-                        }
-                    }
-                }
-            }
+
+                TelegramChat telegramChat = new TelegramChat(
+                    update.getMessage().getChatId(), telegramClient);
+                telegramChat.addMessages(Arrays.copyOfRange(message, 1, message.length));
+                telegramChat.froze();
+
+                // multithreading I want here
+                commands.getOrDefault(commandName, defaultCommand).execute(telegramChat);
+            } // else {
+                // argument passing to known chats
+            // }
         }
     }
 }
