@@ -157,7 +157,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
     @Override
-    public void close() throws LinkerException {
+    public synchronized void close() throws LinkerException {
         try {
             conn.close();
         } catch (SQLException e) {
@@ -167,7 +167,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
     // User
     @Override
-    public void addUser(final UserQuery inputQuery) throws MalformedQuery, LinkerException {
+    public synchronized void addUser(final UserQuery inputQuery)
+            throws MalformedQuery, LinkerException {
         checkUserQuery(inputQuery, false);
         try {
             user_add.setLong(1, inputQuery.getChatId());
@@ -178,7 +179,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
     @Override
-    public void deactivateUser(final int id) throws LinkerException {
+    public synchronized void deactivateUser(final int id) throws LinkerException {
         try {
             user_deactivate.setInt(1, id);
             user_deactivate.executeUpdate();
@@ -188,7 +189,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
     @Override
-    public void updateUser(final UserQuery inputQuery) throws MalformedQuery, LinkerException {
+    public synchronized void updateUser(final UserQuery inputQuery)
+            throws MalformedQuery, LinkerException {
         try {
             checkUserQuery(inputQuery, true);
             user_update.setLong(1, inputQuery.getChatId());
@@ -216,7 +218,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
 
     @Override
-    public UserQuery getUserById(final int id) throws UserNotFound, LinkerException {
+    public synchronized UserQuery getUserById(final int id) throws UserNotFound, LinkerException {
         try {
             user_get_by_id.setInt(1, id);
             return parseUserFromResult(user_get_by_id.executeQuery());
@@ -229,7 +231,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
     @Override
-    public UserQuery getUserByChatId(final long chatId) throws UserNotFound, LinkerException {
+    public synchronized UserQuery getUserByChatId(final long chatId)
+            throws UserNotFound, LinkerException {
         try {
             user_get_by_chat_id.setLong(1, chatId);
             return parseUserFromResult(user_get_by_chat_id.executeQuery());
@@ -243,7 +246,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
     // Deadline
     @Override
-    public void addDeadline(final DeadlineQuery inputQuery) throws MalformedQuery, LinkerException {
+    public synchronized void addDeadline(final DeadlineQuery inputQuery)
+            throws MalformedQuery, LinkerException {
         try {
             checkDeadlineQuery(inputQuery, false);
             deadline_add.setString(1, inputQuery.getName());
@@ -257,7 +261,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
     @Override
-    public void removeDeadline(final int id) throws LinkerException {
+    public synchronized void removeDeadline(final int id) throws LinkerException {
         try {
             deadline_remove.setInt(1, id);
             deadline_remove.executeUpdate();
@@ -267,7 +271,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
     @Override
-    public void updateDeadline(final DeadlineQuery inputQuery)
+    public synchronized void updateDeadline(final DeadlineQuery inputQuery)
             throws MalformedQuery, LinkerException {
         try {
             checkDeadlineQuery(inputQuery, true);
@@ -282,14 +286,16 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         }
     }
 
-    private DeadlineQuery parseDeadlineFromResult(final ResultSet result) throws SQLException {
+    private synchronized DeadlineQuery parseDeadlineFromResult(final ResultSet result)
+            throws SQLException {
         return new DeadlineQuery(result.getInt("id"), result.getString("name"),
             result.getBigDecimal("burns"), result.getBigDecimal("offsetValue"),
             result.getInt("userId"));
     }
 
     @Override
-    public DeadlineQuery getDeadline(final int id) throws DeadlineNotFound, LinkerException {
+    public synchronized DeadlineQuery getDeadline(final int id)
+            throws DeadlineNotFound, LinkerException {
         try {
             deadline_get_by_id.setInt(1, id);
             ResultSet result = deadline_get_by_id.executeQuery();
@@ -304,7 +310,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
     @Override
-    public DeadlineQuery[] getDeadlinesForUser(final int userId)
+    public synchronized DeadlineQuery[] getDeadlinesForUser(final int userId)
             throws DeadlineNotFound, LinkerException {
         try {
             deadline_get_by_user_id.setInt(1, userId);
