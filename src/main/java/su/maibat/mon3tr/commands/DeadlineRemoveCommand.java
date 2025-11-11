@@ -8,6 +8,8 @@ import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
+import java.util.Objects;
+
 public class DeadlineRemoveCommand extends MyDeadlinesCommand {
 
     private final SQLiteLinker linker;
@@ -44,7 +46,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                     arg = arguments[0];
                 }
 
-                while (!isValid(arg, queryList.length)) { //TODO Преждевременный выход
+                while (!isValid(arg, queryList.length)) {
                     arg = chat.getMessage();
                 }
 

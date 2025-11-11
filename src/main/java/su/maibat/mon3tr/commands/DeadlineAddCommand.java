@@ -3,10 +3,10 @@ package su.maibat.mon3tr.commands;
 import java.math.BigDecimal;
 
 import su.maibat.mon3tr.chat.Chat;
-import su.maibat.mon3tr.commands.exceptions.IllegalDeadlineNameException;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.UserQuery;
+import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 import java.time.LocalDate;
@@ -36,74 +36,118 @@ public final class DeadlineAddCommand implements Command {
     }
 
     public void execute(final Chat chat) {
-        String[] arguments = chat.getAllMessages();
-
-        if (arguments.length < 2) {
-            chat.sendAnswer("Something went wrong, try again with input some arguments");
-
-        } else {
+        try {
             try {
+                linker.getUserByChatId(chat.getChatId());
+            } catch (UserNotFound e) {
+                UserQuery userQuery = new UserQuery(-1, chat.getChatId());
+                linker.addUser(userQuery);
+            }
+            UserQuery user = linker.getUserByChatId(chat.getChatId());
+            DeadlineQuery inputQuery = new DeadlineQuery();
 
-                try {
-                    linker.getUserByChatId(chat.getChatId());
-                } catch (UserNotFound e) {
-                    UserQuery userQuery = new UserQuery(-1, chat.getChatId());
-                    linker.addUser(userQuery);
-                }
-                UserQuery user = linker.getUserByChatId(chat.getChatId());
+            inputQuery.setUserId(user.getId());
 
-                if (user.getLimit() == 0) {
-                    chat.sendAnswer("You have used up all your deadline cells, "
-                            + "please close one or more deadlines before add a new one.");
-                    return;
+            String[] arguments = chat.getAllMessages();
+
+            String name, stringBurnTime;
+
+            if (arguments.length >= 2) {
+
+                if (isDate(arguments[1])) {
+                    stringBurnTime = arguments[1];
+                    if (isCorrectName(arguments[0])) {
+                        name = arguments[0];
+                    } else {
+                        name = getArgument(chat, "name");
+                    }
+
+                } else if (isDate(arguments[0])) {
+                    stringBurnTime = arguments[0];
+                    if (isCorrectName(arguments[1])) {
+                        name = arguments[1];
+                    } else {
+                        name = getArgument(chat, "name");
+                    }
+
                 } else {
-                    user.setLimit(user.getLimit() - 1);
+                    if (isCorrectName(arguments[0])) {
+                        name = arguments[0];
+                    } else if (isCorrectName(arguments[1])) {
+                        name = arguments[1];
+                    } else {
+                        name = getArgument(chat, "name");
+                    }
+                    stringBurnTime = getArgument(chat, "date");
                 }
 
-                DeadlineQuery inputQuery = new DeadlineQuery();
+            } else if (arguments.length == 0) {
 
+                name = getArgument(chat, "name");
+                stringBurnTime = getArgument(chat, "date");
+
+            } else {
                 if (isDate(arguments[0])) {
-                    BigDecimal burnTime = new BigDecimal(stringToTime(arguments[0]));
-                    if (isDate(arguments[1]) || arguments[1].isEmpty()) {
-                        throw new IllegalDeadlineNameException();
-                    }
-                    inputQuery.setName(arguments[1]);
-                    inputQuery.setBurnTime(burnTime);
-
+                    name = getArgument(chat, "name");
+                    stringBurnTime = arguments[0];
+                } else if (arguments[0].isEmpty()) {
+                    name = getArgument(chat, "name");
+                    stringBurnTime = getArgument(chat, "date");
                 } else {
-                    BigDecimal burnTime = new BigDecimal(stringToTime(arguments[1]));
-                    if (arguments[0].isEmpty()) {
-                        throw new IllegalDeadlineNameException();
-                    }
-
-                    inputQuery.setName(arguments[0]);
-                    inputQuery.setBurnTime(burnTime);
-
+                    name = arguments[0];
+                    stringBurnTime = getArgument(chat, "date");
                 }
+            }
 
-                inputQuery.setUserId(user.getId());
-                //Заполнение запроса для добавления
+            BigDecimal burnTime = new BigDecimal(stringToTime(stringBurnTime));
 
+            inputQuery.setName(name);
+            inputQuery.setBurnTime(burnTime);
+
+            if (user.getLimit() == 0) {
+                chat.sendAnswer("You have used up all your deadline cells, "
+                        + "please close one or more deadlines before add a new one.");
+            } else {
+                user.setLimit(user.getLimit() - 1);
                 linker.addDeadline(inputQuery);
                 chat.sendAnswer("Deadline added successfully");
-
-            } catch (DateTimeParseException | IllegalArgumentException e) {
-                chat.sendAnswer("Please enter correct date");
-            } catch (IllegalDeadlineNameException idne) {
-                chat.sendAnswer("Please enter valid name for your deadline "
-                        + "(not 'Empty', not date)");
-            } catch (Exception e) {
-                throw new RuntimeException("Arguments not found");
             }
+
+        } catch (UserNotFound e) {
+
+        } catch (InterruptedException ie) {
+
+        } catch (MalformedQuery e) {
+            throw new RuntimeException(e);
         }
 
+    }
 
+    private String getArgument(final Chat chat, final String flag) throws InterruptedException {
+        String answer = "";
+        if (flag.equals("name")) {
+            while (!isCorrectName(answer)) {
+                answer = chat.getMessage();
+            }
+            return answer;
+        } else if (flag.equals("date")) {
+            while (!isDate(answer)) {
+                answer = chat.getMessage();
+            }
+            return answer;
+        } else {
+            return "";
+        }
     }
 
     private boolean isDate(final String argument) {
         final Pattern pattern = compile("^\\d{1,2}[./]\\d{1,2}[./]\\d{1,4}$");
         Matcher matcher = pattern.matcher(argument);
         return matcher.find();
+    }
+
+    private boolean isCorrectName(final String name) {
+        return !(isDate(name) || name.isEmpty());
     }
 
     private Long stringToTime(final String dateString) throws DateTimeParseException,
