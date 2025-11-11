@@ -19,13 +19,23 @@ public class MyDeadlinesCommand implements Command {
         this.linker = inputLinker;
     }
 
+    /**
+     * @return Command name
+     */
     public String getName() {
         return "mydeadlines";
     }
+
+    /**
+     * @return Help info about command
+     */
     public String getHelp() {
         return "This command show list of your deadlines";
     }
 
+    /**
+     * @param chat To which chat command send messages
+     */
     public void execute(final Chat chat) {
 
         try {
@@ -56,7 +66,7 @@ public class MyDeadlinesCommand implements Command {
         }
     }
 
-    protected void printTable(final Chat chat, final DeadlineQuery[] queryList) {
+    protected final void printTable(final Chat chat, final DeadlineQuery[] queryList) {
         String answer = "";
 
         for (int i = 0; i < queryList.length; i++) {
