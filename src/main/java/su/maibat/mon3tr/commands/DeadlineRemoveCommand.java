@@ -1,17 +1,19 @@
 package su.maibat.mon3tr.commands;
 
 import su.maibat.mon3tr.chat.Chat;
+import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-public class DeadlineRemoveCommand implements Command {
+public class DeadlineRemoveCommand extends MyDeadlinesCommand {
 
     private final SQLiteLinker linker;
 
     public DeadlineRemoveCommand(final SQLiteLinker inputLinker) {
+        super(inputLinker);
         this.linker = inputLinker;
     }
 
@@ -25,51 +27,58 @@ public class DeadlineRemoveCommand implements Command {
 
     public final void execute(final Chat chat) {
 
-        String[] arguments = chat.getAllMessages();
-        if (arguments.length == 0) {
-            chat.sendAnswer("Something went wrong, try again with input some arguments");
-        } else  if (arguments.length == 1) {
+        try {
+            UserQuery user = linker.getUserByChatId(chat.getChatId());
             try {
-                int id = Integer.parseInt(arguments[0]);
-
-                if (linker.getUserById(linker.getDeadline(id).getUserId()).getChatId()
-                        != chat.getChatId()) {
-                    chat.sendAnswer("You do not have this deadline "
-                            + "(do not take on more than you need to)");
+                DeadlineQuery[] queryList = linker.getDeadlinesForUser(user.getId());
+                if (queryList.length == 0) {
+                    chat.sendAnswer("You have not any deadlines");
                     return;
                 }
-                linker.removeDeadline(id);
+
+                super.printTable(chat, queryList);
+
+                String[] arguments = chat.getAllMessages();
+                String arg = "";
+                if (arguments.length > 0) {
+                    arg = arguments[0];
+                }
+
+                while (!isValid(arg, queryList.length)) { //TODO Преждевременный выход
+                    arg = chat.getMessage();
+                }
+
+                int removeId = Integer.parseInt(arg);
+
+                linker.removeDeadline(queryList[removeId].getId());
+
                 chat.sendAnswer("You have closed this gestalt!!!");
+
             } catch (DeadlineNotFound dnf) {
-                chat.sendAnswer("Deadline not found");
-            } catch (UserNotFound unf) {
-                UserQuery userQuery = new UserQuery(-1, chat.getChatId());
-                try {
-                    linker.addUser(userQuery);
-                } catch (MalformedQuery me) {
-                    chat.sendAnswer("Something went wrong");
-                }
                 chat.sendAnswer("You have not any deadlines");
-            } catch (NumberFormatException nfe) {
-                chat.sendAnswer("Please enter a valid deadline id (number)");
             }
+        } catch (UserNotFound unf) {
+            UserQuery userQuery = new UserQuery(-1, chat.getChatId());
+            try {
+                linker.addUser(userQuery);
+            } catch (MalformedQuery me) {
+                chat.sendAnswer("Something went wrong");
+            }
+            chat.sendAnswer("You have not any deadlines");
+        } catch (InterruptedException ie) {
 
+        }
+    }
 
-            /*
-            //Фрагмент для случая нахождения множества записей
-
-            if (deleteQueryArray.length == 0) {
-                chat.sendAnswer("No records with this name or date were found");
-            } else {
-                //Если у нас есть несколько записей на одну дату с одним именем мы счтаем их одной
-                for (DeadlineQuery deleteQuery : deleteQueryArray) {
-                    linker.removeDeadline(deleteQuery.getId());
-                }
-                chat.sendAnswer("You have closed this gestalt!!!");
-            }*/
-
-        } else {
-            chat.sendAnswer("Please use 1 argument with this command");
+    private boolean isValid(String arg, int maxValue) {
+        //Не число
+        //Больше предела
+        //Меньше 1
+        try {
+            int intArg = Integer.parseInt(arg);
+            return intArg <= maxValue && intArg >= 1;
+        } catch (NumberFormatException nfe) {
+            return false;
         }
     }
 }
