@@ -68,12 +68,6 @@ public final class TelegramChat implements Chat, MessageSink {
         return messages.poll();
     }
 
-    @Override
-    public String getMessage(final String message) {
-        sendAnswer(message);
-        return getMessage();
-    }
-
     /**
      * @return Array of strings. If chat was in frozen state, return array will
      * consist only from messages from first addMessage[s];
