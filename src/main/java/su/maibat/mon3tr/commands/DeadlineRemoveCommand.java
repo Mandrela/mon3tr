@@ -8,7 +8,6 @@ import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-import java.util.Objects;
 
 public class DeadlineRemoveCommand extends MyDeadlinesCommand {
 
@@ -47,7 +46,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                 }
 
                 while (!isValid(arg, queryList.length)) {
-                    arg = chat.getMessage("needIdToRemove");
+                    arg = chat.getMessage("Please enter a valid deadline id (number)");
                 }
 
                 int removeId = Integer.parseInt(arg);
@@ -72,7 +71,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
         }
     }
 
-    private boolean isValid(String arg, int maxValue) {
+    private boolean isValid(final String arg, final int maxValue) {
         //Не число
         //Больше предела
         //Меньше 1

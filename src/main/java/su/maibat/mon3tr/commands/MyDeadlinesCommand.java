@@ -56,7 +56,7 @@ public class MyDeadlinesCommand implements Command {
         }
     }
 
-    protected void printTable(Chat chat, DeadlineQuery[] queryList) {
+    protected void printTable(final Chat chat, final DeadlineQuery[] queryList) {
         String answer = "";
 
         for (int i = 0; i < queryList.length; i++) {

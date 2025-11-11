@@ -50,7 +50,8 @@ public final class DeadlineAddCommand implements Command {
 
             String[] arguments = chat.getAllMessages();
 
-            String name, stringBurnTime;
+            String name;
+            String stringBurnTime;
 
             if (arguments.length >= 2) {
 
@@ -127,12 +128,13 @@ public final class DeadlineAddCommand implements Command {
         String answer = "";
         if (flag.equals("name")) {
             while (!isCorrectName(answer)) {
-                answer = chat.getMessage("needName");
+                answer = chat.getMessage("Please enter valid name for your deadline \"\n" +
+                        "                        + \"(not 'Empty', not date)");
             }
             return answer;
         } else if (flag.equals("date")) {
             while (!isDate(answer)) {
-                answer = chat.getMessage("needDate");
+                answer = chat.getMessage("Please enter correct date");
             }
             return answer;
         } else {
