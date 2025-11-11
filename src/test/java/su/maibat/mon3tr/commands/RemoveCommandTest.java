@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -72,7 +72,7 @@ public final class RemoveCommandTest {
 
     //@Test
     @DisplayName("Remove with correct arguments")
-    void correctRemoveTest() throws DeadlineNotFound{
+    void correctRemoveTest() throws DeadlineNotFound {
 
         DeadlineQuery deadline = new DeadlineQuery();
         deadline.setUserId(1);
