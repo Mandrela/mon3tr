@@ -17,7 +17,6 @@ class TelegramChatTest {
     private TelegramChat chat;
 
     @BeforeEach
-    @SuppressWarnings("unused")
     void setUp() {
         tgClient = Mockito.mock(TelegramClient.class);
         chat = new TelegramChat(123L, tgClient);
@@ -58,15 +57,15 @@ class TelegramChatTest {
     @DisplayName("Frozing test")
     void frozingTest() {
         assertTrue(!chat.isFrozen(), "Should not be frozen after initialization");
-        chat.froze();
+        chat.freeze();
         assertTrue(chat.isFrozen(), "Should froze if told to");
-        assertDoesNotThrow(() -> chat.unfroze(), "Should not throw on empty inners");
+        assertDoesNotThrow(() -> chat.unfreeze(), "Should not throw on empty inners");
         assertTrue(!chat.isFrozen(), "Should unfroze if told to");
 
         String[] testMessages = {"testMessage", "testMessage + testMessage",
             "More", "and more"};
         chat.addMessages(testMessages);
-        chat.froze();
+        chat.freeze();
         chat.addMessage("This message should not be displayed");
         String[] result = chat.getAllMessages();
         assertEquals(testMessages.length, result.length);
@@ -75,7 +74,7 @@ class TelegramChatTest {
         assertEquals("This message should not be displayed", chat.getMessage());
         assertTrue(chat.isEmpty(), "Finally, should not have anything");
 
-        chat.froze();
+        chat.freeze();
         chat.addMessages(testMessages);
         assertTrue(!chat.isEmpty());
         chat.getMessage();

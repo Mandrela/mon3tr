@@ -41,11 +41,11 @@ public final class TelegramChat implements Chat, MessageSink {
         return isFrozen;
     }
 
-    public void froze() {
+    public void freeze() {
         isFrozen = true;
     }
 
-    public void unfroze() {
+    public void unfreeze() {
         isFrozen = false;
         transfer();
     }
@@ -59,13 +59,19 @@ public final class TelegramChat implements Chat, MessageSink {
     @Override
     public String getMessage() {
         if (isFrozen && messages.isEmpty()) {
-            unfroze();
+            unfreeze();
         }
 
         while (messages.isEmpty()) {
             return ""; // Multithreading
         }
         return messages.poll();
+    }
+
+    @Override
+    public String getMessage(final String message) {
+        sendAnswer(message);
+        return getMessage();
     }
 
     /**
@@ -79,7 +85,7 @@ public final class TelegramChat implements Chat, MessageSink {
         messages.clear();
 
         if (isFrozen) {
-            unfroze();
+            unfreeze();
         }
 
         return result;
