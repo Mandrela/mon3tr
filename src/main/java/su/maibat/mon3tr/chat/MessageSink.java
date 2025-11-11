@@ -7,4 +7,5 @@ public interface MessageSink {
             addMessage(message);
         }
     }
+    void interrupt();
 }
