@@ -54,6 +54,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                 linker.removeDeadline(queryList[removeId].getId());
 
                 chat.sendAnswer("You have closed this gestalt!!!");
+                user.setLimit(user.getLimit() + 1);
 
             } catch (DeadlineNotFound dnf) {
                 chat.sendAnswer("You have not any deadlines");
