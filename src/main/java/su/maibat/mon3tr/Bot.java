@@ -76,7 +76,12 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
 
                 Command commandToExecute = commands.getOrDefault(arguments[0].toLowerCase(),
                     defaultCommand);
-                new Thread(() -> commandToExecute.execute(telegramChat)).start();
+                new Thread(() -> {
+                    commandToExecute.execute(telegramChat);
+                    chatMap.computeIfPresent(chatId, (key, value) -> {
+                            value.interrupt(); return null;
+                    });
+                }).start();
 
             } else if (chatMap.containsKey(chatId)) {
                 chatMap.get(chatId).addMessage(message.getText());

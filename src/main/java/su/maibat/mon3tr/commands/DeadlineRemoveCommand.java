@@ -49,7 +49,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                     arg = chat.getMessage("Please enter a valid deadline id (number)");
                 }
 
-                int removeId = Integer.parseInt(arg);
+                int removeId = Integer.parseInt(arg) - 1;
 
                 linker.removeDeadline(queryList[removeId].getId());
 
