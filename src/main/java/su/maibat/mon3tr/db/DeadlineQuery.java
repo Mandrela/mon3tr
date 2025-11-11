@@ -7,7 +7,7 @@ public final class DeadlineQuery extends DBQuery {
     private BigDecimal burnTime = new BigDecimal(0);
     private BigDecimal offset = new BigDecimal(0);
     private int userId = 0;
-    private int groupId = 0;
+    // private int groupId = 0;
 
     public DeadlineQuery() {
         super();

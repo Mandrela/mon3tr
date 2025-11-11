@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import su.maibat.mon3tr.chat.MessageSink;
@@ -37,24 +38,51 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
         defaultCommand = defaultCommandArgument;
     }
 
+
+    /**
+     * Parses string to array of arguments, where the first argument is a command itself without.
+     * a prefix
+     * @param textString Input String
+     * @return Array of arguments where the first one is a prefix-less command
+     */
+    private String[] parseCommand(final String textString) {
+        if (textString.charAt(0) == PREFIX) {
+            String[] result = textString.split(" ");
+            result[0] = result[0].substring(1);
+            return result;
+        }
+        return null;
+    }
+
+
     @Override
     public void consume(final Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String[] message = update.getMessage().getText().split(" ");
+        Message message = update.getMessage();
 
-            if (message[0].charAt(0) == PREFIX) {
-                String commandName = message[0].substring(1).toLowerCase();
+        if (message != null && message.hasText()) {
+            Long chatId = message.getChatId();
+            String[] arguments = parseCommand(message.getText());
 
-                TelegramChat telegramChat = new TelegramChat(
-                    update.getMessage().getChatId(), telegramClient);
-                telegramChat.addMessages(Arrays.copyOfRange(message, 1, message.length));
+            if (arguments != null) {
+                chatMap.computeIfPresent(chatId,
+                    (key, value) -> {
+                        value.interrupt(); return null;
+                    });
+
+                TelegramChat telegramChat = new TelegramChat(chatId, telegramClient);
+                telegramChat.addMessages(Arrays.copyOfRange(arguments, 1, arguments.length));
                 telegramChat.freeze();
+                chatMap.put(chatId, telegramChat);
 
-                // multithreading I want here
-                commands.getOrDefault(commandName, defaultCommand).execute(telegramChat);
-            } // else {
-                // argument passing to known chats
-            // }
+                Command commandToExecute = commands.getOrDefault(arguments[0].toLowerCase(),
+                    defaultCommand);
+                new Thread(() -> commandToExecute.execute(telegramChat)).start();
+
+            } else if (chatMap.containsKey(chatId)) {
+                chatMap.get(chatId).addMessage(message.getText());
+            } else {
+                defaultCommand.execute(new TelegramChat(chatId, telegramClient));
+            }
         }
     }
 }

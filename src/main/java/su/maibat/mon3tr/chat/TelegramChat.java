@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 public final class TelegramChat implements Chat, MessageSink {
     private static final int REPLY_AMOUNT = 3;
 
+    private boolean isInterrupted = false;
     private final Long chatId;
     private final TelegramClient telegramClient;
 
@@ -57,13 +58,16 @@ public final class TelegramChat implements Chat, MessageSink {
     }
 
     @Override
-    public String getMessage() {
+    public String getMessage() throws InterruptedException {
         if (isFrozen && messages.isEmpty()) {
             unfreeze();
         }
 
         while (messages.isEmpty()) {
-            return ""; // Multithreading
+            if (isInterrupted) {
+                throw new InterruptedException("Chat " + chatId + " was interrupted");
+            }
+            Thread.yield();
         }
         return messages.poll();
     }
@@ -105,5 +109,10 @@ public final class TelegramChat implements Chat, MessageSink {
                 System.out.println("Couldn't send message " + answer + "\n" + e);
             }
         }
+    }
+
+    @Override
+    public void interrupt() {
+        isInterrupted = true;
     }
 }

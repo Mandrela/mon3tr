@@ -24,7 +24,7 @@ class TelegramChatTest {
 
     @Test
     @DisplayName("Base test")
-    void baseTest() {
+    void baseTest() throws InterruptedException {
         assertEquals(123L, chat.getChatId(), "Passed id and fetched should match");
         assertTrue(chat.isEmpty(), "Inner buffer should be empty");
 
@@ -55,7 +55,7 @@ class TelegramChatTest {
 
     @Test
     @DisplayName("Frozing test")
-    void frozingTest() {
+    void frozingTest() throws InterruptedException {
         assertTrue(!chat.isFrozen(), "Should not be frozen after initialization");
         chat.freeze();
         assertTrue(chat.isFrozen(), "Should froze if told to");
@@ -79,5 +79,30 @@ class TelegramChatTest {
         assertTrue(!chat.isEmpty());
         chat.getMessage();
         assertTrue(!chat.isFrozen());
+    }
+
+    @Test
+    @DisplayName("Interruption test")
+    void interruptionTest() throws InterruptedException {
+        class Wrapper implements Runnable {
+            private final TelegramChat chat;
+            Wrapper(final TelegramChat chatArg) {
+                chat = chatArg;
+            }
+
+            public void run() {
+                try {
+                    chat.getMessage();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Interrupted");
+                }
+            }
+        }
+
+        Thread thread = new Thread(new Wrapper(chat));
+        thread.start();
+        chat.interrupt();
+        thread.join(500);
+        assertTrue(!thread.isAlive(), "Should die");
     }
 }

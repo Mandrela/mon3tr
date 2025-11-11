@@ -24,7 +24,6 @@ class HelpCommandTest {
     private final Chat chat = Mockito.mock(Chat.class);
 
     @BeforeEach
-    @SuppressWarnings("unused")
     void setUp() {
         String[] data = {};
         Mockito.when(chat.getAllMessages()).thenReturn(data);
@@ -57,7 +56,7 @@ class HelpCommandTest {
         }
     }
 
-    @Test // TODO: readme, UX date, tests, Fixture
+    @Test
     @DisplayName("Empty command set")
     void emptyCommandTest() {
         helpCommand.setCommands(new LinkedHashMap<>());
@@ -94,7 +93,6 @@ class HelpCommandTest {
     }
 
 
-    @SuppressWarnings("unused")
     static Stream<Arguments> helpArgs() {
         return Stream.of(
             Arguments.of(new String[]{"authors", "about"}, new Boolean[]{true, true}),
