@@ -127,12 +127,12 @@ public final class DeadlineAddCommand implements Command {
         String answer = "";
         if (flag.equals("name")) {
             while (!isCorrectName(answer)) {
-                answer = chat.getMessage();
+                answer = chat.getMessage("needName");
             }
             return answer;
         } else if (flag.equals("date")) {
             while (!isDate(answer)) {
-                answer = chat.getMessage();
+                answer = chat.getMessage("needDate");
             }
             return answer;
         } else {

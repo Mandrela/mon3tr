@@ -47,7 +47,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                 }
 
                 while (!isValid(arg, queryList.length)) {
-                    arg = chat.getMessage();
+                    arg = chat.getMessage("needIdToRemove");
                 }
 
                 int removeId = Integer.parseInt(arg);
