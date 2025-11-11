@@ -128,8 +128,8 @@ public final class DeadlineAddCommand implements Command {
         String answer = "";
         if (flag.equals("name")) {
             while (!isCorrectName(answer)) {
-                answer = chat.getMessage("Please enter valid name for your deadline \"\n" +
-                        "                        + \"(not 'Empty', not date)");
+                answer = chat.getMessage("Please enter valid name for your deadline "
+                                                + "(not 'Empty', not date)");
             }
             return answer;
         } else if (flag.equals("date")) {
