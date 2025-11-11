@@ -11,7 +11,7 @@ import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-public final class MyDeadlinesCommand implements Command {
+public class MyDeadlinesCommand implements Command {
     private static final int OFFSET = 1000;
     private final DataBaseLinker linker;
 
@@ -37,14 +37,8 @@ public final class MyDeadlinesCommand implements Command {
                     return;
                 }
 
-                String answer = "";
+                printTable(chat, queryList);
 
-                for (DeadlineQuery query : queryList) {
-                    answer = answer.concat(query.getId() + " : " + query.getName() + " : "
-                            + new SimpleDateFormat("dd/MM/yyyy").
-                            format(new Date(query.getBurnTime().longValue() * OFFSET)) + "\n");
-                } // TODO: ADEQUATUS TIME PARSING
-                chat.sendAnswer(answer);
             } catch (DeadlineNotFound dnf) {
                 chat.sendAnswer("You have not any deadlines");
             }
@@ -60,5 +54,16 @@ public final class MyDeadlinesCommand implements Command {
 
 
         }
+    }
+
+    protected void printTable(Chat chat, DeadlineQuery[] queryList) {
+        String answer = "";
+
+        for (int i = 0; i < queryList.length; i++) {
+            answer = answer.concat((i + 1) + " : " + queryList[i].getName() + " : "
+                    + new SimpleDateFormat("dd/MM/yyyy").
+                    format(new Date(queryList[i].getBurnTime().longValue() * OFFSET)) + "\n");
+        }
+        chat.sendAnswer(answer);
     }
 }
