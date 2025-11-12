@@ -1,8 +1,8 @@
 package su.maibat.mon3tr;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -19,7 +19,7 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
     private static final char PREFIX = '/';
 
-    private final HashMap<Long, MessageSink> chatMap = new HashMap<>();
+    private final ConcurrentHashMap<Long, MessageSink> sinkMap = new ConcurrentHashMap<>();
     private final TelegramClient telegramClient;
     private final LinkedHashMap<String, Command> commands;
     private final Command defaultCommand;
@@ -40,8 +40,8 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
 
 
     /**
-     * Parses string to array of arguments, where the first argument is a command itself without.
-     * a prefix
+     * Parses string to array of arguments, where the first argument is a command itself without
+     * a prefix.
      * @param textString Input String
      * @return Array of arguments where the first one is a prefix-less command
      */
@@ -64,7 +64,7 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
             String[] arguments = parseCommand(message.getText());
 
             if (arguments != null) {
-                chatMap.computeIfPresent(chatId,
+                sinkMap.computeIfPresent(chatId,
                     (key, value) -> {
                         value.interrupt(); return null;
                     });
@@ -72,19 +72,19 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
                 TelegramChat telegramChat = new TelegramChat(chatId, telegramClient);
                 telegramChat.addMessages(Arrays.copyOfRange(arguments, 1, arguments.length));
                 telegramChat.freeze();
-                chatMap.put(chatId, telegramChat);
+                sinkMap.put(chatId, telegramChat);
 
                 Command commandToExecute = commands.getOrDefault(arguments[0].toLowerCase(),
                     defaultCommand);
                 new Thread(() -> {
                     commandToExecute.execute(telegramChat);
-                    chatMap.computeIfPresent(chatId, (key, value) -> {
+                    sinkMap.computeIfPresent(chatId, (key, value) -> {
                             value.interrupt(); return null;
                     });
                 }).start();
 
-            } else if (chatMap.containsKey(chatId)) {
-                chatMap.get(chatId).addMessage(message.getText());
+            } else if (sinkMap.containsKey(chatId)) {
+                sinkMap.get(chatId).addMessage(message.getText());
             } else {
                 defaultCommand.execute(new TelegramChat(chatId, telegramClient));
             }
