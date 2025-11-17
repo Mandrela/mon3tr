@@ -17,6 +17,7 @@ import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
 
 
+// TODO: Thread pool and Safety
 public final class Main {
     public static final String DEBUG = "\u001b[1;97m[\u001b[0;90mDEBG\u001b[1;97m]\u001b[0m ";
     public static final String INFO = "\u001b[1;97m[INFO]\u001b[0m ";
@@ -30,6 +31,7 @@ public final class Main {
      @param args unused
      */
     public static void main(final String[] args) {
+        // Settings
         String token = System.getenv("MON3TR_TOKEN");
         if (token == null) {
             System.err.println(CRITICAL + "Environmental variable MON3TR_TOKEN is not set.");
@@ -42,6 +44,7 @@ public final class Main {
         }
 
 
+        // Common resources
         SQLiteLinker dataBase;
         try {
             dataBase = new SQLiteLinker(dbName);
@@ -58,6 +61,7 @@ public final class Main {
             new TelegramBotsLongPollingApplication();
 
 
+        // Commands
         HelpCommand help = new HelpCommand();
 
         AuthorsCommand authors = new AuthorsCommand();
@@ -81,6 +85,7 @@ public final class Main {
         help.setCommands(commandMap);
 
 
+        // Workers
         Bot bot = new Bot(token, commandMap, help);
         try {
             BotSession botSession = botsApplication.registerBot(token, bot);

@@ -21,7 +21,7 @@ public final class TelegramChat implements Chat, MessageSink {
 
     private final LinkedList<String> messages = new LinkedList<>();
     private final LinkedList<String> addBuffer = new LinkedList<>();
-    private boolean isFrozen = false;
+    private volatile boolean isFrozen = false;
 
     public TelegramChat(final Long chatIdArgument, final TelegramClient telegramClientArgument) {
         chatId = chatIdArgument;
@@ -51,14 +51,14 @@ public final class TelegramChat implements Chat, MessageSink {
         transfer();
     }
 
-    private void transfer() {
+    private synchronized void transfer() {
         while (!addBuffer.isEmpty()) {
             messages.add(addBuffer.poll());
         }
     }
 
     @Override
-    public String getMessage() throws InterruptedException {
+    public synchronized String getMessage() throws InterruptedException {
         if (isFrozen && messages.isEmpty()) {
             unfreeze();
         }
@@ -77,7 +77,7 @@ public final class TelegramChat implements Chat, MessageSink {
      * consist only from messages from first addMessage[s];
      */
     @Override
-    public String[] getAllMessages() {
+    public synchronized String[] getAllMessages() {
         // https://stackoverflow.com/questions/44310226/what-does-stringnew-mean
         String[] result = messages.toArray(String[]::new);
         messages.clear();
@@ -90,7 +90,7 @@ public final class TelegramChat implements Chat, MessageSink {
     }
 
     @Override
-    public void addMessage(final String message) {
+    public synchronized void addMessage(final String message) {
         if (isFrozen) {
             addBuffer.add(message);
         } else {
