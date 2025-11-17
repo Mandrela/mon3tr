@@ -2,7 +2,6 @@ package su.maibat.mon3tr.db;
 
 import java.io.Closeable;
 import java.io.File;
-import java.math.BigDecimal;
 import java.nio.file.FileAlreadyExistsException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -145,7 +144,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             reason = "Id field of input DeadlineQuery should be -1";
         } else if (inputQuery.getName().equals("")) {
             reason = "Name field of input DeadlineQuery should not be empty";
-        } else if (inputQuery.getBurnTime().compareTo(new BigDecimal(0)) <= 0) {
+        } else if (inputQuery.getBurnTime() <= 0) {
             reason = "Burn time field of input DeadlineQuery should be positive";
         } else if (inputQuery.getUserId() <= 0) {
             reason = "User Id field of input DeadlineQuery should be positive";
@@ -251,8 +250,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         try {
             checkDeadlineQuery(inputQuery, false);
             deadline_add.setString(1, inputQuery.getName());
-            deadline_add.setBigDecimal(2, inputQuery.getBurnTime());
-            deadline_add.setBigDecimal(3, inputQuery.getOffset());
+            deadline_add.setLong(2, inputQuery.getBurnTime());
+            deadline_add.setLong(3, inputQuery.getOffset());
             deadline_add.setInt(4, inputQuery.getUserId());
             deadline_add.executeUpdate();
         } catch (SQLException e) {
@@ -276,8 +275,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         try {
             checkDeadlineQuery(inputQuery, true);
             deadline_update.setString(1, inputQuery.getName());
-            deadline_update.setBigDecimal(2, inputQuery.getBurnTime());
-            deadline_update.setBigDecimal(3, inputQuery.getOffset());
+            deadline_update.setLong(2, inputQuery.getBurnTime());
+            deadline_update.setLong(3, inputQuery.getOffset());
             deadline_update.setInt(4, inputQuery.getUserId());
             deadline_update.setInt(5, inputQuery.getId());
             deadline_update.executeUpdate();
@@ -289,8 +288,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     private synchronized DeadlineQuery parseDeadlineFromResult(final ResultSet result)
             throws SQLException {
         return new DeadlineQuery(result.getInt("id"), result.getString("name"),
-            result.getBigDecimal("burns"), result.getBigDecimal("offsetValue"),
-            result.getInt("userId"));
+            result.getLong("burns"), result.getLong("offsetValue"), result.getInt("userId"));
     }
 
     @Override
@@ -328,5 +326,14 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             throw new LinkerException(collectInfo("getDeadlines") + "User id: " + userId + "\n"
                 + e.getMessage());
         }
+    }
+
+    //TODO
+    public UserQuery[] getAllUsers() {
+        return new UserQuery[0];
+    }
+
+    public DeadlineQuery[] getAllDeadlines() {
+        return new DeadlineQuery[0];
     }
 }

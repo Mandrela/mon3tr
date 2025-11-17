@@ -76,7 +76,7 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
 
                 Command commandToExecute = commands.getOrDefault(arguments[0].toLowerCase(),
                     defaultCommand);
-                new Thread(() -> {
+                new Thread(() -> { // TODO: thread pull
                     commandToExecute.execute(telegramChat);
                     sinkMap.computeIfPresent(chatId, (key, value) -> {
                             value.interrupt(); return null;

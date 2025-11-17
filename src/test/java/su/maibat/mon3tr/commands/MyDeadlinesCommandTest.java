@@ -1,7 +1,5 @@
 package su.maibat.mon3tr.commands;
 
-import java.math.BigDecimal;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -32,7 +30,7 @@ public final class MyDeadlinesCommandTest {
         UserQuery user = new UserQuery(0, chatId);
         Mockito.when(linker.getUserByChatId(chatId)).thenReturn(user);
 
-        BigDecimal burnTime = new BigDecimal(18082011);
+        long burnTime = 18082011;
 
 
         DeadlineQuery dl1 = new DeadlineQuery();

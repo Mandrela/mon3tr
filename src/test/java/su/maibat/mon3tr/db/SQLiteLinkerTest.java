@@ -2,7 +2,6 @@ package su.maibat.mon3tr.db;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.FileAlreadyExistsException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -92,8 +91,7 @@ public class SQLiteLinkerTest {
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadline(100000));
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadlinesForUser(12345678));
 
-            DeadlineQuery query = new DeadlineQuery(-1, "testname", new BigDecimal(123),
-                new BigDecimal(123), 2020);
+            DeadlineQuery query = new DeadlineQuery(-1, "testname", 123, 123, 2020);
             assertDoesNotThrow(() -> linker.addDeadline(query));
 
             int id = 0;
@@ -123,8 +121,7 @@ public class SQLiteLinkerTest {
             }
 
             try {
-                DeadlineQuery query2 = new DeadlineQuery(-1, "testname 2", new BigDecimal(133),
-                    new BigDecimal(23), 2020);
+                DeadlineQuery query2 = new DeadlineQuery(-1, "testname 2", 133, 23, 2020);
                 assertDoesNotThrow(() -> linker.addDeadline(query2));
 
                 DeadlineQuery[] output = linker.getDeadlinesForUser(2020);

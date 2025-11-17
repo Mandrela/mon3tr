@@ -1,7 +1,5 @@
 package su.maibat.mon3tr.commands;
 
-import java.math.BigDecimal;
-
 import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
@@ -100,7 +98,7 @@ public final class DeadlineAddCommand implements Command {
                 }
             }
 
-            BigDecimal burnTime = new BigDecimal(stringToTime(stringBurnTime));
+            long burnTime = stringToTime(stringBurnTime);
 
             inputQuery.setName(name);
             inputQuery.setBurnTime(burnTime);

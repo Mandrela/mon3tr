@@ -15,8 +15,6 @@ import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-import java.math.BigDecimal;
-
 public final class RemoveCommandTest {
     private final Chat chat = Mockito.mock(Chat.class);
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
@@ -42,7 +40,7 @@ public final class RemoveCommandTest {
         String[] data = {"4"};
         Mockito.when(chat.getAllMessages()).thenReturn(data);
 
-        BigDecimal burnTime = new BigDecimal(18082011);
+        long burnTime = 18082011;
 
         DeadlineQuery dl1 = new DeadlineQuery();
         dl1.setName("first");

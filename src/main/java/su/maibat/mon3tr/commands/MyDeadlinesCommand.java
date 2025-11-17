@@ -72,7 +72,7 @@ public class MyDeadlinesCommand implements Command {
         for (int i = 0; i < queryList.length; i++) {
             answer = answer.concat((i + 1) + " : " + queryList[i].getName() + " : "
                     + new SimpleDateFormat("dd/MM/yyyy").
-                    format(new Date(queryList[i].getBurnTime().longValue() * OFFSET)) + "\n");
+                    format(new Date(queryList[i].getBurnTime() * OFFSET)) + "\n");
         }
         chat.sendAnswer(answer);
     }
