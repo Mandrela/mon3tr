@@ -35,9 +35,9 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         + "userId = ? AND active = 1";
     private static final String DEADLINE_SELECT_ALL = "SELECT* FROM deadlines WHERE active = 1";
     private static final String DEADLINE_INSERT = "INSERT INTO deadlines (name, burns, "
-        + "offsetValue, userId) VALUES (?, ?, ?, ?)";
+        + "offsetValue, userId, notified) VALUES (?, ?, ?, ?, ?)";
     private static final String DEADLINE_UPDATE = "UPDATE deadlines SET name = ?, burns = ?, "
-        + "offsetValue = ?, userId = ? WHERE id = ?";
+        + "offsetValue = ?, userId = ?, notified = ? WHERE id = ?";
     private static final String DEADLINE_UPDATE_ACTIVE = "UPDATE deadlines SET active = 0 "
         + "WHERE id = ?";
 
@@ -75,7 +75,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
         File f = new File(dbName);
         if (f.isDirectory()) {
-            throw new FileAlreadyExistsException("Database name collide with directory");
+            throw new FileAlreadyExistsException("Database name collide with directory.");
         }
 
         if (!f.exists()) {
@@ -89,7 +89,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             String create_deadlines = "CREATE TABLE IF NOT EXISTS deadlines "
                 + "(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, "
                 + "burns INTEGER NOT NULL, offsetValue INTEGER DEFAULT 10000, "
-                + "userId INTEGER NOT NULL, groupId INTEGER, active INTEGER DEFAULT 1);";
+                + "userId INTEGER NOT NULL, groupId INTEGER, active INTEGER DEFAULT 1, "
+                + "notified INTEGER DEFAULT 0);";
             String create_users = "CREATE TABLE IF NOT EXISTS users "
                 + "(id INTEGER PRIMARY KEY AUTOINCREMENT, chatId REAL NOT NULL, "
                 + "queryLimit INTEGER DEFAULT 32, hpsfwn INTEGER DEFAULT 0, "
@@ -127,7 +128,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 }
             }
         } catch (SQLException e) {
-            throw new LinkerException("Couldn't collect conn info");
+            throw new LinkerException("Couldn't collect conn info.");
         }
         return "Current Linker state:\nConn: " + connState + "\nName: " + dbName
             + "\nMethod name: " + methodName + "\n";
@@ -136,10 +137,10 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     private void checkUserQuery(final UserQuery inputQuery, final boolean anyId)
             throws MalformedQuery {
         if (!anyId && inputQuery.getId() != -1) {
-            throw new MalformedQuery("Id field of input UserQuery should be -1");
+            throw new MalformedQuery("Id field of input UserQuery should be -1.");
         } else if (inputQuery.getChatId() == 0) {
             throw new MalformedQuery(
-                "ChatId field of input UserQuery should not be default value");
+                "ChatId field of input UserQuery should not be default value.");
         }
     }
 
@@ -148,13 +149,13 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         String reason = "";
 
         if (!anyId && inputQuery.getId() != -1) {
-            reason = "Id field of input DeadlineQuery should be -1";
+            reason = "Id field of input DeadlineQuery should be -1.";
         } else if (inputQuery.getName().equals("")) {
-            reason = "Name field of input DeadlineQuery should not be empty";
+            reason = "Name field of input DeadlineQuery should not be empty.";
         } else if (inputQuery.getBurnTime() <= 0) {
-            reason = "Burn time field of input DeadlineQuery should be positive";
+            reason = "Burn time field of input DeadlineQuery should be positive.";
         } else if (inputQuery.getUserId() <= 0) {
-            reason = "User Id field of input DeadlineQuery should be positive";
+            reason = "User Id field of input DeadlineQuery should be positive.";
         }
 
         if (!reason.equals("")) {
@@ -307,6 +308,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 deadline_add.setLong(2, inputQuery.getBurnTime());
                 deadline_add.setLong(3, inputQuery.getOffset());
                 deadline_add.setInt(4, inputQuery.getUserId());
+                deadline_add.setBoolean(5, inputQuery.isNotified());
                 synchronized (conn) {
                     deadline_add.executeUpdate();
                 }
@@ -340,7 +342,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 deadline_update.setLong(2, inputQuery.getBurnTime());
                 deadline_update.setLong(3, inputQuery.getOffset());
                 deadline_update.setInt(4, inputQuery.getUserId());
-                deadline_update.setInt(5, inputQuery.getId());
+                deadline_update.setBoolean(5, inputQuery.isNotified());
+                deadline_update.setInt(6, inputQuery.getId());
                 synchronized (conn) {
                     deadline_update.executeUpdate();
                 }
@@ -353,7 +356,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     private synchronized DeadlineQuery parseDeadlineFromResult(final ResultSet result)
             throws SQLException {
         return new DeadlineQuery(result.getInt("id"), result.getString("name"),
-            result.getLong("burns"), result.getLong("offsetValue"), result.getInt("userId"));
+            result.getLong("burns"), result.getLong("offsetValue"), result.getInt("userId"),
+            result.getBoolean("notified"));
     }
 
     @Override

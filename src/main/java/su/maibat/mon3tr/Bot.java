@@ -1,5 +1,7 @@
 package su.maibat.mon3tr;
 
+import static su.maibat.mon3tr.Main.DEBUG;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -32,7 +34,7 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
     private static final long THREADS_IDLE_TIMEOUT = 2;
     private static final TimeUnit THREADS_TIME_UNIT = TimeUnit.MINUTES;
 
-    
+
     private final BlockingQueue<Runnable> jobQueue = new ArrayBlockingQueue<>(THREADS_QUEUE_SIZE);
     private final ConcurrentHashMap<Long, MessageSink> sinkMap = new ConcurrentHashMap<>();
     private final TelegramClient telegramClient;
@@ -72,6 +74,10 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
         return null;
     }
 
+    public TelegramClient getTelegramClient() {
+        return telegramClient;
+    }
+
 
     @Override
     public void consume(final Update update) {
@@ -82,6 +88,7 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
             String[] arguments = parseCommand(message.getText());
 
             if (arguments != null) {
+                System.out.println(DEBUG + "Initializing new command");
                 sinkMap.computeIfPresent(chatId,
                     (key, value) -> {
                         value.interrupt(); return null;
@@ -103,8 +110,10 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
                     });
                 });
             } else if (sinkMap.containsKey(chatId)) {
+                System.out.println(DEBUG + "Passing message");
                 sinkMap.get(chatId).addMessage(message.getText());
             } else {
+                System.out.println(DEBUG + "Executing default command");
                 executor.execute(() ->
                     defaultCommand.execute(new TelegramChat(chatId, telegramClient)));
             }
