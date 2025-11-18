@@ -1,15 +1,17 @@
 package su.maibat.mon3tr.db;
 
 public final class DeadlineQuery extends DBQuery {
+
     private String name = "";
     private long burnTime = 0;
-    private long offset = 0;
+    private long offset = 86400;
     private int userId = 0;
     private int state = 0;
     // private int groupId = 0;
 
     public DeadlineQuery() {
         super();
+        updateState();
     }
 
     /**
@@ -31,14 +33,17 @@ public final class DeadlineQuery extends DBQuery {
     }
 
     private void updateState() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis() / 1000;
+        System.out.println("Burn: " + burnTime);
+        System.out.println("Current: " + currentTime);
         if (currentTime > burnTime) {
             state = -1;
-        } else if (currentTime + offset > burnTime) {
+        } else if ((currentTime + offset) > burnTime) {
             state = 1;
         } else {
             state = 0;
         }
+        System.out.println(offset);
     }
 
     public String getName() {
