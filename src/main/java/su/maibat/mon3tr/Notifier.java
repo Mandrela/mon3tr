@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 
 public final class Notifier {
-    private static final int WAIT_TIME_SEC = 1 * 60;
+    private static final int WAIT_TIME_SEC = 60 * 60;
 
     private final DataBaseLinker dataBase;
     private final TelegramClient telegramClient;
@@ -30,8 +30,9 @@ public final class Notifier {
                 System.out.println(DEBUG + "[notif]: Found burning deadline " + deadline.getName());
                 try {
                     long chatId = dataBase.getUserById(deadline.getUserId()).getChatId();
-                    new TelegramChat(chatId, telegramClient).sendAnswer("Your deadline "
-                        + deadline.getName() + " is burning!!!"); // TODO fires
+                    new TelegramChat(chatId, telegramClient).sendAnswer("\uD83D\uDD25\uD83D\uDD25"
+                        + "\uD83D\uDD25\n Your deadline " + deadline.getName() + " is burning\n"
+                        + "\uD83D\uDD25\uD83D\uDD25\uD83D\uDD25");
                     deadline.setNotified();
                     dataBase.updateDeadline(deadline);
                 } catch (UserNotFound e) {

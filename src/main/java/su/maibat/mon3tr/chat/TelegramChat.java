@@ -1,5 +1,7 @@
 package su.maibat.mon3tr.chat;
 
+import static su.maibat.mon3tr.Main.ERROR;
+
 import java.util.LinkedList;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -117,7 +119,7 @@ public final class TelegramChat implements Chat, MessageSink {
                 telegramClient.execute(sendMessage);
                 return;
             } catch (TelegramApiException e) {
-                System.out.println("Couldn't send message " + answer + "\n" + e);
+                System.out.println(ERROR + "Couldn't send message " + answer + "\n" + e);
             }
         }
     }

@@ -47,7 +47,6 @@ public final class DeadlineQuery extends DBQuery {
         } else {
             state = 0;
         }
-        System.out.println(offset);
     }
 
     public String getName() {
