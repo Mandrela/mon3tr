@@ -10,6 +10,7 @@ public final class DeadlineQuery extends DBQuery {
 
     public DeadlineQuery() {
         super();
+        updateState();
     }
 
     /**
