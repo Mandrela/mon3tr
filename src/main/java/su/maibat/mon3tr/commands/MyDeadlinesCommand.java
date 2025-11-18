@@ -11,7 +11,7 @@ import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-public final class MyDeadlinesCommand implements Command {
+public class MyDeadlinesCommand implements Command {
     private static final int OFFSET = 1000;
     private final DataBaseLinker linker;
 
@@ -19,13 +19,23 @@ public final class MyDeadlinesCommand implements Command {
         this.linker = inputLinker;
     }
 
+    /**
+     * @return Command name
+     */
     public String getName() {
         return "mydeadlines";
     }
+
+    /**
+     * @return Help info about command
+     */
     public String getHelp() {
         return "This command show list of your deadlines";
     }
 
+    /**
+     * @param chat To which chat command send messages
+     */
     public void execute(final Chat chat) {
 
         try {
@@ -37,14 +47,8 @@ public final class MyDeadlinesCommand implements Command {
                     return;
                 }
 
-                String answer = "";
+                printTable(chat, queryList);
 
-                for (DeadlineQuery query : queryList) {
-                    answer = answer.concat(query.getId() + " : " + query.getName() + " : "
-                            + new SimpleDateFormat("dd/MM/yyyy").
-                            format(new Date(query.getBurnTime().longValue() * OFFSET)) + "\n");
-                } // TODO: ADEQUATUS TIME PARSING
-                chat.sendAnswer(answer);
             } catch (DeadlineNotFound dnf) {
                 chat.sendAnswer("You have not any deadlines");
             }
@@ -60,5 +64,25 @@ public final class MyDeadlinesCommand implements Command {
 
 
         }
+    }
+
+    protected final void printTable(final Chat chat, final DeadlineQuery[] queryList) {
+        String answer = "";
+        String answerFragment = "";
+        for (int i = 0; i < queryList.length; i++) {
+            answerFragment = answerFragment.concat((i + 1) + " : " + queryList[i].getName() + " : "
+                    + new SimpleDateFormat("dd/MM/yyyy").
+                    format(new Date(queryList[i].getBurnTime() * OFFSET)));
+            if (queryList[i].isBurning()) {
+                answerFragment = answerFragment + "\uD83D\uDD25";
+            }
+            if (queryList[i].isDead()) {
+                answerFragment = answerFragment + "\uD83D\uDC80";
+            }
+            answer = answer.concat(answerFragment + "\n");
+            answerFragment = "";
+
+        }
+        chat.sendAnswer(answer);
     }
 }

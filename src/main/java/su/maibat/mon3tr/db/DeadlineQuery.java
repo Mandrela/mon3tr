@@ -1,16 +1,21 @@
 package su.maibat.mon3tr.db;
 
-import java.math.BigDecimal;
+import static su.maibat.mon3tr.Main.DAY_SEC;
+import static su.maibat.mon3tr.Main.SEC_TO_MILLIS_FACTOR;
 
 public final class DeadlineQuery extends DBQuery {
+
     private String name = "";
-    private BigDecimal burnTime = new BigDecimal(0);
-    private BigDecimal offset = new BigDecimal(0);
+    private long burnTime = 0;
+    private long offset = DAY_SEC;
     private int userId = 0;
-    private int groupId = 0;
+    private int state = 0;
+    private boolean notified = false;
+    // private int groupId = 0;
 
     public DeadlineQuery() {
         super();
+        updateState();
     }
 
     /**
@@ -20,38 +25,73 @@ public final class DeadlineQuery extends DBQuery {
      * @param triggerOffset Relative to burnAtTime. Deadlines between burnAtTime and offset are
      * considered burning
      * @param ownerUserId Id of user to notify
+     * @param isNotifiedAbout Flag set if this deadline was notified about
      */
-    public DeadlineQuery(final int idArg, final String deadlineName, final BigDecimal burnAtTime,
-        final BigDecimal triggerOffset, final int ownerUserId) {
-            super(idArg);
-            name = deadlineName;
-            burnTime = burnAtTime;
-            offset = triggerOffset;
-            userId = ownerUserId;
+    public DeadlineQuery(final int idArg, final String deadlineName, final long burnAtTime,
+            final long triggerOffset, final int ownerUserId, final boolean isNotifiedAbout) {
+        super(idArg);
+        name = deadlineName;
+        burnTime = burnAtTime;
+        offset = triggerOffset;
+        userId = ownerUserId;
+        notified = isNotifiedAbout;
+        updateState();
+    }
+
+    private void updateState() {
+        long currentTime = System.currentTimeMillis() / SEC_TO_MILLIS_FACTOR;
+        if (currentTime > burnTime) {
+            state = -1;
+        } else if ((currentTime + offset) > burnTime) {
+            state = 1;
+        } else {
+            state = 0;
+        }
     }
 
     public String getName() {
         return name;
     }
     public void setName(final String arg) {
-        this.name = arg;
+        name = arg;
     }
 
-    public BigDecimal getBurnTime() {
+    public long getBurnTime() {
         return burnTime;
     }
-    public void setBurnTime(final BigDecimal arg) {
-        this.burnTime = arg;
+    public void setBurnTime(final long arg) {
+        burnTime = arg;
+        updateState();
     }
 
     public int getUserId() {
         return userId;
     }
     public void setUserId(final int arg) {
-        this.userId = arg;
+        userId = arg;
     }
 
-    public BigDecimal getOffset() {
+    public long getOffset() {
         return offset;
+    }
+    public void setOffset(final long arg) {
+        offset = arg;
+        updateState();
+    }
+
+    public boolean isBurning() {
+        return state == 1;
+    }
+
+    public boolean isDead() {
+        return state == -1;
+    }
+
+    public boolean isNotified() {
+        return notified;
+    }
+
+    public void setNotified() {
+        notified = true;
     }
 }

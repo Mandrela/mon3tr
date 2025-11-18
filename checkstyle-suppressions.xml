@@ -11,6 +11,7 @@
 	<suppress checks="MemberName" files="SQLiteLinker.java"/>
 	<suppress checks="LocalVariableName" files="SQLiteLinker.java"/>
 	<suppress checks="MagicNumber" files="DeadlineAddCommand.java"/>
+	<suppress checks="MagicNumber" files="DeadlineQuery.java"/>
 
 	<suppress checks="JavadocPackage" files=".*Test.java"/>
 	<suppress checks="MagicNumber" files=".*Test.java"/>

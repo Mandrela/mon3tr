@@ -23,7 +23,7 @@ public interface DataBaseLinker {
 
     UserQuery getUserById(int id) throws UserNotFound, LinkerException;
     UserQuery getUserByChatId(long chatId) throws UserNotFound, LinkerException;
-    //UserQuery[] findUsersByQuery(UserQuery searchQuery);
+    UserQuery[] getAllUsers() throws LinkerException;
 
     // Deadline
     /**
@@ -42,5 +42,6 @@ public interface DataBaseLinker {
 
     DeadlineQuery getDeadline(int id) throws DeadlineNotFound, LinkerException;
     DeadlineQuery[] getDeadlinesForUser(int userId) throws DeadlineNotFound, LinkerException;
+    DeadlineQuery[] getAllDeadlines() throws LinkerException;
     //DeadlineQuery[] find(String fieldName, String value);
 }

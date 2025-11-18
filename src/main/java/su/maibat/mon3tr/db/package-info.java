@@ -5,7 +5,8 @@ package su.maibat.mon3tr.db;
 Database layout
 
 Deadlines:
-ID  | Burn Date | Name  | Remind offset | UserID    | GroupID   | Active[0|1]
+ID  | Burn Date | Name  | Remind offset | UserID    | GroupID   | Active[-1|0|1]
+                                                                  Dead|Normal|Burning
 
 
 

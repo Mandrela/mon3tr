@@ -1,5 +1,7 @@
 package su.maibat.mon3tr.chat;
 
+import static su.maibat.mon3tr.Main.ERROR;
+
 import java.util.LinkedList;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -15,12 +17,15 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 public final class TelegramChat implements Chat, MessageSink {
     private static final int REPLY_AMOUNT = 3;
 
-    private final Long chatId;
+    private volatile boolean isInterrupted = false;
     private final TelegramClient telegramClient;
+    private final Long chatId;
 
     private final LinkedList<String> messages = new LinkedList<>();
     private final LinkedList<String> addBuffer = new LinkedList<>();
-    private boolean isFrozen = false;
+    private volatile boolean isFrozen = false;
+
+    private final Object bufferLock = new Object();
 
     public TelegramChat(final Long chatIdArgument, final TelegramClient telegramClientArgument) {
         chatId = chatIdArgument;
@@ -41,31 +46,39 @@ public final class TelegramChat implements Chat, MessageSink {
         return isFrozen;
     }
 
-    public void froze() {
+    public void freeze() {
         isFrozen = true;
     }
 
-    public void unfroze() {
+    public void unfreeze() {
         isFrozen = false;
         transfer();
     }
 
     private void transfer() {
-        while (!addBuffer.isEmpty()) {
-            messages.add(addBuffer.poll());
+        synchronized (bufferLock) {
+            while (!addBuffer.isEmpty()) {
+                messages.add(addBuffer.poll());
+            }
         }
     }
 
     @Override
-    public String getMessage() {
+    public String getMessage() throws InterruptedException {
         if (isFrozen && messages.isEmpty()) {
-            unfroze();
+            unfreeze();
         }
 
         while (messages.isEmpty()) {
-            return ""; // Multithreading
+            if (isInterrupted) {
+                throw new InterruptedException("Chat " + chatId + " was interrupted");
+            }
+            Thread.yield();
         }
-        return messages.poll();
+
+        synchronized (bufferLock) {
+            return messages.poll();
+        }
     }
 
     /**
@@ -75,22 +88,26 @@ public final class TelegramChat implements Chat, MessageSink {
     @Override
     public String[] getAllMessages() {
         // https://stackoverflow.com/questions/44310226/what-does-stringnew-mean
-        String[] result = messages.toArray(String[]::new);
-        messages.clear();
+        synchronized (bufferLock) {
+            String[] result = messages.toArray(String[]::new);
+            messages.clear();
 
-        if (isFrozen) {
-            unfroze();
+            if (isFrozen) {
+                unfreeze();
+            }
+
+            return result;
         }
-
-        return result;
     }
 
     @Override
     public void addMessage(final String message) {
-        if (isFrozen) {
-            addBuffer.add(message);
-        } else {
-            messages.add(message);
+        synchronized (bufferLock) {
+            if (isFrozen) {
+                addBuffer.add(message);
+            } else {
+                messages.add(message);
+            }
         }
     }
 
@@ -102,8 +119,13 @@ public final class TelegramChat implements Chat, MessageSink {
                 telegramClient.execute(sendMessage);
                 return;
             } catch (TelegramApiException e) {
-                System.out.println("Couldn't send message " + answer + "\n" + e);
+                System.out.println(ERROR + "Couldn't send message " + answer + "\n" + e);
             }
         }
+    }
+
+    @Override
+    public void interrupt() {
+        isInterrupted = true;
     }
 }

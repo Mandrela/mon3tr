@@ -1,12 +1,21 @@
 package su.maibat.mon3tr;
 
+import static su.maibat.mon3tr.Main.DEBUG;
+
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import su.maibat.mon3tr.chat.MessageSink;
@@ -18,43 +27,96 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
     private static final char PREFIX = '/';
 
-    private final HashMap<Long, MessageSink> chatMap = new HashMap<>();
+    private static final int THREADS_CORE_POOL_SIZE = 2;
+    private static final int THREADS_MAX_POOL_SIZE = 8;
+    private static final int THREADS_QUEUE_SIZE = 2 * THREADS_MAX_POOL_SIZE;
+
+    private static final long THREADS_IDLE_TIMEOUT = 2;
+    private static final TimeUnit THREADS_TIME_UNIT = TimeUnit.MINUTES;
+
+
+    private final BlockingQueue<Runnable> jobQueue = new ArrayBlockingQueue<>(THREADS_QUEUE_SIZE);
+    private final ConcurrentHashMap<Long, MessageSink> sinkMap = new ConcurrentHashMap<>();
     private final TelegramClient telegramClient;
-    private final LinkedHashMap<String, Command> commands;
+    private final Map<String, Command> commands;
     private final Command defaultCommand;
+    private final Executor executor;
 
     /**
-     * @param token Telegram token -- KEEP SAFE, DO NOT SHARE IT
+     * @param token Telegram token -- KEEP SAFE, DO NOT SHARE IT.
      * @param commandsArgument Map were key is a name of a command in bot's interface
-     * and value is an instance of Command implementing class
+     * and value is an instance of Command implementing class.
      * @param defaultCommandArgument The default command which will be executed if incorrect
-     * command supplied
+     * command supplied.
      */
-    public Bot(final String token, final LinkedHashMap<String, Command> commandsArgument,
+    public Bot(final String token, final Map<String, Command> commandsArgument,
                 final Command defaultCommandArgument) {
         telegramClient = new OkHttpTelegramClient(token);
-        commands = commandsArgument;
+        commands = Collections.unmodifiableMap(commandsArgument);
         defaultCommand = defaultCommandArgument;
+        executor = new ThreadPoolExecutor(THREADS_CORE_POOL_SIZE, THREADS_MAX_POOL_SIZE,
+            THREADS_IDLE_TIMEOUT, THREADS_TIME_UNIT, jobQueue);
     }
+
+
+    /**
+     * Parses string to array of arguments, where the first argument is a command itself without
+     * a prefix.
+     * @param textString Input String
+     * @return Array of arguments where the first one is a prefix-less command
+     */
+    private static String[] parseCommand(final String textString) {
+        if (textString.charAt(0) == PREFIX) {
+            String[] result = textString.split(" ");
+            result[0] = result[0].substring(1);
+            return result;
+        }
+        return null;
+    }
+
+    public TelegramClient getTelegramClient() {
+        return telegramClient;
+    }
+
 
     @Override
     public void consume(final Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String[] message = update.getMessage().getText().split(" ");
+        Message message = update.getMessage();
 
-            if (message[0].charAt(0) == PREFIX) {
-                String commandName = message[0].substring(1).toLowerCase();
+        if (message != null && message.hasText()) {
+            Long chatId = message.getChatId();
+            String[] arguments = parseCommand(message.getText());
 
-                TelegramChat telegramChat = new TelegramChat(
-                    update.getMessage().getChatId(), telegramClient);
-                telegramChat.addMessages(Arrays.copyOfRange(message, 1, message.length));
-                telegramChat.froze();
+            if (arguments != null) {
+                System.out.println(DEBUG + "Initializing new command");
+                sinkMap.computeIfPresent(chatId,
+                    (key, value) -> {
+                        value.interrupt(); return null;
+                    });
 
-                // multithreading I want here
-                commands.getOrDefault(commandName, defaultCommand).execute(telegramChat);
-            } // else {
-                // argument passing to known chats
-            // }
+                TelegramChat telegramChat = new TelegramChat(chatId, telegramClient);
+                telegramChat.addMessages(Arrays.copyOfRange(arguments, 1, arguments.length));
+                telegramChat.freeze();
+                sinkMap.put(chatId, telegramChat);
+
+                Command commandToExecute = commands.getOrDefault(arguments[0].toLowerCase(),
+                    defaultCommand);
+
+                executor.execute(() -> {
+                    commandToExecute.execute(telegramChat);
+                    sinkMap.computeIfPresent(chatId, (key, value) -> {
+                        value.interrupt();
+                        return null;
+                    });
+                });
+            } else if (sinkMap.containsKey(chatId)) {
+                System.out.println(DEBUG + "Passing message");
+                sinkMap.get(chatId).addMessage(message.getText());
+            } else {
+                System.out.println(DEBUG + "Executing default command");
+                executor.execute(() ->
+                    defaultCommand.execute(new TelegramChat(chatId, telegramClient)));
+            }
         }
     }
 }
