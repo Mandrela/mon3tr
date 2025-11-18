@@ -8,27 +8,22 @@ import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-
-
-
-
-
-
-public class DeadlineRemoveCommand extends MyDeadlinesCommand {
+public class UpdateOffsetCommand extends MyDeadlinesCommand {
 
     private final SQLiteLinker linker;
 
-    public DeadlineRemoveCommand(final SQLiteLinker inputLinker) {
+    public UpdateOffsetCommand(final SQLiteLinker inputLinker) {
         super(inputLinker);
         this.linker = inputLinker;
     }
 
     public final String getName() {
-        return "remove";
+        return "offset";
     }
 
     public final String getHelp() {
-        return "This command remove your deadline";
+        return "You can use this command to set how long before "
+                + "the deadline will start to burn";
     }
 
     public final void execute(final Chat chat) {
@@ -50,16 +45,20 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                     arg = arguments[0];
                 }
 
-                while (!isValid(arg, queryList.length)) {
+                while (!isValidId(arg, queryList.length)) {
                     arg = chat.getMessage("Please enter a valid deadline id (number)");
                 }
 
-                int removeId = Integer.parseInt(arg) - 1;
+                int updateId = Integer.parseInt(arg) - 1;
 
-                linker.removeDeadline(queryList[removeId].getId());
+                DeadlineQuery updateQuery = queryList[updateId];
 
-                chat.sendAnswer("You have closed this gestalt!!!");
-                user.setLimit(user.getLimit() + 1);
+                String offsetArg = "";
+                while (!isValidOffset(arg)) {
+                    offsetArg = chat.getMessage("Please enter a offset");
+                }
+                updateQuery.setOffset(Long.getLong(offsetArg));
+                chat.sendAnswer("Offset has been updated");
 
             } catch (DeadlineNotFound dnf) {
                 chat.sendAnswer("You have not any deadlines");
@@ -77,7 +76,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
         }
     }
 
-    private boolean isValid(final String arg, final int maxValue) {
+    private boolean isValidId(final String arg, final int maxValue) {
         //Не число
         //Больше предела
         //Меньше 1
@@ -88,4 +87,14 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
             return false;
         }
     }
+
+    private boolean isValidOffset(final String arg) {
+        try {
+            int intArg = Integer.parseInt(arg);
+            return intArg >= 0;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
 }
+

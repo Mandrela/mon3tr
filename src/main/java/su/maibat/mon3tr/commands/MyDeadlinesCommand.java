@@ -68,11 +68,20 @@ public class MyDeadlinesCommand implements Command {
 
     protected final void printTable(final Chat chat, final DeadlineQuery[] queryList) {
         String answer = "";
-
+        String answerFragment = "";
         for (int i = 0; i < queryList.length; i++) {
-            answer = answer.concat((i + 1) + " : " + queryList[i].getName() + " : "
+            answerFragment = answerFragment.concat((i + 1) + " : " + queryList[i].getName() + " : "
                     + new SimpleDateFormat("dd/MM/yyyy").
-                    format(new Date(queryList[i].getBurnTime() * OFFSET)) + "\n");
+                    format(new Date(queryList[i].getBurnTime() * OFFSET)));
+            if (queryList[i].isBurning()) {
+                answerFragment = answerFragment + "\uD83D\uDD25";
+            }
+            if (queryList[i].isDead()) {
+                answerFragment = answerFragment + "\uD83D\uDC80";
+            }
+            answer = answer.concat(answerFragment + "\n");
+            answerFragment = "";
+
         }
         chat.sendAnswer(answer);
     }

@@ -10,6 +10,7 @@ public final class DeadlineQuery extends DBQuery {
 
     public DeadlineQuery() {
         super();
+        updateState();
     }
 
     /**
@@ -32,6 +33,8 @@ public final class DeadlineQuery extends DBQuery {
 
     private void updateState() {
         long currentTime = System.currentTimeMillis();
+        System.out.println("Burn: " + burnTime);
+        System.out.println("Current: " + currentTime);
         if (currentTime > burnTime) {
             state = -1;
         } else if (currentTime + offset > burnTime) {
