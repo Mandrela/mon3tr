@@ -11,6 +11,7 @@ import su.maibat.mon3tr.db.exceptions.UserNotFound;
 public class UpdateOffsetCommand extends MyDeadlinesCommand {
 
     private final SQLiteLinker linker;
+    private static final int SECONDS_IN_DAY = 86400;
 
     public UpdateOffsetCommand(final SQLiteLinker inputLinker) {
         super(inputLinker);
@@ -54,14 +55,17 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
                 DeadlineQuery updateQuery = queryList[updateId];
 
                 String offsetArg = "";
-                while (!isValidOffset(arg)) {
-                    offsetArg = chat.getMessage("Please enter a offset");
+                while (!isValidOffset(offsetArg)) {
+                    offsetArg = chat.getMessage("Please enter a offset (days before final date)");
                 }
-                updateQuery.setOffset(Long.getLong(offsetArg));
+                updateQuery.setOffset(Long.parseLong(offsetArg) * SECONDS_IN_DAY);
                 chat.sendAnswer("Offset has been updated");
+                linker.updateDeadline(updateQuery);
 
             } catch (DeadlineNotFound dnf) {
                 chat.sendAnswer("You have not any deadlines");
+            } catch (MalformedQuery e) {
+                chat.sendAnswer("Incorrect query");
             }
         } catch (UserNotFound unf) {
             UserQuery userQuery = new UserQuery(-1, chat.getChatId());

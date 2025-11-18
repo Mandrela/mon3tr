@@ -13,6 +13,7 @@ import su.maibat.mon3tr.commands.DeadlineAddCommand;
 import su.maibat.mon3tr.commands.DeadlineRemoveCommand;
 import su.maibat.mon3tr.commands.HelpCommand;
 import su.maibat.mon3tr.commands.MyDeadlinesCommand;
+import su.maibat.mon3tr.commands.UpdateOffsetCommand;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
 
@@ -71,8 +72,11 @@ public final class Main {
         MyDeadlinesCommand deadlineGetCommand = new MyDeadlinesCommand(dataBase);
         DeadlineRemoveCommand deadlineRemoveCommand = new DeadlineRemoveCommand(dataBase);
 
+
+        UpdateOffsetCommand updateOffsetCommand = new UpdateOffsetCommand(dataBase);
+
         Command[] commands = {help, new AboutCommand(), authors, deadlineAddCommand,
-            deadlineGetCommand, deadlineRemoveCommand}; // Commands
+                deadlineGetCommand, deadlineRemoveCommand, updateOffsetCommand}; // Commands
 
         LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
         for (Command command : commands) {
