@@ -15,13 +15,15 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 public final class TelegramChat implements Chat, MessageSink {
     private static final int REPLY_AMOUNT = 3;
 
-    private boolean isInterrupted = false;
-    private final Long chatId;
+    private volatile boolean isInterrupted = false;
     private final TelegramClient telegramClient;
+    private final Long chatId;
 
     private final LinkedList<String> messages = new LinkedList<>();
     private final LinkedList<String> addBuffer = new LinkedList<>();
-    private boolean isFrozen = false;
+    private volatile boolean isFrozen = false;
+
+    private final Object bufferLock = new Object();
 
     public TelegramChat(final Long chatIdArgument, final TelegramClient telegramClientArgument) {
         chatId = chatIdArgument;
@@ -52,8 +54,10 @@ public final class TelegramChat implements Chat, MessageSink {
     }
 
     private void transfer() {
-        while (!addBuffer.isEmpty()) {
-            messages.add(addBuffer.poll());
+        synchronized (bufferLock) {
+            while (!addBuffer.isEmpty()) {
+                messages.add(addBuffer.poll());
+            }
         }
     }
 
@@ -69,7 +73,10 @@ public final class TelegramChat implements Chat, MessageSink {
             }
             Thread.yield();
         }
-        return messages.poll();
+
+        synchronized (bufferLock) {
+            return messages.poll();
+        }
     }
 
     /**
@@ -79,22 +86,26 @@ public final class TelegramChat implements Chat, MessageSink {
     @Override
     public String[] getAllMessages() {
         // https://stackoverflow.com/questions/44310226/what-does-stringnew-mean
-        String[] result = messages.toArray(String[]::new);
-        messages.clear();
+        synchronized (bufferLock) {
+            String[] result = messages.toArray(String[]::new);
+            messages.clear();
 
-        if (isFrozen) {
-            unfreeze();
+            if (isFrozen) {
+                unfreeze();
+            }
+
+            return result;
         }
-
-        return result;
     }
 
     @Override
     public void addMessage(final String message) {
-        if (isFrozen) {
-            addBuffer.add(message);
-        } else {
-            messages.add(message);
+        synchronized (bufferLock) {
+            if (isFrozen) {
+                addBuffer.add(message);
+            } else {
+                messages.add(message);
+            }
         }
     }
 

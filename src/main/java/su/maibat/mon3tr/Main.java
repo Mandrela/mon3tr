@@ -24,6 +24,9 @@ public final class Main {
     public static final String WARNING = "\u001b[1;97m[\u001b[1;33mWARN\u001b[1;97m]\u001b[0m ";
     public static final String ERROR = "\u001b[1;97m[\u001b[0;31mERRO\u001b[1;97m]\u001b[0m ";
     public static final String CRITICAL = "\u001b[1;97m[\u001b[1;91mCRIT\u001b[1;97m]\u001b[0m ";
+    public static final int MINUTE_TIME_SEC = 60;
+    public static final int SEC_TO_MILLIS_FACTOR = 1000;
+    public static final int DAY_SEC = 86400;
 
     private Main() { }
 
@@ -31,6 +34,7 @@ public final class Main {
      @param args unused
      */
     public static void main(final String[] args) {
+        // Settings
         String token = System.getenv("MON3TR_TOKEN");
         if (token == null) {
             System.err.println(CRITICAL + "Environmental variable MON3TR_TOKEN is not set.");
@@ -43,6 +47,7 @@ public final class Main {
         }
 
 
+        // Common resources
         SQLiteLinker dataBase;
         try {
             dataBase = new SQLiteLinker(dbName);
@@ -59,6 +64,7 @@ public final class Main {
             new TelegramBotsLongPollingApplication();
 
 
+        // Commands
         HelpCommand help = new HelpCommand();
 
         AuthorsCommand authors = new AuthorsCommand();
@@ -85,7 +91,13 @@ public final class Main {
         help.setCommands(commandMap);
 
 
+        // Workers
         Bot bot = new Bot(token, commandMap, help);
+        Notifier notifier = new Notifier(dataBase, bot.getTelegramClient());
+
+        Thread notifierThread = new Thread(() -> notifier.runInfinitely());
+        notifierThread.start();
+
         try {
             BotSession botSession = botsApplication.registerBot(token, bot);
             synchronized (botSession) {
@@ -94,13 +106,27 @@ public final class Main {
         } catch (Exception e) {
             System.out.println(CRITICAL + e.getMessage());
         } finally {
+            System.out.println(INFO + "Started finalization process.");
+
+            notifierThread.interrupt();
+            try {
+                notifierThread.join(MINUTE_TIME_SEC * SEC_TO_MILLIS_FACTOR);
+                if (notifierThread.isAlive()) {
+                    throw new InterruptedException("Notifier wasn't dying during whole minute.");
+                }
+            } catch (InterruptedException e) {
+                System.out.println(ERROR + "Couldn't stop notifier module properly:\n"
+                    + e.getMessage());
+            }
+
             try {
                 dataBase.close();
                 botsApplication.close();
             } catch (Exception e) {
-                System.out.println(CRITICAL + "Couldn't release resources properly:\n"
+                System.out.println(ERROR + "Couldn't release resources properly:\n"
                 + e.getMessage());
             }
+
             System.out.println(INFO + "Terminated, bye!");
         }
     }

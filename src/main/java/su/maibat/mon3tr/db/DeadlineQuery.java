@@ -1,12 +1,16 @@
 package su.maibat.mon3tr.db;
 
+import static su.maibat.mon3tr.Main.DAY_SEC;
+import static su.maibat.mon3tr.Main.SEC_TO_MILLIS_FACTOR;
+
 public final class DeadlineQuery extends DBQuery {
 
     private String name = "";
     private long burnTime = 0;
-    private long offset = 86400;
+    private long offset = DAY_SEC;
     private int userId = 0;
     private int state = 0;
+    private boolean notified = false;
     // private int groupId = 0;
 
     public DeadlineQuery() {
@@ -21,21 +25,21 @@ public final class DeadlineQuery extends DBQuery {
      * @param triggerOffset Relative to burnAtTime. Deadlines between burnAtTime and offset are
      * considered burning
      * @param ownerUserId Id of user to notify
+     * @param isNotifiedAbout Flag set if this deadline was notified about
      */
     public DeadlineQuery(final int idArg, final String deadlineName, final long burnAtTime,
-            final long triggerOffset, final int ownerUserId) {
+            final long triggerOffset, final int ownerUserId, final boolean isNotifiedAbout) {
         super(idArg);
         name = deadlineName;
         burnTime = burnAtTime;
         offset = triggerOffset;
         userId = ownerUserId;
+        notified = isNotifiedAbout;
         updateState();
     }
 
     private void updateState() {
-        long currentTime = System.currentTimeMillis() / 1000;
-        System.out.println("Burn: " + burnTime);
-        System.out.println("Current: " + currentTime);
+        long currentTime = System.currentTimeMillis() / SEC_TO_MILLIS_FACTOR;
         if (currentTime > burnTime) {
             state = -1;
         } else if ((currentTime + offset) > burnTime) {
@@ -82,5 +86,13 @@ public final class DeadlineQuery extends DBQuery {
 
     public boolean isDead() {
         return state == -1;
+    }
+
+    public boolean isNotified() {
+        return notified;
+    }
+
+    public void setNotified() {
+        notified = true;
     }
 }

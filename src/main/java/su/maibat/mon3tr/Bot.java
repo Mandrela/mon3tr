@@ -1,8 +1,16 @@
 package su.maibat.mon3tr;
 
+import static su.maibat.mon3tr.Main.DEBUG;
+
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -19,23 +27,35 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
     public static final String NAME = "mon3tr";
     private static final char PREFIX = '/';
 
+    private static final int THREADS_CORE_POOL_SIZE = 2;
+    private static final int THREADS_MAX_POOL_SIZE = 8;
+    private static final int THREADS_QUEUE_SIZE = 2 * THREADS_MAX_POOL_SIZE;
+
+    private static final long THREADS_IDLE_TIMEOUT = 2;
+    private static final TimeUnit THREADS_TIME_UNIT = TimeUnit.MINUTES;
+
+
+    private final BlockingQueue<Runnable> jobQueue = new ArrayBlockingQueue<>(THREADS_QUEUE_SIZE);
     private final ConcurrentHashMap<Long, MessageSink> sinkMap = new ConcurrentHashMap<>();
     private final TelegramClient telegramClient;
-    private final LinkedHashMap<String, Command> commands;
+    private final Map<String, Command> commands;
     private final Command defaultCommand;
+    private final Executor executor;
 
     /**
-     * @param token Telegram token -- KEEP SAFE, DO NOT SHARE IT
+     * @param token Telegram token -- KEEP SAFE, DO NOT SHARE IT.
      * @param commandsArgument Map were key is a name of a command in bot's interface
-     * and value is an instance of Command implementing class
+     * and value is an instance of Command implementing class.
      * @param defaultCommandArgument The default command which will be executed if incorrect
-     * command supplied
+     * command supplied.
      */
-    public Bot(final String token, final LinkedHashMap<String, Command> commandsArgument,
+    public Bot(final String token, final Map<String, Command> commandsArgument,
                 final Command defaultCommandArgument) {
         telegramClient = new OkHttpTelegramClient(token);
-        commands = commandsArgument;
+        commands = Collections.unmodifiableMap(commandsArgument);
         defaultCommand = defaultCommandArgument;
+        executor = new ThreadPoolExecutor(THREADS_CORE_POOL_SIZE, THREADS_MAX_POOL_SIZE,
+            THREADS_IDLE_TIMEOUT, THREADS_TIME_UNIT, jobQueue);
     }
 
 
@@ -45,13 +65,17 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
      * @param textString Input String
      * @return Array of arguments where the first one is a prefix-less command
      */
-    private String[] parseCommand(final String textString) {
+    private static String[] parseCommand(final String textString) {
         if (textString.charAt(0) == PREFIX) {
             String[] result = textString.split(" ");
             result[0] = result[0].substring(1);
             return result;
         }
         return null;
+    }
+
+    public TelegramClient getTelegramClient() {
+        return telegramClient;
     }
 
 
@@ -64,6 +88,7 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
             String[] arguments = parseCommand(message.getText());
 
             if (arguments != null) {
+                System.out.println(DEBUG + "Initializing new command");
                 sinkMap.computeIfPresent(chatId,
                     (key, value) -> {
                         value.interrupt(); return null;
@@ -76,17 +101,21 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
 
                 Command commandToExecute = commands.getOrDefault(arguments[0].toLowerCase(),
                     defaultCommand);
-                new Thread(() -> { // TODO: thread pull
+
+                executor.execute(() -> {
                     commandToExecute.execute(telegramChat);
                     sinkMap.computeIfPresent(chatId, (key, value) -> {
-                            value.interrupt(); return null;
+                        value.interrupt();
+                        return null;
                     });
-                }).start();
-
+                });
             } else if (sinkMap.containsKey(chatId)) {
+                System.out.println(DEBUG + "Passing message");
                 sinkMap.get(chatId).addMessage(message.getText());
             } else {
-                defaultCommand.execute(new TelegramChat(chatId, telegramClient));
+                System.out.println(DEBUG + "Executing default command");
+                executor.execute(() ->
+                    defaultCommand.execute(new TelegramChat(chatId, telegramClient)));
             }
         }
     }
