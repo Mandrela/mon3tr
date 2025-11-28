@@ -280,19 +280,16 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 result = user_get_all.executeQuery();
             }
 
-            result.last();
-            UserQuery[] userQuerys = new UserQuery[result.getRow()];
-            result.beforeFirst();
+            java.util.ArrayList<UserQuery> userQuerys = new java.util.ArrayList<>();
+            try {
+                while (true) {
+                    userQuerys.add(parseUserFromResult(result));
+                }
+            } catch (UserNotFound e) { }
 
-            for (int i = 0; i < userQuerys.length; i++) {
-                userQuerys[i] = parseUserFromResult(result);
-            }
-
-            return userQuerys;
+            return userQuerys.toArray(UserQuery[]::new);
         } catch (SQLException e) {
             throw new LinkerException(collectInfo("getAllUsers") + e.getMessage());
-        } catch (UserNotFound e) {
-            throw new LinkerException("Unexpected end of ResultSet");
         }
     }
 
@@ -424,6 +421,28 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             return deadlineQuerys.toArray(DeadlineQuery[]::new);
         } catch (SQLException e) {
             throw new LinkerException(collectInfo("getAllDeadlines") + e.getMessage());
+        }
+    }
+
+    public static void main(final String[] args) {
+        System.out.println("Hello");
+        try {
+            SQLiteLinker db = new SQLiteLinker("kek");
+
+            long start_e = System.currentTimeMillis();
+            for (int i = 1; i <= 1000; i++) {
+                db.getDeadlinesForUser(i);
+            }
+            long end_e = System.currentTimeMillis();
+
+            double time_e = end_e - start_e;
+            System.out.println(time_e / 1000 + " seconds to execute devastating thing, "
+                + Math.round(time_e / 1000) + " ms on item");
+
+
+            db.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }

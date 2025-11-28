@@ -34,6 +34,8 @@ public final class Main {
      @param args unused
      */
     public static void main(final String[] args) {
+        SQLiteLinker.main(new String[0]);
+
         // Settings
         String token = System.getenv("MON3TR_TOKEN");
         if (token == null) {

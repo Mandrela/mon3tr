@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 
 public final class Notifier {
-    private static final int WAIT_TIME_SEC = 60 * 60;
+    private static final int WAIT_TIME_SEC = 1 * 60;
 
     private final DataBaseLinker dataBase;
     private final TelegramClient telegramClient;
@@ -24,6 +24,7 @@ public final class Notifier {
         telegramClient = telegramClientArg;
     }
 
+    // TODO: Get all burning and not notified, Test, Arch
     public void run() {
         for (DeadlineQuery deadline: dataBase.getAllDeadlines()) {
             if (deadline.isBurning() && !deadline.isNotified()) {

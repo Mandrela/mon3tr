@@ -19,10 +19,10 @@ import static java.util.regex.Pattern.compile;
 
 public final class DeadlineAddCommand implements Command {
 
-    private final DataBaseLinker linker;
+    private final DataBaseLinker db;
 
     public DeadlineAddCommand(final DataBaseLinker inputLinker) {
-        this.linker = inputLinker;
+        this.db = inputLinker;
     }
 
     public String getName() {
@@ -36,12 +36,12 @@ public final class DeadlineAddCommand implements Command {
     public void execute(final Chat chat) {
         try {
             try {
-                linker.getUserByChatId(chat.getChatId());
+                db.getUserByChatId(chat.getChatId());
             } catch (UserNotFound e) {
                 UserQuery userQuery = new UserQuery(-1, chat.getChatId());
-                linker.addUser(userQuery);
+                db.addUser(userQuery);
             }
-            UserQuery user = linker.getUserByChatId(chat.getChatId());
+            UserQuery user = db.getUserByChatId(chat.getChatId());
             DeadlineQuery inputQuery = new DeadlineQuery();
 
             inputQuery.setUserId(user.getId());
@@ -108,7 +108,7 @@ public final class DeadlineAddCommand implements Command {
                         + "please close one or more deadlines before add a new one.");
             } else {
                 user.setLimit(user.getLimit() - 1);
-                linker.addDeadline(inputQuery);
+                db.addDeadline(inputQuery);
                 chat.sendAnswer("Deadline added successfully");
             }
 
