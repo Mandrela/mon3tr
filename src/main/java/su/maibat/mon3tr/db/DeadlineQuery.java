@@ -4,14 +4,19 @@ import static su.maibat.mon3tr.Main.DAY_SEC;
 import static su.maibat.mon3tr.Main.SEC_TO_MILLIS_FACTOR;
 
 public final class DeadlineQuery extends DBQuery {
+    // State enumerator: 0 - normal, 1 - burning, 2 - completed, 3 - dead, -1 - deleted
 
     private String name = "";
-    private long burnTime = 0;
-    private long offset = DAY_SEC;
-    private int userId = 0;
-    private int state = 0;
+    private long expireTime = 0;
+    private long remindOffset = DAY_SEC;
+
+    private int ownerId = 0;
+    private int[] assignedGroups;
+
     private boolean notified = false;
-    // private int groupId = 0;
+    private int state = 0;
+    private int notifCounter = 0;
+
 
     public DeadlineQuery() {
         super();
@@ -31,18 +36,18 @@ public final class DeadlineQuery extends DBQuery {
             final long triggerOffset, final int ownerUserId, final boolean isNotifiedAbout) {
         super(idArg);
         name = deadlineName;
-        burnTime = burnAtTime;
-        offset = triggerOffset;
-        userId = ownerUserId;
+        expireTime = burnAtTime;
+        remindOffset = triggerOffset;
+        ownerId = ownerUserId;
         notified = isNotifiedAbout;
         updateState();
     }
 
     private void updateState() {
         long currentTime = System.currentTimeMillis() / SEC_TO_MILLIS_FACTOR;
-        if (currentTime > burnTime) {
+        if (currentTime > expireTime) {
             state = -1;
-        } else if ((currentTime + offset) > burnTime) {
+        } else if ((currentTime + remindOffset) > expireTime) {
             state = 1;
         } else {
             state = 0;
@@ -56,26 +61,26 @@ public final class DeadlineQuery extends DBQuery {
         name = arg;
     }
 
-    public long getBurnTime() {
-        return burnTime;
+    public long getExpireTime() {
+        return expireTime;
     }
-    public void setBurnTime(final long arg) {
-        burnTime = arg;
+    public void setExpireTime(final long arg) {
+        expireTime = arg;
         updateState();
     }
 
-    public int getUserId() {
-        return userId;
+    public int getOwnerId() {
+        return ownerId;
     }
-    public void setUserId(final int arg) {
-        userId = arg;
+    public void setOwnerId(final int arg) {
+        ownerId = arg;
     }
 
-    public long getOffset() {
-        return offset;
+    public long getRemindOffset() {
+        return remindOffset;
     }
-    public void setOffset(final long arg) {
-        offset = arg;
+    public void setRemindOffset(final long arg) {
+        remindOffset = arg;
         updateState();
     }
 
@@ -93,5 +98,23 @@ public final class DeadlineQuery extends DBQuery {
 
     public void setNotified() {
         notified = true;
+    }
+
+
+    public int[] getAssignedGroups() {
+        return assignedGroups;
+    }
+
+    public void setAssignedGroups(final int[] arg) {
+
+    }
+
+
+    public int getNotifCounter() {
+        return notifCounter;
+    }
+
+    public void setNotifCounter(final int arg) {
+
     }
 }

@@ -30,7 +30,7 @@ public final class HelpCommand implements Command {
     }
 
 
-    @Override
+    // @Override
     public void execute(final Chat chat) {
         String[] args = chat.getAllMessages();
         String answer = "";

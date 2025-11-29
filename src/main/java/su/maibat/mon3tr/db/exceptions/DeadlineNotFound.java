@@ -1,13 +1,13 @@
 package su.maibat.mon3tr.db.exceptions;
 
 public class DeadlineNotFound extends Exception {
-    private final int userId;
+    private final int deadlineId;
 
-    public DeadlineNotFound(final int userIdArg) {
-        userId = userIdArg;
+    public DeadlineNotFound(final int deadlineArg) {
+        deadlineId = deadlineArg;
     }
 
-    public final int getUserId() {
-        return userId;
+    public final int getDeadlineId() {
+        return deadlineId;
     }
 }

@@ -35,23 +35,23 @@ public final class MyDeadlinesCommandTest {
 
         DeadlineQuery dl1 = new DeadlineQuery();
         dl1.setName("first");
-        dl1.setBurnTime(burnTime);
-        dl1.setUserId(0);
+        dl1.setExpireTime(burnTime);
+        dl1.setOwnerId(0);
 
         DeadlineQuery dl2 = new DeadlineQuery();
         dl2.setName("second");
-        dl2.setBurnTime(burnTime);
-        dl2.setUserId(0);
+        dl2.setExpireTime(burnTime);
+        dl2.setOwnerId(0);
 
         DeadlineQuery dl3 = new DeadlineQuery();
         dl3.setName("third");
-        dl3.setBurnTime(burnTime);
-        dl3.setUserId(0);
+        dl3.setExpireTime(burnTime);
+        dl3.setOwnerId(0);
 
         DeadlineQuery dl4 = new DeadlineQuery();
         dl4.setName("chotyri");
-        dl4.setBurnTime(burnTime);
-        dl4.setUserId(0);
+        dl4.setExpireTime(burnTime);
+        dl4.setOwnerId(0);
 
         DeadlineQuery[] deadlinesForUser = {dl1, dl2, dl3, dl4};
 

@@ -6,7 +6,7 @@ import su.maibat.mon3tr.chat.Chat;
 public abstract class InfoCommand implements Command {
     protected String info = "";
 
-    @Override
+    //@Override
     public final void execute(final Chat chat) {
         chat.sendAnswer(info);
     }

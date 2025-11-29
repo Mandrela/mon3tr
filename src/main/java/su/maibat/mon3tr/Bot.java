@@ -1,8 +1,8 @@
 package su.maibat.mon3tr;
 
-import static su.maibat.mon3tr.Main.DEBUG;
+// import static su.maibat.mon3tr.Main.DEBUG;
 
-import java.util.Arrays;
+// import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -13,17 +13,17 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
-import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.message.Message;
+// import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
+// import org.telegram.telegrambots.meta.api.objects.Update;
+// import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import su.maibat.mon3tr.chat.MessageSink;
-import su.maibat.mon3tr.chat.TelegramChat;
+// import su.maibat.mon3tr.chat.TelegramChat;
 import su.maibat.mon3tr.commands.Command;
 
 
-public final class Bot implements LongPollingSingleThreadUpdateConsumer {
+public final class Bot /*extends BotBackend*/ {
     public static final String NAME = "mon3tr";
     private static final char PREFIX = '/';
 
@@ -50,6 +50,7 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
      * command supplied.
      */
     public Bot(final String token, final Map<String, Command> commandsArgument,
+                /*final BlockingQueue<Pair<int, String>> responseQueue,*/
                 final Command defaultCommandArgument) {
         telegramClient = new OkHttpTelegramClient(token);
         commands = Collections.unmodifiableMap(commandsArgument);
@@ -57,6 +58,11 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
         executor = new ThreadPoolExecutor(THREADS_CORE_POOL_SIZE, THREADS_MAX_POOL_SIZE,
             THREADS_IDLE_TIMEOUT, THREADS_TIME_UNIT, jobQueue);
     }
+
+    // public Bot(final Map<String, Command> commandsArgument, final BlockingQueue<Pair<int,
+    // String>> responseQueue,
+    //     final Command defaultCommandArgument, final Command registerCommandArgument) {
+    // }
 
 
     /**
@@ -78,45 +84,66 @@ public final class Bot implements LongPollingSingleThreadUpdateConsumer {
         return telegramClient;
     }
 
+    // @Override
+    // public void consume(final Update update) {
+    //     Message message = update.getMessage();
 
-    @Override
-    public void consume(final Update update) {
-        Message message = update.getMessage();
+    //     if (message != null && message.hasText()) {
+    //         Long chatId = message.getChatId();
+    //         String[] arguments = parseCommand(message.getText());
 
-        if (message != null && message.hasText()) {
-            Long chatId = message.getChatId();
-            String[] arguments = parseCommand(message.getText());
+    //         if (arguments != null) {
+    //             System.out.println(DEBUG + "Initializing new command");
+    //             sinkMap.computeIfPresent(chatId,
+    //                 (key, value) -> {
+    //                     value.interrupt(); return null;
+    //                 });
 
-            if (arguments != null) {
-                System.out.println(DEBUG + "Initializing new command");
-                sinkMap.computeIfPresent(chatId,
-                    (key, value) -> {
-                        value.interrupt(); return null;
-                    });
+    //             TelegramChat telegramChat = new TelegramChat(chatId, telegramClient);
+    //             telegramChat.addMessages(Arrays.copyOfRange(arguments, 1,
+    // arguments.length));
+    //             telegramChat.freeze();
+    //             sinkMap.put(chatId, telegramChat);
 
-                TelegramChat telegramChat = new TelegramChat(chatId, telegramClient);
-                telegramChat.addMessages(Arrays.copyOfRange(arguments, 1, arguments.length));
-                telegramChat.freeze();
-                sinkMap.put(chatId, telegramChat);
+    //             Command commandToExecute = commands.getOrDefault(arguments[0].
+    // toLowerCase(),
+    //                 defaultCommand);
 
-                Command commandToExecute = commands.getOrDefault(arguments[0].toLowerCase(),
-                    defaultCommand);
+    //             executor.execute(() -> {
+    //                 commandToExecute.execute(telegramChat);
+    //                 sinkMap.computeIfPresent(chatId, (key, value) -> {
+    //                     value.interrupt();
+    //                     return null;
+    //                 });
+    //             });
+    //         } else if (sinkMap.containsKey(chatId)) {
+    //             System.out.println(DEBUG + "Passing message");
+    //             sinkMap.get(chatId).addMessage(message.getText());
+    //         } else {
+    //             System.out.println(DEBUG + "Executing default command");
+    //             executor.execute(() ->
+    //                 defaultCommand.execute(new TelegramChat(chatId, telegramClient)));
+    //         }
+    //     }
+    // }
 
-                executor.execute(() -> {
-                    commandToExecute.execute(telegramChat);
-                    sinkMap.computeIfPresent(chatId, (key, value) -> {
-                        value.interrupt();
-                        return null;
-                    });
-                });
-            } else if (sinkMap.containsKey(chatId)) {
-                System.out.println(DEBUG + "Passing message");
-                sinkMap.get(chatId).addMessage(message.getText());
-            } else {
-                System.out.println(DEBUG + "Executing default command");
-                executor.execute(() ->
-                    defaultCommand.execute(new TelegramChat(chatId, telegramClient)));
-            }
-        }
-    }
+    // Map<userId, State> map = HashMap<>();
+
+    // // State = {"command": Command pointer, "data": String[]}
+
+    // @Override
+    // public void process(final int userId, final String command) throws BotException {
+    //     if (userId <= 0) {
+    //         registerCommand.execute(userId, command.split(" "), null);
+    //     } else {
+    //         if (isCommand(command)) {
+    //             map.add((command or defaultCommand).execute(userId, command.split(" ")[1:],
+    // null));
+    //         } else if (map.has(userId)){
+    //             map.add(map[userId].command, command.split(" ")[1:], map[userId].data);
+    //         } else {
+    //             defaultCommand.execute(userId, null, null);
+    //         }
+    //     }
+    // }
 }

@@ -58,7 +58,7 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
                 while (!isValidOffset(offsetArg)) {
                     offsetArg = chat.getMessage("Please enter a offset (days before final date)");
                 }
-                updateQuery.setOffset(Long.parseLong(offsetArg) * SECONDS_IN_DAY);
+                updateQuery.setRemindOffset(Long.parseLong(offsetArg) * SECONDS_IN_DAY);
                 chat.sendAnswer("Offset has been updated");
                 linker.updateDeadline(updateQuery);
 

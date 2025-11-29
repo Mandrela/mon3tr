@@ -44,7 +44,7 @@ public final class DeadlineAddCommand implements Command {
             UserQuery user = db.getUserByChatId(chat.getChatId());
             DeadlineQuery inputQuery = new DeadlineQuery();
 
-            inputQuery.setUserId(user.getId());
+            inputQuery.setOwnerId(user.getId());
 
             String[] arguments = chat.getAllMessages();
 
@@ -101,7 +101,7 @@ public final class DeadlineAddCommand implements Command {
             long burnTime = stringToTime(stringBurnTime);
 
             inputQuery.setName(name);
-            inputQuery.setBurnTime(burnTime);
+            inputQuery.setExpireTime(burnTime);
 
             if (user.getLimit() == 0) {
                 chat.sendAnswer("You have used up all your deadline cells, "

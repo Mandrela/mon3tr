@@ -12,8 +12,10 @@ import java.sql.Statement;
 
 import static su.maibat.mon3tr.Main.INFO;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+import su.maibat.mon3tr.db.exceptions.GroupNotFound;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
+import su.maibat.mon3tr.db.exceptions.TokenNotFound;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 // TODO Tests
@@ -152,9 +154,9 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             reason = "Id field of input DeadlineQuery should be -1.";
         } else if (inputQuery.getName().equals("")) {
             reason = "Name field of input DeadlineQuery should not be empty.";
-        } else if (inputQuery.getBurnTime() <= 0) {
+        } else if (inputQuery.getExpireTime() <= 0) {
             reason = "Burn time field of input DeadlineQuery should be positive.";
-        } else if (inputQuery.getUserId() <= 0) {
+        } else if (inputQuery.getOwnerId() <= 0) {
             reason = "User Id field of input DeadlineQuery should be positive.";
         }
 
@@ -302,9 +304,9 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             checkDeadlineQuery(inputQuery, false);
             synchronized (deadline_add) {
                 deadline_add.setString(1, inputQuery.getName());
-                deadline_add.setLong(2, inputQuery.getBurnTime());
-                deadline_add.setLong(3, inputQuery.getOffset());
-                deadline_add.setInt(4, inputQuery.getUserId());
+                deadline_add.setLong(2, inputQuery.getExpireTime());
+                deadline_add.setLong(3, inputQuery.getRemindOffset());
+                deadline_add.setInt(4, inputQuery.getOwnerId());
                 deadline_add.setBoolean(5, inputQuery.isNotified());
                 synchronized (conn) {
                     deadline_add.executeUpdate();
@@ -336,9 +338,9 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             checkDeadlineQuery(inputQuery, true);
             synchronized (deadline_update) {
                 deadline_update.setString(1, inputQuery.getName());
-                deadline_update.setLong(2, inputQuery.getBurnTime());
-                deadline_update.setLong(3, inputQuery.getOffset());
-                deadline_update.setInt(4, inputQuery.getUserId());
+                deadline_update.setLong(2, inputQuery.getExpireTime());
+                deadline_update.setLong(3, inputQuery.getRemindOffset());
+                deadline_update.setInt(4, inputQuery.getOwnerId());
                 deadline_update.setBoolean(5, inputQuery.isNotified());
                 deadline_update.setInt(6, inputQuery.getId());
                 synchronized (conn) {
@@ -444,5 +446,48 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public boolean toggleNews(final int userId) throws UserNotFound, LinkerException {
+        return true;
+    }
+
+    public boolean toggleLeaderboard(final int userId) throws UserNotFound, LinkerException {
+        return true;
+    }
+
+
+    public void addGroup(final GroupQuery inputQuery) throws GroupNotFound, LinkerException {
+
+    }
+
+    public void updateGroup(final GroupQuery inputQuery) throws MalformedQuery, LinkerException {
+
+    }
+
+    public void removeGroup(final int id) throws LinkerException {
+
+    }
+
+    public GroupQuery[] getGroups(final int[] groupsId) throws GroupNotFound, LinkerException {
+        return new GroupQuery[0];
+    }
+
+    public GroupQuery[] getOwnedGroups(final int userId) throws UserNotFound, LinkerException {
+        return new GroupQuery[0];
+    }
+
+    public String[] getGroupNamesForDeadline(final int deadlineId)
+            throws DeadlineNotFound, LinkerException {
+        return new String[0];
+    }
+
+    public GroupQuery tryFindToken(final String token) throws TokenNotFound, LinkerException {
+        return new GroupQuery();
+    }
+
+    public DeadlineQuery[] getGroupsDeadlines(final int[] groupsId)
+            throws GroupNotFound, LinkerException {
+        return new DeadlineQuery[0];
     }
 }

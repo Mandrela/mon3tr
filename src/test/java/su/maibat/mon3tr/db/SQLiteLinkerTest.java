@@ -99,9 +99,9 @@ public class SQLiteLinkerTest {
                 DeadlineQuery[] output = linker.getDeadlinesForUser(2020);
                 assertEquals(1, output.length);
                 assertEquals(query.getName(), output[0].getName());
-                assertEquals(query.getBurnTime(), output[0].getBurnTime());
-                assertEquals(query.getOffset(), output[0].getOffset());
-                assertEquals(query.getUserId(), output[0].getUserId());
+                assertEquals(query.getExpireTime(), output[0].getExpireTime());
+                assertEquals(query.getRemindOffset(), output[0].getRemindOffset());
+                assertEquals(query.getOwnerId(), output[0].getOwnerId());
 
                 id = output[0].getId();
             } catch (DeadlineNotFound e) {

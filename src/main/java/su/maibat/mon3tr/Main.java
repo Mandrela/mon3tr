@@ -2,9 +2,11 @@ package su.maibat.mon3tr;
 
 import java.nio.file.FileAlreadyExistsException;
 import java.util.LinkedHashMap;
+// import java.util.concurrent.ArrayBlockingQueue;
+// import java.util.concurrent.BlockingQueue;
 
-import org.telegram.telegrambots.longpolling.BotSession;
-import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
+// import org.telegram.telegrambots.longpolling.BotSession;
+// import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 import su.maibat.mon3tr.commands.AboutCommand;
 import su.maibat.mon3tr.commands.AuthorsCommand;
@@ -16,6 +18,7 @@ import su.maibat.mon3tr.commands.MyDeadlinesCommand;
 import su.maibat.mon3tr.commands.UpdateOffsetCommand;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
+// import su.maibat.mon3tr.telegramwrap.Gate;
 
 
 public final class Main {
@@ -34,7 +37,10 @@ public final class Main {
      @param args unused
      */
     public static void main(final String[] args) {
-        SQLiteLinker.main(new String[0]);
+        //BlockingQueue<Pair<int, String>> queue = new ArrayBlockingQueue<>();
+
+        //new Responder(new ConcurrentHashMap<Int, Long>());
+        //new Gate(new ConcurrentHashMap<Int, Long>());
 
         // Settings
         String token = System.getenv("MON3TR_TOKEN");
@@ -62,8 +68,8 @@ public final class Main {
             return;
         }
 
-        TelegramBotsLongPollingApplication botsApplication =
-            new TelegramBotsLongPollingApplication();
+        // TelegramBotsLongPollingApplication botsApplication =
+        //     new TelegramBotsLongPollingApplication();
 
 
         // Commands
@@ -94,42 +100,42 @@ public final class Main {
 
 
         // Workers
-        Bot bot = new Bot(token, commandMap, help);
-        Notifier notifier = new Notifier(dataBase, bot.getTelegramClient());
+        // Bot bot = new Bot(token, commandMap, help);
+        // Notifier notifier = new Notifier(dataBase, bot.getTelegramClient());
 
-        Thread notifierThread = new Thread(() -> notifier.runInfinitely());
-        notifierThread.start();
+        // Thread notifierThread = new Thread(getExpireTime);
+        // notifierThread.start();
 
-        try {
-            BotSession botSession = botsApplication.registerBot(token, bot);
-            synchronized (botSession) {
-                botSession.wait();
-            }
-        } catch (Exception e) {
-            System.out.println(CRITICAL + e.getMessage());
-        } finally {
-            System.out.println(INFO + "Started finalization process.");
+        // try {
+        //     BotSession botSession = botsApplication.registerBot(token, bot);
+        //     synchronized (botSession) {
+        //         botSession.wait();
+        //     }
+        // } catch (Exception e) {
+        //     System.out.println(CRITICAL + e.getMessage());
+        // } finally {
+        //     System.out.println(INFO + "Started finalization process.");
 
-            notifierThread.interrupt();
-            try {
-                notifierThread.join(MINUTE_TIME_SEC * SEC_TO_MILLIS_FACTOR);
-                if (notifierThread.isAlive()) {
-                    throw new InterruptedException("Notifier wasn't dying during whole minute.");
-                }
-            } catch (InterruptedException e) {
-                System.out.println(ERROR + "Couldn't stop notifier module properly:\n"
-                    + e.getMessage());
-            }
+        //     notifierThread.interrupt();
+        //     try {
+        //         notifierThread.join(MINUTE_TIME_SEC * SEC_TO_MILLIS_FACTOR);
+        //         if (notifierThread.isAlive()) {
+        //             throw new InterruptedException("Notifier wasn't dying during whole minute.");
+        //         }
+        //     } catch (InterruptedException e) {
+        //         System.out.println(ERROR + "Couldn't stop notifier module properly:\n"
+        //             + e.getMessage());
+        //     }
 
-            try {
-                dataBase.close();
-                botsApplication.close();
-            } catch (Exception e) {
-                System.out.println(ERROR + "Couldn't release resources properly:\n"
-                + e.getMessage());
-            }
+        //     try {
+        //         dataBase.close();
+        //         botsApplication.close();
+        //     } catch (Exception e) {
+        //         System.out.println(ERROR + "Couldn't release resources properly:\n"
+        //         + e.getMessage());
+        //     }
 
-            System.out.println(INFO + "Terminated, bye!");
-        }
+        //     System.out.println(INFO + "Terminated, bye!");
+        // }
     }
 }

@@ -7,12 +7,23 @@ public final class UserQuery extends DBQuery {
 
     private long chatId = 0;
     private int limit = STANDARD_LIMIT;
+
+    // For future use
     private boolean hasPaidSubscribeForWeatherNews = false;
+    private boolean sendNews;
+    private int remindStrategy;
+
+    private boolean concurrent;
+    private int burnedDeadlines;
+    private int completedDeadlines;
+    private String name;
+
+    private int[] membership;
+
 
     public UserQuery() {
         super();
     }
-
 
     /**
      * @param idArg
@@ -23,12 +34,16 @@ public final class UserQuery extends DBQuery {
         chatId = targetChatId;
     }
 
+
     public long getChatId() {
         return chatId;
     }
+
     public void setChatId(final long arg) {
         this.chatId = arg;
     }
+
+
     public int getLimit() {
         return limit;
     }
@@ -37,8 +52,16 @@ public final class UserQuery extends DBQuery {
     }
 
 
-
     public boolean isHasPaidSubscribeForWeatherNews() {
         return hasPaidSubscribeForWeatherNews;
+    }
+
+
+    public int[] getMembership() {
+        return membership;
+    }
+
+    public void setMembership() {
+
     }
 }

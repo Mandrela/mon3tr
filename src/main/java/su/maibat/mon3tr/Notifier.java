@@ -30,7 +30,7 @@ public final class Notifier {
             if (deadline.isBurning() && !deadline.isNotified()) {
                 System.out.println(DEBUG + "[notif]: Found burning deadline " + deadline.getName());
                 try {
-                    long chatId = dataBase.getUserById(deadline.getUserId()).getChatId();
+                    long chatId = dataBase.getUserById(deadline.getOwnerId()).getChatId();
                     new TelegramChat(chatId, telegramClient).sendAnswer("\uD83D\uDD25\uD83D\uDD25"
                         + "\uD83D\uDD25\n Your deadline " + deadline.getName() + " is burning\n"
                         + "\uD83D\uDD25\uD83D\uDD25\uD83D\uDD25");

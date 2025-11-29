@@ -1,8 +1,10 @@
 package su.maibat.mon3tr.db;
 
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+import su.maibat.mon3tr.db.exceptions.GroupNotFound;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
+import su.maibat.mon3tr.db.exceptions.TokenNotFound;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 public interface DataBaseLinker {
@@ -42,6 +44,20 @@ public interface DataBaseLinker {
 
     DeadlineQuery getDeadline(int id) throws DeadlineNotFound, LinkerException;
     DeadlineQuery[] getDeadlinesForUser(int userId) throws DeadlineNotFound, LinkerException;
+    DeadlineQuery[] getGroupsDeadlines(int[] groupsId) throws GroupNotFound, LinkerException;
     DeadlineQuery[] getAllDeadlines() throws LinkerException;
-    //DeadlineQuery[] find(String fieldName, String value);
+
+    boolean toggleNews(int userId) throws UserNotFound, LinkerException;
+    boolean toggleLeaderboard(int userId) throws UserNotFound, LinkerException;
+
+
+    void addGroup(GroupQuery inputQuery) throws GroupNotFound, LinkerException;
+    void updateGroup(GroupQuery inputQuery) throws MalformedQuery, LinkerException;
+    void removeGroup(int id) throws LinkerException;
+
+    GroupQuery[] getGroups(int[] groupsId) throws GroupNotFound, LinkerException;
+    GroupQuery[] getOwnedGroups(int userId) throws UserNotFound, LinkerException;
+    String[] getGroupNamesForDeadline(int deadlineId) throws DeadlineNotFound, LinkerException;
+
+    GroupQuery tryFindToken(String token) throws TokenNotFound, LinkerException;
 }

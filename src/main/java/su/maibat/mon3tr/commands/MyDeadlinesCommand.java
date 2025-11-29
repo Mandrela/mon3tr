@@ -72,7 +72,7 @@ public class MyDeadlinesCommand implements Command {
         for (int i = 0; i < queryList.length; i++) {
             answerFragment = answerFragment.concat((i + 1) + " : " + queryList[i].getName() + " : "
                     + new SimpleDateFormat("dd/MM/yyyy").
-                    format(new Date(queryList[i].getBurnTime() * OFFSET)));
+                    format(new Date(queryList[i].getExpireTime() * OFFSET)));
             if (queryList[i].isBurning()) {
                 answerFragment = answerFragment + "\uD83D\uDD25";
             }
