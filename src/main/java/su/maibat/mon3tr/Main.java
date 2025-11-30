@@ -2,11 +2,8 @@ package su.maibat.mon3tr;
 
 import java.nio.file.FileAlreadyExistsException;
 import java.util.LinkedHashMap;
-// import java.util.concurrent.ArrayBlockingQueue;
-// import java.util.concurrent.BlockingQueue;
-
-// import org.telegram.telegrambots.longpolling.BotSession;
-// import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import su.maibat.mon3tr.commands.AboutCommand;
 import su.maibat.mon3tr.commands.AuthorsCommand;
@@ -18,7 +15,6 @@ import su.maibat.mon3tr.commands.MyDeadlinesCommand;
 import su.maibat.mon3tr.commands.UpdateOffsetCommand;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
-// import su.maibat.mon3tr.telegramwrap.Gate;
 
 
 public final class Main {
@@ -37,11 +33,6 @@ public final class Main {
      @param args unused
      */
     public static void main(final String[] args) {
-        //BlockingQueue<Pair<int, String>> queue = new ArrayBlockingQueue<>();
-
-        //new Responder(new ConcurrentHashMap<Int, Long>());
-        //new Gate(new ConcurrentHashMap<Int, Long>());
-
         // Settings
         String token = System.getenv("MON3TR_TOKEN");
         if (token == null) {
@@ -53,6 +44,8 @@ public final class Main {
         if (dbName == null) {
             dbName = "mon3tr-database.db";
         }
+
+        String customAuthors = System.getenv("AUTHORS");
 
 
         // Common resources
@@ -76,7 +69,6 @@ public final class Main {
         HelpCommand help = new HelpCommand();
 
         AuthorsCommand authors = new AuthorsCommand();
-        String customAuthors = System.getenv("AUTHORS");
         if (customAuthors != null) {
             authors.setInfo(customAuthors);
             System.out.println(INFO + "Using custom authors info.");
@@ -85,8 +77,6 @@ public final class Main {
         DeadlineAddCommand deadlineAddCommand = new DeadlineAddCommand(dataBase);
         MyDeadlinesCommand deadlineGetCommand = new MyDeadlinesCommand(dataBase);
         DeadlineRemoveCommand deadlineRemoveCommand = new DeadlineRemoveCommand(dataBase);
-
-
         UpdateOffsetCommand updateOffsetCommand = new UpdateOffsetCommand(dataBase);
 
         Command[] commands = {help, new AboutCommand(), authors, deadlineAddCommand,
@@ -100,6 +90,10 @@ public final class Main {
 
 
         // Workers
+        BlockingQueue<NumberedString> queue = new ArrayBlockingQueue<NumberedString>();
+
+        //new Responder(new ConcurrentHashMap<Int, Long>());
+        //new Gate(new ConcurrentHashMap<Int, Long>());
         // Bot bot = new Bot(token, commandMap, help);
         // Notifier notifier = new Notifier(dataBase, bot.getTelegramClient());
 
