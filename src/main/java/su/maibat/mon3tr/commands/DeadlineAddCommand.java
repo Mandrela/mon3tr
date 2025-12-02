@@ -1,20 +1,25 @@
 package su.maibat.mon3tr.commands;
 
+import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.chat.Chat;
+import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
+import java.sql.Array;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.concurrent.BlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Arrays.copyOfRange;
 import static java.util.regex.Pattern.compile;
 
 public final class DeadlineAddCommand implements Command {
@@ -33,112 +38,95 @@ public final class DeadlineAddCommand implements Command {
         return "this command add your deadline";
     }
 
-    public void execute(final Chat chat) {
+
+    public State execute(int userId, String[] args, State currentState,
+                  BlockingQueue<NumberedString> responseQueue) throws CommandException {
         try {
-            try {
-                db.getUserByChatId(chat.getChatId());
-            } catch (UserNotFound e) {
-                UserQuery userQuery = new UserQuery(-1, chat.getChatId());
-                db.addUser(userQuery);
+            if (currentState == null) {
+                return new State(0, new String[]{}, this);
             }
-            UserQuery user = db.getUserByChatId(chat.getChatId());
-            DeadlineQuery inputQuery = new DeadlineQuery();
-
-            inputQuery.setOwnerId(user.getId());
-
-            String[] arguments = chat.getAllMessages();
-
-            String name;
-            String stringBurnTime;
-
-            if (arguments.length >= 2) {
-
-                if (isDate(arguments[1])) {
-                    stringBurnTime = arguments[1];
-                    if (isCorrectName(arguments[0])) {
-                        name = arguments[0];
-                    } else {
-                        name = getArgument(chat, "name");
-                    }
-
-                } else if (isDate(arguments[0])) {
-                    stringBurnTime = arguments[0];
-                    if (isCorrectName(arguments[1])) {
-                        name = arguments[1];
-                    } else {
-                        name = getArgument(chat, "name");
-                    }
-
-                } else {
-                    if (isCorrectName(arguments[0])) {
-                        name = arguments[0];
-                    } else if (isCorrectName(arguments[1])) {
-                        name = arguments[1];
-                    } else {
-                        name = getArgument(chat, "name");
-                    }
-                    stringBurnTime = getArgument(chat, "date");
-                }
-
-            } else if (arguments.length == 0) {
-
-                name = getArgument(chat, "name");
-                stringBurnTime = getArgument(chat, "date");
-
-            } else {
-                if (isDate(arguments[0])) {
-                    name = getArgument(chat, "name");
-                    stringBurnTime = arguments[0];
-                } else if (arguments[0].isEmpty()) {
-                    name = getArgument(chat, "name");
-                    stringBurnTime = getArgument(chat, "date");
-                } else {
-                    name = arguments[0];
-                    stringBurnTime = getArgument(chat, "date");
-                }
+            if (db.getUserById(userId).getLimit() == 0) {
+                NumberedString answer = new NumberedString(userId, "You have used up all your "
+                        + "deadline cells, please close one or more deadlines before add a new one.");
+                responseQueue.add(answer);
+                return null;
             }
 
-            long burnTime = stringToTime(stringBurnTime);
+            switch (currentState.getStateId()) {
+                case (0):
+                    return nameCheck(userId, args, currentState, responseQueue);
 
-            inputQuery.setName(name);
-            inputQuery.setExpireTime(burnTime);
+                case (1):
+                    return dateCheck(userId, args[0], currentState, responseQueue);
 
-            if (user.getLimit() == 0) {
-                chat.sendAnswer("You have used up all your deadline cells, "
-                        + "please close one or more deadlines before add a new one.");
-            } else {
-                user.setLimit(user.getLimit() - 1);
-                db.addDeadline(inputQuery);
-                chat.sendAnswer("Deadline added successfully");
+                case (2):
+                    return addDeadline(userId, currentState, responseQueue);
+
+                default:
+                    System.out.println("Out state");
+                    NumberedString answer = new NumberedString(userId, "Something went wrong");
+                    responseQueue.add(answer);
+                    return currentState;
             }
 
-        } catch (UserNotFound e) {
-
-        } catch (InterruptedException ie) {
-
-        } catch (MalformedQuery e) {
-            throw new RuntimeException(e);
+        } catch (UserNotFound unf) {
+            System.out.println("UserNotFound");
+            NumberedString answer = new NumberedString(userId, "Something went wrong");
+            responseQueue.add(answer);
+            return null;
         }
-
     }
 
-    private String getArgument(final Chat chat, final String flag) throws InterruptedException {
-        String answer = "";
-        if (flag.equals("name")) {
-            while (!isCorrectName(answer)) {
-                answer = chat.getMessage("Please enter valid name for your deadline "
-                    + "(not empty, not date)");
-            }
-            return answer;
-        } else if (flag.equals("date")) {
-            while (!isDate(answer)) {
-                answer = chat.getMessage("Please enter correct date");
-            }
-            return answer;
+    private State nameCheck(int userId, String[] args, State currentState,
+                            BlockingQueue<NumberedString> responseQueue) {
+        if (isCorrectName(args[0])) {
+            currentState.setMemory(new String[]{args[0], ""});
+            return dateCheck(userId, args[1], currentState, responseQueue);
         } else {
-            return "";
+            NumberedString answer = new NumberedString(userId, "Please, enter a valid name");
+            responseQueue.add(answer);
+            return currentState;
         }
     }
+
+    private State dateCheck(int userId, String arg, State currentState,
+                               BlockingQueue<NumberedString> responseQueue) {
+        if (isDate(arg)) {
+            String[] outMem = currentState.getMemory();
+            outMem[1] = arg;
+            currentState.setMemory(outMem);
+            return addDeadline(userId, currentState, responseQueue);
+        } else {
+            NumberedString answer = new NumberedString(userId, "Please, enter a valid date");
+            responseQueue.add(answer);
+            return currentState;
+        }
+
+    }
+
+    private State addDeadline(int userId, State currentState,
+                              BlockingQueue<NumberedString> responseQueue) {
+        try {
+            DeadlineQuery inputQuery = new DeadlineQuery();
+            String[] stateMemory = currentState.getMemory();
+
+            long expireTime = stringToTime(stateMemory[1]);
+
+            inputQuery.setName(stateMemory[0]);
+            inputQuery.setExpireTime(expireTime);
+            inputQuery.setOwnerId(userId);
+
+            db.addDeadline(inputQuery);
+
+            NumberedString answer = new NumberedString(userId, "Deadline added successfully");
+            responseQueue.add(answer);
+            return null;
+        } catch (MalformedQuery mq) {
+            currentState.setStateId(2);
+            return currentState;
+        }
+    }
+
 
     private boolean isDate(final String argument) {
         final Pattern pattern = compile("^\\d{1,2}[./]\\d{1,2}[./]\\d{1,4}$");
