@@ -2,8 +2,11 @@ package su.maibat.mon3tr.commands;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
 
+import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.chat.Chat;
+import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.UserQuery;
@@ -13,10 +16,10 @@ import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 public class MyDeadlinesCommand implements Command {
     private static final int OFFSET = 1000;
-    private final DataBaseLinker linker;
+    private final DataBaseLinker db;
 
     public MyDeadlinesCommand(final DataBaseLinker inputLinker) {
-        this.linker = inputLinker;
+        this.db = inputLinker;
     }
 
     /**
@@ -33,40 +36,30 @@ public class MyDeadlinesCommand implements Command {
         return "This command show list of your deadlines";
     }
 
-    /**
-     * @param chat To which chat command send messages
-     */
-    public void execute(final Chat chat) {
+
+    public State execute(int userId, String[] args, State currentState,
+                        BlockingQueue<NumberedString> responseQueue) throws CommandException {
+
 
         try {
-            UserQuery user = linker.getUserByChatId(chat.getChatId());
-            try {
-                DeadlineQuery[] queryList = linker.getDeadlinesForUser(user.getId());
-                if (queryList.length == 0) {
-                    chat.sendAnswer("You have not any deadlines");
-                    return;
-                }
-
-                printTable(chat, queryList);
-
-            } catch (DeadlineNotFound dnf) {
-                chat.sendAnswer("You have not any deadlines");
+            DeadlineQuery[] queryList = db.getDeadlinesForUser(userId);
+            if (queryList.length == 0) {
+                NumberedString answer = new NumberedString(userId, "You have not any deadlines");
+                responseQueue.add(answer);
+                return null;
             }
-
-        } catch (UserNotFound unf) {
-            UserQuery userQuery = new UserQuery(-1, chat.getChatId());
-            try {
-                linker.addUser(userQuery);
-                chat.sendAnswer("You have not any deadlines");
-            } catch (MalformedQuery me) {
-                chat.sendAnswer("Something went wrong");
-            }
-
-
+            NumberedString answer = new NumberedString(userId, printTable(queryList));
+            responseQueue.add(answer);
+            return null;
+        } catch (DeadlineNotFound dnf) {
+            NumberedString answer = new NumberedString(userId, "You have not any deadlines");
+            responseQueue.add(answer);
+            return null;
         }
+
     }
 
-    protected final void printTable(final Chat chat, final DeadlineQuery[] queryList) {
+    protected final String printTable(final DeadlineQuery[] queryList) {
         String answer = "";
         String answerFragment = "";
         for (int i = 0; i < queryList.length; i++) {
@@ -83,6 +76,6 @@ public class MyDeadlinesCommand implements Command {
             answerFragment = "";
 
         }
-        chat.sendAnswer(answer);
+        return answer;
     }
 }

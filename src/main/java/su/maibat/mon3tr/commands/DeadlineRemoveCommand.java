@@ -1,26 +1,22 @@
 package su.maibat.mon3tr.commands;
 
-import su.maibat.mon3tr.chat.Chat;
+import su.maibat.mon3tr.NumberedString;
+import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
-import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
-import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-
-
-
-
+import java.util.concurrent.BlockingQueue;
 
 
 public class DeadlineRemoveCommand extends MyDeadlinesCommand {
 
-    private final SQLiteLinker linker;
+    private final SQLiteLinker db;
 
     public DeadlineRemoveCommand(final SQLiteLinker inputLinker) {
         super(inputLinker);
-        this.linker = inputLinker;
+        this.db = inputLinker;
     }
 
     public final String getName() {
@@ -31,49 +27,77 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
         return "This command remove your deadline";
     }
 
-    public final void execute(final Chat chat) {
 
+    public final State execute(final int userId, final String[] args, final State currentState,
+                               final BlockingQueue<NumberedString> responseQueue)
+            throws CommandException {
+        switch (currentState.getStateId()) {
+            case(0):
+                return deadlineTable(userId, args, currentState, responseQueue);
+            case (1):
+                return selectIndex(userId, args, currentState, responseQueue);
+            default:
+                System.out.println("Out state");
+                NumberedString answer = new NumberedString(userId, "Something went wrong");
+                responseQueue.add(answer);
+                return currentState;
+        }
+    }
+
+
+    private State deadlineTable(final int userId, final String[] args, final State currentState,
+                                final BlockingQueue<NumberedString> responseQueue) {
         try {
-            UserQuery user = linker.getUserByChatId(chat.getChatId());
-            try {
-                DeadlineQuery[] queryList = linker.getDeadlinesForUser(user.getId());
-                if (queryList.length == 0) {
-                    chat.sendAnswer("You have not any deadlines");
-                    return;
-                }
-
-                super.printTable(chat, queryList);
-
-                String[] arguments = chat.getAllMessages();
-                String arg = "";
-                if (arguments.length > 0) {
-                    arg = arguments[0];
-                }
-
-                while (!isValid(arg, queryList.length)) {
-                    arg = chat.getMessage("Please enter a valid deadline id (number)");
-                }
-
-                int removeId = Integer.parseInt(arg) - 1;
-
-                linker.removeDeadline(queryList[removeId].getId());
-
-                chat.sendAnswer("You have closed this gestalt!!!");
-                user.setLimit(user.getLimit() + 1);
-
-            } catch (DeadlineNotFound dnf) {
-                chat.sendAnswer("You have not any deadlines");
+            DeadlineQuery[] queryList = db.getDeadlinesForUser(userId);
+            if (queryList.length == 0) {
+                NumberedString answer = new NumberedString(userId, "You have not any deadlines");
+                responseQueue.add(answer);
+                return null;
             }
+
+            NumberedString answer = new NumberedString(userId, printTable(queryList));
+            responseQueue.add(answer);
+
+            String[] idList = new String[queryList.length];
+            for (int i = 0; i < queryList.length; i++) {
+                idList[i] = Integer.toString(queryList[i].getId());
+            }
+            currentState.setMemory(idList);
+
+            return selectIndex(userId, args, currentState, responseQueue);
+        } catch (DeadlineNotFound dnf) {
+            NumberedString answer = new NumberedString(userId, "You have not any deadlines");
+            responseQueue.add(answer);
+            return null;
+        }
+    }
+
+    private State selectIndex(final int userId, final String[] args, final State currentState,
+                              final BlockingQueue<NumberedString> responseQueue) {
+        if (isValid(args[0], currentState.getMemory().length)) {
+            int removeId = Integer.parseInt(args[0]) - 1;
+            return deleteDeadline(userId, removeId, currentState, responseQueue);
+        } else {
+            NumberedString answer = new NumberedString(userId,
+                    "Please enter a valid deadline id (number)");
+            responseQueue.add(answer);
+            currentState.setStateId(1);
+            return currentState;
+        }
+    }
+
+    private State deleteDeadline(final int userId, final int arg, final State currentState,
+                                 final BlockingQueue<NumberedString> responseQueue){
+        try {
+            int removeQueryId = Integer.parseInt(currentState.getMemory()[arg]);
+            db.getUserById(userId).setLimit(db.getUserById(userId).getLimit() + 1);
+            db.removeDeadline(removeQueryId);
+
+            NumberedString answer = new NumberedString(userId, "You have closed this gestalt!!!");
+            responseQueue.add(answer);
+            return null;
         } catch (UserNotFound unf) {
-            UserQuery userQuery = new UserQuery(-1, chat.getChatId());
-            try {
-                linker.addUser(userQuery);
-            } catch (MalformedQuery me) {
-                chat.sendAnswer("Something went wrong");
-            }
-            chat.sendAnswer("You have not any deadlines");
-        } catch (InterruptedException ie) {
-
+            return currentState;
         }
     }
 

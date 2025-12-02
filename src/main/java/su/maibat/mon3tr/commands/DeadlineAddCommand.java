@@ -9,7 +9,6 @@ import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-import java.sql.Array;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -19,7 +18,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.Arrays.copyOfRange;
 import static java.util.regex.Pattern.compile;
 
 public final class DeadlineAddCommand implements Command {
@@ -39,8 +37,9 @@ public final class DeadlineAddCommand implements Command {
     }
 
 
-    public State execute(int userId, String[] args, State currentState,
-                  BlockingQueue<NumberedString> responseQueue) throws CommandException {
+    public State execute(final int userId, final String[] args, final State currentState,
+                         final BlockingQueue<NumberedString> responseQueue)
+            throws CommandException {
         try {
             if (currentState == null) {
                 return new State(0, new String[]{}, this);
@@ -118,12 +117,17 @@ public final class DeadlineAddCommand implements Command {
 
             db.addDeadline(inputQuery);
 
+            UserQuery user = db.getUserById(userId);
+            user.setLimit(user.getLimit() - 1);
+
             NumberedString answer = new NumberedString(userId, "Deadline added successfully");
             responseQueue.add(answer);
             return null;
         } catch (MalformedQuery mq) {
             currentState.setStateId(2);
             return currentState;
+        } catch (UserNotFound e) {
+            throw new RuntimeException(e);
         }
     }
 
