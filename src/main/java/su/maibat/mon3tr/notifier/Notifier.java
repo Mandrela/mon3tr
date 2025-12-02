@@ -1,4 +1,4 @@
-package su.maibat.mon3tr;
+package su.maibat.mon3tr.notifier;
 
 import static su.maibat.mon3tr.Main.DEBUG;
 import static su.maibat.mon3tr.Main.ERROR;

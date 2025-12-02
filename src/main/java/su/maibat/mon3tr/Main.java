@@ -4,6 +4,11 @@ import java.nio.file.FileAlreadyExistsException;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import su.maibat.mon3tr.commands.AboutCommand;
 import su.maibat.mon3tr.commands.AuthorsCommand;
@@ -15,17 +20,20 @@ import su.maibat.mon3tr.commands.MyDeadlinesCommand;
 import su.maibat.mon3tr.commands.UpdateOffsetCommand;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
+import su.maibat.mon3tr.telegramwrap.Responder;
 
 
 public final class Main {
     public static final String DEBUG = "\u001b[1;97m[\u001b[0;90mDEBG\u001b[1;97m]\u001b[0m ";
     public static final String INFO = "\u001b[1;97m[INFO]\u001b[0m ";
     public static final String WARNING = "\u001b[1;97m[\u001b[1;33mWARN\u001b[1;97m]\u001b[0m ";
-    public static final String ERROR = "\u001b[1;97m[\u001b[0;31mERRO\u001b[1;97m]\u001b[0m ";
+    public static final String ERROR = "\u001b[1;97m[\u001b[0;31mERR\u001b[1;97m]\u001b[0m ";
     public static final String CRITICAL = "\u001b[1;97m[\u001b[1;91mCRIT\u001b[1;97m]\u001b[0m ";
     public static final int MINUTE_TIME_SEC = 60;
     public static final int SEC_TO_MILLIS_FACTOR = 1000;
     public static final int DAY_SEC = 86400;
+
+    private static final int DEFAULT_QUEUE_CAPACITY = 8;
 
     private Main() { }
 
@@ -38,6 +46,17 @@ public final class Main {
         if (token == null) {
             System.err.println(CRITICAL + "Environmental variable MON3TR_TOKEN is not set.");
             System.exit(1);
+        }
+
+        int queueCapacity = DEFAULT_QUEUE_CAPACITY;
+        String rawQueueCapacity = System.getenv("RESP_CAPACITY");
+        if (rawQueueCapacity != null) {
+            try {
+                queueCapacity = Integer.parseInt(rawQueueCapacity);
+            } catch (NumberFormatException e) {
+                System.err.println(CRITICAL + "Environmental variable RESP_CAPACITY is set to "
+                    + "garbage: " + rawQueueCapacity);
+            }
         }
 
         String dbName = System.getenv("DB_NAME");
@@ -61,8 +80,9 @@ public final class Main {
             return;
         }
 
-        // TelegramBotsLongPollingApplication botsApplication =
-        //     new TelegramBotsLongPollingApplication();
+        TelegramBotsLongPollingApplication botsApplication =
+            new TelegramBotsLongPollingApplication();
+        TelegramClient telegramClient = new OkHttpTelegramClient(token);
 
 
         // Commands
@@ -90,7 +110,11 @@ public final class Main {
 
 
         // Workers
-        BlockingQueue<NumberedString> queue = new ArrayBlockingQueue<NumberedString>();
+        BlockingQueue<NumberedString> queue = new ArrayBlockingQueue<NumberedString>(queueCapacity);
+
+        ConcurrentHashMap<Integer, Long> uidMap = new ConcurrentHashMap<>();
+        Responder responder = new Responder(telegramClient, queue, dataBase, uidMap);
+
 
         //new Responder(new ConcurrentHashMap<Int, Long>());
         //new Gate(new ConcurrentHashMap<Int, Long>());
