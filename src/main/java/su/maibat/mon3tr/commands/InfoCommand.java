@@ -1,14 +1,27 @@
 package su.maibat.mon3tr.commands;
 
-import su.maibat.mon3tr.chat.Chat;
+import java.util.concurrent.BlockingQueue;
+
+import su.maibat.mon3tr.NumberedString;
 
 
-public abstract class InfoCommand implements Command {
+public abstract class InfoCommand implements StatelessCommand {
     protected String info = "";
 
-    //@Override
-    public final void execute(final Chat chat) {
-        chat.sendAnswer(info);
+    @Override
+    public final State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
+        executeWithoutState(userId, args, responseQueue);
+        return null;
+    }
+
+    @Override
+    public final void executeWithoutState(final int userId, final String[] args,
+            final BlockingQueue<NumberedString> responseQueue) {
+        try {
+            responseQueue.put(new NumberedString(userId, info));
+        } catch (InterruptedException e) {
+        }
     }
 
     /**

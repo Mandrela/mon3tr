@@ -23,11 +23,15 @@ public interface DataBaseLinker {
      */
     void updateUser(UserQuery inputQuery) throws MalformedQuery, LinkerException;
 
+    boolean checkUserExists(int id) throws LinkerException;
+    int getUserIdByChatId(long chatId) throws UserNotFound, LinkerException;
+    long getChatIdByUserId(int id) throws UserNotFound, LinkerException;
     UserQuery getUserById(int id) throws UserNotFound, LinkerException;
     UserQuery getUserByChatId(long chatId) throws UserNotFound, LinkerException;
     UserQuery[] getAllUsers() throws LinkerException;
 
-    // Deadline
+
+    // Deadlines
     /**
      * @param inputQuery I do assume, that id field is -1, else I will shoot!
      * @throws MalformedQuery when, for example, id != -1
@@ -47,11 +51,14 @@ public interface DataBaseLinker {
     DeadlineQuery[] getGroupsDeadlines(int[] groupsId) throws GroupNotFound, LinkerException;
     DeadlineQuery[] getAllDeadlines() throws LinkerException;
 
+
+    // User Settings
     boolean toggleNews(int userId) throws UserNotFound, LinkerException;
     boolean toggleLeaderboard(int userId) throws UserNotFound, LinkerException;
 
 
-    void addGroup(GroupQuery inputQuery) throws GroupNotFound, LinkerException;
+    // Groups
+    void addGroup(GroupQuery inputQuery) throws MalformedQuery, LinkerException;
     void updateGroup(GroupQuery inputQuery) throws MalformedQuery, LinkerException;
     void removeGroup(int id) throws LinkerException;
 

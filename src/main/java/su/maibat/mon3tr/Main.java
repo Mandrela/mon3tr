@@ -2,12 +2,18 @@ package su.maibat.mon3tr;
 
 import java.nio.file.FileAlreadyExistsException;
 import java.util.LinkedHashMap;
-// import java.util.concurrent.ArrayBlockingQueue;
-// import java.util.concurrent.BlockingQueue;
+import java.util.WeakHashMap;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
-// import org.telegram.telegrambots.longpolling.BotSession;
-// import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.longpolling.BotSession;
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import su.maibat.mon3tr.bot.Bot;
+import su.maibat.mon3tr.bot.BotBackend;
 import su.maibat.mon3tr.commands.AboutCommand;
 import su.maibat.mon3tr.commands.AuthorsCommand;
 import su.maibat.mon3tr.commands.Command;
@@ -18,18 +24,22 @@ import su.maibat.mon3tr.commands.MyDeadlinesCommand;
 import su.maibat.mon3tr.commands.UpdateOffsetCommand;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
-// import su.maibat.mon3tr.telegramwrap.Gate;
+import su.maibat.mon3tr.notifier.Notifier;
+import su.maibat.mon3tr.telegramwrap.Gate;
+import su.maibat.mon3tr.telegramwrap.Responder;
 
 
 public final class Main {
     public static final String DEBUG = "\u001b[1;97m[\u001b[0;90mDEBG\u001b[1;97m]\u001b[0m ";
     public static final String INFO = "\u001b[1;97m[INFO]\u001b[0m ";
     public static final String WARNING = "\u001b[1;97m[\u001b[1;33mWARN\u001b[1;97m]\u001b[0m ";
-    public static final String ERROR = "\u001b[1;97m[\u001b[0;31mERRO\u001b[1;97m]\u001b[0m ";
+    public static final String ERROR = "\u001b[1;97m[\u001b[0;31mERR\u001b[1;97m]\u001b[0m ";
     public static final String CRITICAL = "\u001b[1;97m[\u001b[1;91mCRIT\u001b[1;97m]\u001b[0m ";
     public static final int MINUTE_TIME_SEC = 60;
     public static final int SEC_TO_MILLIS_FACTOR = 1000;
     public static final int DAY_SEC = 86400;
+
+    private static final int DEFAULT_QUEUE_CAPACITY = 8;
 
     private Main() { }
 
@@ -37,11 +47,6 @@ public final class Main {
      @param args unused
      */
     public static void main(final String[] args) {
-        //BlockingQueue<Pair<int, String>> queue = new ArrayBlockingQueue<>();
-
-        //new Responder(new ConcurrentHashMap<Int, Long>());
-        //new Gate(new ConcurrentHashMap<Int, Long>());
-
         // Settings
         String token = System.getenv("MON3TR_TOKEN");
         if (token == null) {
@@ -49,10 +54,23 @@ public final class Main {
             System.exit(1);
         }
 
+        int queueCapacity = DEFAULT_QUEUE_CAPACITY;
+        String rawQueueCapacity = System.getenv("RESP_CAPACITY");
+        if (rawQueueCapacity != null) {
+            try {
+                queueCapacity = Integer.parseInt(rawQueueCapacity);
+            } catch (NumberFormatException e) {
+                System.err.println(CRITICAL + "Environmental variable RESP_CAPACITY is set to "
+                    + "garbage: " + rawQueueCapacity);
+            }
+        }
+
         String dbName = System.getenv("DB_NAME");
         if (dbName == null) {
             dbName = "mon3tr-database.db";
         }
+
+        String customAuthors = System.getenv("AUTHORS");
 
 
         // Common resources
@@ -68,15 +86,15 @@ public final class Main {
             return;
         }
 
-        // TelegramBotsLongPollingApplication botsApplication =
-        //     new TelegramBotsLongPollingApplication();
+        TelegramBotsLongPollingApplication botsApplication =
+            new TelegramBotsLongPollingApplication();
+        TelegramClient telegramClient = new OkHttpTelegramClient(token);
 
 
         // Commands
         HelpCommand help = new HelpCommand();
 
         AuthorsCommand authors = new AuthorsCommand();
-        String customAuthors = System.getenv("AUTHORS");
         if (customAuthors != null) {
             authors.setInfo(customAuthors);
             System.out.println(INFO + "Using custom authors info.");
@@ -85,8 +103,6 @@ public final class Main {
         DeadlineAddCommand deadlineAddCommand = new DeadlineAddCommand(dataBase);
         MyDeadlinesCommand deadlineGetCommand = new MyDeadlinesCommand(dataBase);
         DeadlineRemoveCommand deadlineRemoveCommand = new DeadlineRemoveCommand(dataBase);
-
-
         UpdateOffsetCommand updateOffsetCommand = new UpdateOffsetCommand(dataBase);
 
         Command[] commands = {help, new AboutCommand(), authors, deadlineAddCommand,
@@ -100,42 +116,45 @@ public final class Main {
 
 
         // Workers
-        // Bot bot = new Bot(token, commandMap, help);
-        // Notifier notifier = new Notifier(dataBase, bot.getTelegramClient());
+        BlockingQueue<NumberedString> queue = new ArrayBlockingQueue<NumberedString>(queueCapacity);
+        WeakHashMap<Integer, Long> uidMap = new WeakHashMap<>();
 
-        // Thread notifierThread = new Thread(getExpireTime);
-        // notifierThread.start();
+        BotBackend bot = new Bot(dataBase, help, help, commandMap, queue);
 
-        // try {
-        //     BotSession botSession = botsApplication.registerBot(token, bot);
-        //     synchronized (botSession) {
-        //         botSession.wait();
-        //     }
-        // } catch (Exception e) {
-        //     System.out.println(CRITICAL + e.getMessage());
-        // } finally {
-        //     System.out.println(INFO + "Started finalization process.");
+        Responder responder = new Responder(telegramClient, queue, dataBase, uidMap);
+        Thread responderThread = new Thread(responder);
+        responderThread.start();
 
-        //     notifierThread.interrupt();
-        //     try {
-        //         notifierThread.join(MINUTE_TIME_SEC * SEC_TO_MILLIS_FACTOR);
-        //         if (notifierThread.isAlive()) {
-        //             throw new InterruptedException("Notifier wasn't dying during whole minute.");
-        //         }
-        //     } catch (InterruptedException e) {
-        //         System.out.println(ERROR + "Couldn't stop notifier module properly:\n"
-        //             + e.getMessage());
-        //     }
+        Gate gate = new Gate(bot, dataBase, uidMap);
 
-        //     try {
-        //         dataBase.close();
-        //         botsApplication.close();
-        //     } catch (Exception e) {
-        //         System.out.println(ERROR + "Couldn't release resources properly:\n"
-        //         + e.getMessage());
-        //     }
+        Notifier notifier = new Notifier(dataBase, queue);
+        Thread notifierThread = new Thread(notifier);
+        notifierThread.setDaemon(true);
+        notifierThread.start();
 
-        //     System.out.println(INFO + "Terminated, bye!");
-        // }
+        try {
+            BotSession botSession = botsApplication.registerBot(token, gate);
+            synchronized (botSession) {
+                botSession.wait();
+            }
+        } catch (Exception e) {
+            System.out.println(CRITICAL + e.getMessage());
+        } finally {
+            System.out.println(INFO + "Started finalization process.");
+
+            notifierThread.interrupt();
+            responderThread.interrupt();
+
+            try {
+                dataBase.close();
+                botsApplication.close();
+            } catch (Exception e) {
+                System.out.println(ERROR + "Couldn't release resources properly:\n"
+                + e.getMessage());
+            }
+
+            responderThread.join();
+            System.out.println(INFO + "Terminated, bye!");
+        }
     }
 }

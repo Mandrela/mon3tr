@@ -29,9 +29,10 @@ public final class UserQuery extends DBQuery {
      * @param idArg
      * @param targetChatId
      */
-    public UserQuery(final int idArg, final long targetChatId) {
-        super(idArg);
+    public UserQuery(final int id, final long targetChatId, final int[] groups) {
+        super(id);
         chatId = targetChatId;
+        membership = groups;
     }
 
 
@@ -61,7 +62,7 @@ public final class UserQuery extends DBQuery {
         return membership;
     }
 
-    public void setMembership() {
-
+    public void setMembership(final int[] newMembership) {
+        membership = newMembership;
     }
 }

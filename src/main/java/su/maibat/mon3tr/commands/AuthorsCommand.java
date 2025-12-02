@@ -12,6 +12,6 @@ public final class AuthorsCommand extends InfoCommand {
 
     @Override
     public String getHelp() {
-        return "Show info about bot' authors";
+        return "Show info about bots' authors";
     }
 }

@@ -2,7 +2,7 @@ package su.maibat.mon3tr.commands;
 
 import su.maibat.mon3tr.chat.Chat;
 
-public final class DeadlineUpdateCommand implements Command {
+public final class DeadlineUpdateCommand /*implements Command*/ {
 
     public String getName() {
         return "update";

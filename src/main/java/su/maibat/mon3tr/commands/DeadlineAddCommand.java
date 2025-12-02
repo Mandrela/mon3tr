@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
 
-public final class DeadlineAddCommand implements Command {
+public final class DeadlineAddCommand /*implements Command*/ {
 
     private final DataBaseLinker db;
 
