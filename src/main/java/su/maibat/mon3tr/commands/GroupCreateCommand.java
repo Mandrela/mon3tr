@@ -7,10 +7,10 @@ import su.maibat.mon3tr.db.SQLiteLinker;
 
 import java.util.concurrent.BlockingQueue;
 
-public class CreateGroupCommand implements Command{
+public class GroupCreateCommand implements Command{
 
     private final SQLiteLinker db;
-    public CreateGroupCommand(final SQLiteLinker linker) {
+    public GroupCreateCommand(final SQLiteLinker linker) {
         this.db = linker;
     }
 
