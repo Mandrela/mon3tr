@@ -58,7 +58,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                 return null;
             }
 
-            NumberedString answer = new NumberedString(userId, printTable(queryList));
+            NumberedString answer = new NumberedString(userId, super.printTable(queryList));
             responseQueue.add(answer);
 
             String[] idList = new String[queryList.length];
