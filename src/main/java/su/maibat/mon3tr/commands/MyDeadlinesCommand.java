@@ -39,8 +39,6 @@ public class MyDeadlinesCommand implements Command {
 
     public State execute(int userId, String[] args, State currentState,
                         BlockingQueue<NumberedString> responseQueue) throws CommandException {
-
-
         try {
             DeadlineQuery[] queryList = db.getDeadlinesForUser(userId);
             if (queryList.length == 0) {

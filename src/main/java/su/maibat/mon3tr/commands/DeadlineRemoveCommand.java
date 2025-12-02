@@ -75,8 +75,19 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
     private State selectIndex(final int userId, final String[] args, final State currentState,
                               final BlockingQueue<NumberedString> responseQueue) {
         if (isValid(args[0], currentState.getMemory().length)) {
-            int removeId = Integer.parseInt(args[0]) - 1;
-            return deleteDeadline(userId, removeId, currentState, responseQueue);
+            try {
+                int removeId = Integer.parseInt(args[0]) - 1;
+
+                int removeQueryId = Integer.parseInt(currentState.getMemory()[removeId]);
+                db.getUserById(userId).setLimit(db.getUserById(userId).getLimit() + 1);
+                db.removeDeadline(removeQueryId);
+
+                NumberedString answer = new NumberedString(userId, "You have closed this gestalt!!!");
+                responseQueue.add(answer);
+                return null;
+            } catch (UserNotFound unf) {
+                return currentState;
+            }
         } else {
             NumberedString answer = new NumberedString(userId,
                     "Please enter a valid deadline id (number)");
@@ -86,20 +97,6 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
         }
     }
 
-    private State deleteDeadline(final int userId, final int arg, final State currentState,
-                                 final BlockingQueue<NumberedString> responseQueue){
-        try {
-            int removeQueryId = Integer.parseInt(currentState.getMemory()[arg]);
-            db.getUserById(userId).setLimit(db.getUserById(userId).getLimit() + 1);
-            db.removeDeadline(removeQueryId);
-
-            NumberedString answer = new NumberedString(userId, "You have closed this gestalt!!!");
-            responseQueue.add(answer);
-            return null;
-        } catch (UserNotFound unf) {
-            return currentState;
-        }
-    }
 
     private boolean isValid(final String arg, final int maxValue) {
         //Не число
