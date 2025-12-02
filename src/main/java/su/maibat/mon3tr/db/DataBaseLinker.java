@@ -23,9 +23,12 @@ public interface DataBaseLinker {
      */
     void updateUser(UserQuery inputQuery) throws MalformedQuery, LinkerException;
 
+    int getUserIdByChatId(long chatId) throws UserNotFound, LinkerException;
+    long getChatIdByUserId(int id) throws UserNotFound, LinkerException;
     UserQuery getUserById(int id) throws UserNotFound, LinkerException;
     UserQuery getUserByChatId(long chatId) throws UserNotFound, LinkerException;
     UserQuery[] getAllUsers() throws LinkerException;
+
 
     // Deadline
     /**

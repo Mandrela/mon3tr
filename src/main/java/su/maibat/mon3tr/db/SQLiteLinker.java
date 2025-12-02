@@ -490,4 +490,12 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             throws GroupNotFound, LinkerException {
         return new DeadlineQuery[0];
     }
+
+    public long getChatIdByUserId(final int id) throws UserNotFound, LinkerException {
+        return 0L;
+    }
+
+    public int getUserIdByChatId(final long chatId) throws UserNotFound, LinkerException {
+        return 0;
+    }
 }
