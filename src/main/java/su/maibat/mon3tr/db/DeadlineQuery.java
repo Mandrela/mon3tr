@@ -24,23 +24,19 @@ public final class DeadlineQuery extends DBQuery {
     }
 
     /**
-     * @param idArg
+     * @param idArg lol.
      * @param deadlineName Display name of the deadline
      * @param burnAtTime Time at wich deadline will be burned
      * @param triggerOffset Relative to burnAtTime. Deadlines between burnAtTime and offset are
      * considered burning
      * @param ownerUserId Id of user to notify
      * @param isNotifiedAbout Flag set if this deadline was notified about
-     * @param state
+     * @param currentState kek.
+     * @param groups kek.
      */
     public DeadlineQuery(final int idArg, final String deadlineName, final long burnAtTime,
-<<<<<<< HEAD
             final long triggerOffset, final int ownerUserId, final int[] groups,
             final boolean isNotifiedAbout, final int currentState) {
-=======
-            final long triggerOffset, final int ownerUserId, final boolean isNotifiedAbout,
-            final int stateArg) {
->>>>>>> feature-7
         super(idArg);
         name = deadlineName;
         expireTime = burnAtTime;
@@ -48,11 +44,7 @@ public final class DeadlineQuery extends DBQuery {
         ownerId = ownerUserId;
         assignedGroups = groups;
         notified = isNotifiedAbout;
-<<<<<<< HEAD
         state = currentState;
-=======
-        state = stateArg;
->>>>>>> feature-7
     }
 
     public String getName() {

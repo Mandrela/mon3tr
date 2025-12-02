@@ -31,7 +31,7 @@ public final class State {
         return memory;
     }
 
-    public void setMemory(String[] newMemory) {
+    public void setMemory(final String[] newMemory) {
         memory = newMemory;
     }
 

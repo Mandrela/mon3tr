@@ -1,6 +1,6 @@
 package su.maibat.mon3tr.db;
 
-public class GroupQuery extends DBQuery {
+public final class GroupQuery extends DBQuery {
     private String name;
     private int ownerId;
     private String token;
@@ -28,7 +28,7 @@ public class GroupQuery extends DBQuery {
         return name;
     }
 
-    public void setName(String newName) {
+    public void setName(final String newName) {
         name = newName;
     }
 

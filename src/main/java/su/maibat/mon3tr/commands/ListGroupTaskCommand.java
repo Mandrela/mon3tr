@@ -19,15 +19,29 @@ public class ListGroupTaskCommand implements Command {
         this.db = linker;
     }
 
+    /**
+     * @return kek.
+     */
     public String getName() {
         return "listGroupTask";
     }
+
+    /**
+     * @return kek.
+     */
     public String getHelp() {
         return "This command show tasks of some group";
     }
 
-    public State execute(int userId, String[] args, State currentState,
-                         BlockingQueue<NumberedString> responseQueue) throws CommandException {
+    /**
+     * @param userId kek.
+     * @param args kek.
+     * @param currentState kek.
+     * @param responseQueue kek.
+     * @return  kek.
+     */
+    public State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
         if (currentState == null) {
             return (new State(0, new String[]{}, this));
         }
@@ -44,8 +58,16 @@ public class ListGroupTaskCommand implements Command {
         }
     }
 
-    protected State showGroups(int userId, String[] args, State currentState,
-                             BlockingQueue<NumberedString> responseQueue) {
+
+    /**
+     * @param userId
+     * @param args
+     * @param currentState
+     * @param responseQueue
+     * @return kek
+     */
+    protected State showGroups(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         try {
             GroupQuery[] groupList = db.getOwnedGroups(userId);
             if (groupList.length == 0) {
@@ -71,14 +93,21 @@ public class ListGroupTaskCommand implements Command {
     }
 
 
-    protected State selectGroup(int userId, String[] args, State currentState,
-                              BlockingQueue<NumberedString> responseQueue) {
+    /**
+     * @param userId
+     * @param args
+     * @param currentState
+     * @param responseQueue
+     * @return kek
+     */
+    protected State selectGroup(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         if (args.length != 0) {
             if (isValid(args[0], currentState.getMemory().length)) {
                 int reqId = Integer.parseInt(args[0]) - 1;
                 String reqGroup = currentState.getMemory()[reqId];
                 currentState.setMemory(new String[]{reqGroup});
-                return showDeadlines(userId, args,currentState, responseQueue);
+                return showDeadlines(userId, args, currentState, responseQueue);
             } else {
                 NumberedString answer = new NumberedString(userId, "Please enter a"
                         + " valid group id (number)");
@@ -94,8 +123,10 @@ public class ListGroupTaskCommand implements Command {
             return currentState;
         }
     }
-    private State showDeadlines(int userId,String[] args, State currentState,
-                                BlockingQueue<NumberedString> responseQueue) {
+
+
+    private State showDeadlines(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         try {
             int groupId = Integer.parseInt(currentState.getMemory()[0]);
 
@@ -125,6 +156,10 @@ public class ListGroupTaskCommand implements Command {
     }
 
 
+    /**
+     * @param queryList
+     * @return kek
+     */
     protected final String printDeadlineTable(final DeadlineQuery[] queryList) {
         String answer = "";
         String answerFragment = "";
@@ -145,7 +180,7 @@ public class ListGroupTaskCommand implements Command {
         return answer;
     }
 
-    private String printGroupTable(GroupQuery[] groupList) {
+    private String printGroupTable(final GroupQuery[] groupList) {
         String answer = "Your own groups: \n\n";
         for (int i = 0; i < groupList.length; i++) {
             answer = answer.concat((i + 1) + " : " + groupList[i].getName());
@@ -153,6 +188,11 @@ public class ListGroupTaskCommand implements Command {
         return answer;
     }
 
+    /**
+     * @param arg
+     * @param maxValue
+     * @return kek
+     */
     protected boolean isValid(final String arg, final int maxValue) {
         //Не число
         //Больше предела

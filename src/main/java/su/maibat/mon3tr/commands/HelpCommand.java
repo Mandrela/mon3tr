@@ -51,7 +51,7 @@ public final class HelpCommand implements StatelessCommand {
             answer += "\nType help <command> to see information about specific command";
         } else {
             answer += args[0] + ":\n";
-            Command command = commands.get(args[0]); 
+            Command command = commands.get(args[0]);
             if (command != null) {
                 answer += command.getHelp();
             } else {

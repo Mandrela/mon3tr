@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.WeakHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.BotSession;
@@ -19,8 +18,16 @@ import su.maibat.mon3tr.commands.AuthorsCommand;
 import su.maibat.mon3tr.commands.Command;
 import su.maibat.mon3tr.commands.DeadlineAddCommand;
 import su.maibat.mon3tr.commands.DeadlineRemoveCommand;
+import su.maibat.mon3tr.commands.GroupCreateCommand;
+import su.maibat.mon3tr.commands.GroupDeleteCommand;
+import su.maibat.mon3tr.commands.GroupJoinCommand;
 import su.maibat.mon3tr.commands.HelpCommand;
+import su.maibat.mon3tr.commands.ListGroupTaskCommand;
+import su.maibat.mon3tr.commands.MoveToGroupCommand;
 import su.maibat.mon3tr.commands.MyDeadlinesCommand;
+import su.maibat.mon3tr.commands.OwnedGroupsCommand;
+import su.maibat.mon3tr.commands.RegisterCommand;
+import su.maibat.mon3tr.commands.RemoveFromGroupCommand;
 import su.maibat.mon3tr.commands.UpdateOffsetCommand;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
@@ -35,9 +42,6 @@ public final class Main {
     public static final String WARNING = "\u001b[1;97m[\u001b[1;33mWARN\u001b[1;97m]\u001b[0m ";
     public static final String ERROR = "\u001b[1;97m[\u001b[0;31mERR\u001b[1;97m]\u001b[0m ";
     public static final String CRITICAL = "\u001b[1;97m[\u001b[1;91mCRIT\u001b[1;97m]\u001b[0m ";
-    public static final int MINUTE_TIME_SEC = 60;
-    public static final int SEC_TO_MILLIS_FACTOR = 1000;
-    public static final int DAY_SEC = 86400;
 
     private static final int DEFAULT_QUEUE_CAPACITY = 8;
 
@@ -92,6 +96,9 @@ public final class Main {
 
 
         // Commands
+        WeakHashMap<Integer, Long> uidMap = new WeakHashMap<>();
+        RegisterCommand register = new RegisterCommand(dataBase, uidMap);
+
         HelpCommand help = new HelpCommand();
 
         AuthorsCommand authors = new AuthorsCommand();
@@ -105,8 +112,22 @@ public final class Main {
         DeadlineRemoveCommand deadlineRemoveCommand = new DeadlineRemoveCommand(dataBase);
         UpdateOffsetCommand updateOffsetCommand = new UpdateOffsetCommand(dataBase);
 
-        Command[] commands = {help, new AboutCommand(), authors, deadlineAddCommand,
-                deadlineGetCommand, deadlineRemoveCommand, updateOffsetCommand}; // Commands
+        GroupCreateCommand groupCreateCommand = new GroupCreateCommand(dataBase);
+        OwnedGroupsCommand ownedGroupsCommand = new OwnedGroupsCommand(dataBase);
+        GroupDeleteCommand groupDeleteCommand = new GroupDeleteCommand(dataBase);
+
+        GroupJoinCommand groupJoinCommand = new GroupJoinCommand(dataBase);
+
+        MoveToGroupCommand moveToGroupCommand = new MoveToGroupCommand(dataBase);
+        ListGroupTaskCommand listGroupTaskCommand = new ListGroupTaskCommand(dataBase);
+        RemoveFromGroupCommand removeFromGroupCommand = new RemoveFromGroupCommand(dataBase);
+
+
+        Command[] commands = {help, register, new AboutCommand(), authors,
+                deadlineAddCommand, deadlineGetCommand, deadlineRemoveCommand,
+                updateOffsetCommand, groupCreateCommand, ownedGroupsCommand,
+                groupDeleteCommand, groupJoinCommand, moveToGroupCommand,
+                listGroupTaskCommand, removeFromGroupCommand};
 
         LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
         for (Command command : commands) {
@@ -117,9 +138,9 @@ public final class Main {
 
         // Workers
         BlockingQueue<NumberedString> queue = new ArrayBlockingQueue<NumberedString>(queueCapacity);
-        WeakHashMap<Integer, Long> uidMap = new WeakHashMap<>();
 
-        BotBackend bot = new Bot(dataBase, help, help, commandMap, queue);
+
+        BotBackend bot = new Bot(dataBase, help, register, commandMap, queue);
 
         Responder responder = new Responder(telegramClient, queue, dataBase, uidMap);
         Thread responderThread = new Thread(responder);
@@ -148,12 +169,11 @@ public final class Main {
             try {
                 dataBase.close();
                 botsApplication.close();
+                responderThread.join();
             } catch (Exception e) {
                 System.out.println(ERROR + "Couldn't release resources properly:\n"
                 + e.getMessage());
             }
-
-            responderThread.join();
             System.out.println(INFO + "Terminated, bye!");
         }
     }

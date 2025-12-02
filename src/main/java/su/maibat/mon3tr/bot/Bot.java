@@ -82,8 +82,7 @@ public final class Bot implements BotBackend {
                 if (currentState != null) {
                     assert currentState.getOwner() != null : "Malformed state in map (null owner)";
                     executeCommand(currentState.getOwner(), userId, tokens, currentState);
-                }
-                else {
+                } else {
                     defaultCommand.executeWithoutState(userId, tokens, responseQueue);
                 }
             }

@@ -25,28 +25,28 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
     private static final String USER_SELECT_BY_ID = "SELECT* FROM users WHERE id = ? AND "
         + "active = 1";
-    private static final String USER_SELECT_BY_CHAT_ID = "SELECT* FROM users WHERE chatID = ?";
+    private static final String USER_SELECT_BY_CHAT_ID = "SELECT* FROM users WHERE chatId = ?";
     private static final String USER_SELECT_ALL = "SELECT* FROM users";
     private static final String USER_INSERT = "INSERT INTO users (chatId) VALUES (?)";
-    private static final String USER_UPDATE = "UPDATE users SET chatId = ?, limit = ?, "
+    private static final String USER_UPDATE = "UPDATE users SET chatId = ?, dlimit = ?, "
         + "hpsfwn = ?, strat = ?, news = ?, leader = ?, burned = ?, completed = ?, "
         + "name = ?, groups = ? WHERE id = ?";
     private static final String USER_UPDATE_ACTIVE = "UPDATE users SET active = 0 WHERE id = ?";
 
 
     private static final String DEADLINE_SELECT_BY_ID = "SELECT* FROM deadlines WHERE id = ? AND "
-        + "active = 1";
+        + "state != -1";
     private static final String DEADLINE_SELECT_BY_USER_ID = "SELECT* FROM deadlines WHERE "
-        + "userId = ? AND active = 1";
+        + "userId = ? AND state != -1";
     private static final String DEADLINE_SELECT_FOR_GROUP = "SELECT* FROM deadlines WHERE "
-        + "instr(groups, \':?:\') > 0";
-    private static final String DEADLINE_SELECT_ALL = "SELECT* FROM deadlines WHERE active = 1";
+        + "instr(groups, \':?:\') > 0 AND state != -1";
+    private static final String DEADLINE_SELECT_ALL = "SELECT* FROM deadlines WHERE state != -1";
     private static final String DEADLINE_INSERT = "INSERT INTO deadlines (name, burns, "
         + "offsetValue, userId) VALUES (?, ?, ?, ?)";
     private static final String DEADLINE_UPDATE = "UPDATE deadlines SET name = ?, burns = ?, "
         + "offsetValue = ?, userId = ?, groups = ?, notified = ?, state = ?, notifCounter = ? "
         + " WHERE id = ?";
-    private static final String DEADLINE_UPDATE_ACTIVE = "UPDATE deadlines SET active = 0 "
+    private static final String DEADLINE_UPDATE_ACTIVE = "UPDATE deadlines SET state = -1 "
         + "WHERE id = ?";
 
 
@@ -54,9 +54,9 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         + "ocflag = 0";
     private static final String GROUP_SELECT_BY_OWNER_ID = "SELECT* FROM groups WHERE owner = ?";
     private static final String GROUP_SELECT_BY_TOKEN = "SELECT* FROM groups WHERE token = ?";
-    private static final String GROUP_INSERT = "INSERT INTO groups (name, uid) VALUES "
+    private static final String GROUP_INSERT = "INSERT INTO groups (name, owner) VALUES "
         + "(?, ?)";
-    private static final String GROUP_UPDATE = "UPDATE groups SET name = ?, owner = ?, token = ?, "
+    private static final String GROUP_UPDATE = "UPDATE groups SET name = ?, owner = ?, token = ? "
         + "WHERE id = ?";
     private static final String GROUP_UPDATE_ACTIVE = "UPDATE groups SET ocflag = -1 WHERE "
         + "id = ?";
@@ -122,7 +122,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 + " DEFAULT 0);";
             String create_users = "CREATE TABLE IF NOT EXISTS users "
                 + "(id INTEGER PRIMARY KEY AUTOINCREMENT, chatId INTEGER NOT NULL, "
-                + "limit INTEGER DEFAULT 32, hpsfwn INTEGER DEFAULT 0, "
+                + "dlimit INTEGER DEFAULT 32, hpsfwn INTEGER DEFAULT 0, "
                 + "strat INTEGER DEFAULT 0, news INTEGER DEFAULT 1, leader INTEGER DEFAULT 0, "
                 + "burned INTEGER DEFAULT 0, completed INTEGER DEFAULT 0, name TEXT, groups "
                 + "TEXT, active INTEGER DEFAULT 1);";
@@ -161,15 +161,21 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
 
-    public static String arrayToString(int[] array) {
+    public static String arrayToString(final int[] array) {
+        if (array == null) {
+            return "";
+        }
         String string = ":";
-		for (int i : array) {
+        for (int i : array) {
             string = string + String.valueOf(i) + ":";
         }
         return string;
-	}
+    }
 
-    public static int[] stringToArray(String string) {
+    public static int[] stringToArray(final String string) {
+        if (string == null) {
+            return new int[0];
+        }
         int[] array = new int[string.length()];
         int i = 0;
         for (String number : string.split(":")) {
@@ -294,7 +300,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
 
-	/**
+    /**
      * @param result Result set, assuming not toched
      * @return UserQuery parsed from result, @throws UserNotFound if result is empty
      */
@@ -492,7 +498,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             return deadlineQuerys.toArray(DeadlineQuery[]::new);
         } catch (SQLException e) {
             throw new LinkerException(collectInfo("getDeadlinesForUser") + "User id: " + userId
-                + ": "+ e.getMessage());
+                + ": " + e.getMessage());
         }
     }
 
@@ -510,7 +516,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                     }
                 }
 
-                while(result.next()) {
+                while (result.next()) {
                     deadlineQuerys.add(parseDeadlineFromResult(result));
                 }
             }
@@ -603,7 +609,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                     }
                 }
 
-                while(result.next()) {
+                while (result.next()) {
                     groupQuerys.add(parseGroupFromResult(result));
                 }
             }
@@ -624,7 +630,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 }
             }
             java.util.ArrayList<GroupQuery> groupQuerys = new java.util.ArrayList<>();
-            while(result.next()) {
+            while (result.next()) {
                 groupQuerys.add(parseGroupFromResult(result));
             }
 

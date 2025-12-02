@@ -10,8 +10,7 @@ import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 
 import java.util.concurrent.BlockingQueue;
 
-public class RemoveFromGroupCommand extends ListGroupTaskCommand {
-    private static final int OFFSET = 1000;
+public final class RemoveFromGroupCommand extends ListGroupTaskCommand {
     private final SQLiteLinker db;
     public RemoveFromGroupCommand(final SQLiteLinker linker) {
         super(linker);
@@ -25,8 +24,8 @@ public class RemoveFromGroupCommand extends ListGroupTaskCommand {
         return "This command unlink your deadline from group";
     }
 
-    public State execute(int userId, String[] args, State currentState,
-                         BlockingQueue<NumberedString> responseQueue) throws CommandException {
+    public State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
         if (currentState == null) {
             return (new State(0, new String[]{}, this));
         }
@@ -43,8 +42,8 @@ public class RemoveFromGroupCommand extends ListGroupTaskCommand {
         }
     }
 
-    private State showDeadlines(int userId, String[] args, State currentState,
-                                BlockingQueue<NumberedString> responseQueue) {
+    private State showDeadlines(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         try {
             int groupId = Integer.parseInt(currentState.getMemory()[0]);
 
@@ -74,8 +73,8 @@ public class RemoveFromGroupCommand extends ListGroupTaskCommand {
         }
     }
 
-    private State selectDeadlineIndex (int userId, String[] args, State currentState,
-                                       BlockingQueue<NumberedString> responseQueue) {
+    private State selectDeadlineIndex(final int userId, final String[] args,
+            final State currentState, final BlockingQueue<NumberedString> responseQueue) {
         if (super.isValid(args[0], currentState.getMemory().length)) {
             try {
                 int deadlineId = Integer.parseInt(args[0]);
@@ -100,14 +99,14 @@ public class RemoveFromGroupCommand extends ListGroupTaskCommand {
                 responseQueue.add(answer);
                 return null;
             } catch (DeadlineNotFound | MalformedQuery dnf) {
-                currentState.setStateId(4);
+                currentState.setStateId(2 + 2);
                 return currentState;
             }
         } else {
             NumberedString answer = new NumberedString(userId,
                     "Please enter a valid deadline id (number)");
             responseQueue.add(answer);
-            currentState.setStateId(3);
+            currentState.setStateId(2 + 1);
             return currentState;
         }
     }

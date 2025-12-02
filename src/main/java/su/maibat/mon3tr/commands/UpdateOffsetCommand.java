@@ -32,7 +32,7 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
                                final BlockingQueue<NumberedString> responseQueue)
             throws CommandException {
         if (currentState == null) {
-            return (new State(0, new String[]{}, this));
+            return new State(0, new String[]{}, (Command) this);
         }
 
         switch (currentState.getStateId()) {
@@ -56,7 +56,8 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
             try {
                 DeadlineQuery[] queryList = db.getDeadlinesForUser(userId);
                 if (queryList.length == 0) {
-                    NumberedString answer = new NumberedString(userId, "You have not any deadlines");
+                    NumberedString answer = new NumberedString(userId,
+                        "You have not any deadlines");
                     responseQueue.add(answer);
                     return null;
                 }
@@ -97,7 +98,7 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
         }
 
         private State selectOffset(final int userId, final String arg, final State currentState,
-        final BlockingQueue<NumberedString> responseQueue){
+        final BlockingQueue<NumberedString> responseQueue) {
             if (isValidOffset(arg)) {
                 try {
                     int updateId = Integer.parseInt(currentState.getMemory()[0]);

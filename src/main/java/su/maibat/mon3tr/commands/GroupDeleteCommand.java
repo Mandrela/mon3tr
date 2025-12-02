@@ -4,11 +4,11 @@ import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.GroupQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
-
+import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 import java.util.concurrent.BlockingQueue;
 
-public class GroupDeleteCommand extends OwnedGroupsCommand {
+public final class GroupDeleteCommand extends OwnedGroupsCommand {
     private final SQLiteLinker db;
     public GroupDeleteCommand(final SQLiteLinker linker) {
         super(linker);
@@ -22,8 +22,8 @@ public class GroupDeleteCommand extends OwnedGroupsCommand {
         return "This command destroy one of yours troop";
     }
 
-    public State execute(int userId, String[] args, State currentState,
-                         BlockingQueue<NumberedString> responseQueue) throws CommandException {
+    public State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
         if (currentState == null) {
             return (new State(0, new String[]{}, this));
         }
@@ -42,9 +42,13 @@ public class GroupDeleteCommand extends OwnedGroupsCommand {
 
 
     private State groupTable(final int userId, final String[] args, final State currentState,
-    final BlockingQueue<NumberedString> responseQueue) {
-
-        GroupQuery[] queryList = db.getOwnedGroups(userId);
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
+        GroupQuery[] queryList;
+        try {
+            queryList = db.getOwnedGroups(userId);
+        } catch (UserNotFound e) {
+            throw new CommandException("User not found");
+        }
         if (queryList.length == 0) {
             NumberedString answer = new NumberedString(userId, "You have not any groups");
             responseQueue.add(answer);
@@ -65,7 +69,7 @@ public class GroupDeleteCommand extends OwnedGroupsCommand {
     }
 
     private State selectIndex(final int userId, final String[] args, final State currentState,
-    final BlockingQueue<NumberedString> responseQueue) {
+            final BlockingQueue<NumberedString> responseQueue) {
         if (isValid(args[0], currentState.getMemory().length)) {
 
             int removeId = Integer.parseInt(args[0]) - 1;
@@ -99,7 +103,3 @@ public class GroupDeleteCommand extends OwnedGroupsCommand {
         }
     }
 }
-
-
-
-

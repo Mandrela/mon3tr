@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 
-public class MoveToGroupCommand implements Command {
+public final class MoveToGroupCommand implements Command {
     private static final int OFFSET = 1000;
     private final SQLiteLinker db;
     public MoveToGroupCommand(final SQLiteLinker linker) {
@@ -27,8 +27,8 @@ public class MoveToGroupCommand implements Command {
         return "This command link your deadline to group";
     }
 
-    public State execute(int userId, String[] args, State currentState,
-                         BlockingQueue<NumberedString> responseQueue) throws CommandException {
+    public State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
         if (currentState == null) {
             return (new State(0, new String[]{}, this));
         }
@@ -39,7 +39,7 @@ public class MoveToGroupCommand implements Command {
                 return selectGroup(userId, args, currentState, responseQueue);
             case(2):
                 return showDeadlines(userId, args, currentState, responseQueue);
-            case (3):
+            case (2 + 1):
                 return selectDeadlineIndex(userId, args, currentState, responseQueue);
             default:
                 System.out.println("Out state");
@@ -49,8 +49,8 @@ public class MoveToGroupCommand implements Command {
         }
     }
 
-    private State showGroups(int userId, String[] args, State currentState,
-                             BlockingQueue<NumberedString> responseQueue) {
+    private State showGroups(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         try {
             GroupQuery[] groupList = db.getOwnedGroups(userId);
             if (groupList.length == 0) {
@@ -76,8 +76,8 @@ public class MoveToGroupCommand implements Command {
     }
 
 
-    private State selectGroup(int userId, String[] args, State currentState,
-                              BlockingQueue<NumberedString> responseQueue) {
+    private State selectGroup(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         if (args.length != 0) {
             if (isValid(args[0], currentState.getMemory().length)) {
                 int reqId = Integer.parseInt(args[0]) - 1;
@@ -100,8 +100,8 @@ public class MoveToGroupCommand implements Command {
         }
     }
 
-    private State showDeadlines(int userId, String[] args, State currentState,
-                                BlockingQueue<NumberedString> responseQueue) {
+    private State showDeadlines(final int userId, final String[] args, final State currentState,
+                                final BlockingQueue<NumberedString> responseQueue) {
         try {
             DeadlineQuery[] queryList = db.getDeadlinesForUser(userId);
             if (queryList.length == 0) {
@@ -129,8 +129,8 @@ public class MoveToGroupCommand implements Command {
     }
 
 
-    private State selectDeadlineIndex (int userId, String[] args, State currentState,
-                                       BlockingQueue<NumberedString> responseQueue) {
+    private State selectDeadlineIndex(final int userId, final String[] args,
+            final State currentState, final BlockingQueue<NumberedString> responseQueue) {
         if (isValid(args[0], currentState.getMemory().length)) {
             try {
                 int deadlineId = Integer.parseInt(args[0]);
@@ -142,7 +142,7 @@ public class MoveToGroupCommand implements Command {
 
                 int[] oldGroups = deadline.getAssignedGroups();
                 int[] newGroups = new int[oldGroups.length + 1];
-                System.arraycopy(oldGroups,0,newGroups,0, oldGroups.length);
+                System.arraycopy(oldGroups, 0, newGroups, 0, oldGroups.length);
                 newGroups[oldGroups.length] = groupQueryId;
 
                 deadline.setAssignedGroups(newGroups);
@@ -152,20 +152,20 @@ public class MoveToGroupCommand implements Command {
                 responseQueue.add(answer);
                 return null;
             } catch (DeadlineNotFound | MalformedQuery dnf) {
-                currentState.setStateId(4);
+                currentState.setStateId(2 + 2);
                 return currentState;
             }
         } else {
             NumberedString answer = new NumberedString(userId,
                     "Please enter a valid deadline id (number)");
             responseQueue.add(answer);
-            currentState.setStateId(3);
+            currentState.setStateId(2 + 1);
             return currentState;
         }
     }
 
 
-    private String printGroupTable(GroupQuery[] groupList) {
+    private String printGroupTable(final GroupQuery[] groupList) {
         String answer = "Your own groups: \n\n";
         for (int i = 0; i < groupList.length; i++) {
             answer = answer.concat((i + 1) + " : " + groupList[i].getName());

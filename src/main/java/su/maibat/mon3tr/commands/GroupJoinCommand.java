@@ -6,7 +6,7 @@ import su.maibat.mon3tr.db.SQLiteLinker;
 
 import java.util.concurrent.BlockingQueue;
 
-public class GroupJoinCommand implements Command{
+public final class GroupJoinCommand implements Command {
 
     private final SQLiteLinker db;
 
@@ -22,8 +22,8 @@ public class GroupJoinCommand implements Command{
         return "You can join to other's groups by this command";
     }
 
-    public State execute(int userId, String[] args, State currentState,
-                         BlockingQueue<NumberedString> responseQueue) throws CommandException {
+    public State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
         if (currentState == null) {
             return (new State(0, new String[]{}, this));
         }
@@ -32,10 +32,10 @@ public class GroupJoinCommand implements Command{
             responseQueue.add(answer);
             return currentState;
         }
-
-
+        return null;
     }
-    private boolean isCorrectToken(String token) {
+
+    private boolean isCorrectToken(final String token) {
         return true;
     }
 }

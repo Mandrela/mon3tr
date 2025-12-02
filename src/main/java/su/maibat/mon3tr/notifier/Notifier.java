@@ -2,10 +2,10 @@ package su.maibat.mon3tr.notifier;
 
 import static su.maibat.mon3tr.Main.DEBUG;
 import static su.maibat.mon3tr.Main.ERROR;
-import static su.maibat.mon3tr.Main.SEC_TO_MILLIS_FACTOR;
 
 import java.util.concurrent.BlockingQueue;
 
+import su.maibat.mon3tr.DateUtils;
 import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
@@ -13,12 +13,11 @@ import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 
 
 public final class Notifier implements Runnable {
-    private static final int WAIT_TIME_SEC = 1 * 60;
-
     private final DataBaseLinker db;
     private final BlockingQueue<NumberedString> queue;
 
-    public Notifier(final DataBaseLinker dataBase, final BlockingQueue<NumberedString> responseQueue) {
+    public Notifier(final DataBaseLinker dataBase,
+            final BlockingQueue<NumberedString> responseQueue) {
         db = dataBase;
         queue = responseQueue;
     }
@@ -47,7 +46,7 @@ public final class Notifier implements Runnable {
         while (true) {
             try {
                 runOnce();
-                Thread.sleep(WAIT_TIME_SEC * SEC_TO_MILLIS_FACTOR);
+                Thread.sleep(DateUtils.SECONDS_IN_30_MINUTES);
             } catch (InterruptedException e) {
                 return;
             } catch (Exception e) {

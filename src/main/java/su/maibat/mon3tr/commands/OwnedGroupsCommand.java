@@ -14,15 +14,29 @@ public class OwnedGroupsCommand implements Command {
         this.db = linker;
     }
 
+    /** This is javadoc.
+     * @return kek.
+    */
     public String getName() {
         return "listOwnedGroups";
     }
+
+    /** This is javadoc.
+     * @return kek.
+    */
     public String getHelp() {
         return "This command shows your own groups";
     }
 
-    public State execute(int userId, String[] args, State currentState,
-                         BlockingQueue<NumberedString> responseQueue) throws CommandException {
+    /**
+     * @param userId kek.
+     * @param args kek.
+     * @param currentState kek.
+     * @param responseQueue kek.
+     * @return  kek.
+     */
+    public State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
         try {
             GroupQuery[] groupList = db.getOwnedGroups(userId);
             if (groupList.length == 0) {
@@ -40,7 +54,11 @@ public class OwnedGroupsCommand implements Command {
         }
     }
 
-    protected final String printTable(GroupQuery[] groupList) {
+    /**
+     * @param groupList kek.
+     * @return kek.
+    */
+    protected final String printTable(final GroupQuery[] groupList) {
         String answer = "Your own groups: \n\n";
         for (int i = 0; i < groupList.length; i++) {
             answer = answer.concat((i + 1) + " : " + groupList[i].getName());

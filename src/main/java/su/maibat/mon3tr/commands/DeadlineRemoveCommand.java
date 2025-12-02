@@ -32,7 +32,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                                final BlockingQueue<NumberedString> responseQueue)
             throws CommandException {
         if (currentState == null) {
-            return (new State(0, new String[]{}, this));
+            return (new State(0, new String[]{}, (Command) this));
         }
         switch (currentState.getStateId()) {
             case(0):
@@ -85,7 +85,8 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
                 db.getUserById(userId).setLimit(db.getUserById(userId).getLimit() + 1);
                 db.removeDeadline(removeQueryId);
 
-                NumberedString answer = new NumberedString(userId, "You have closed this gestalt!!!");
+                NumberedString answer = new NumberedString(userId,
+                    "You have closed this gestalt!!!");
                 responseQueue.add(answer);
                 return null;
             } catch (UserNotFound unf) {

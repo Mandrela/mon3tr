@@ -67,12 +67,8 @@ public class Gate implements LongPollingSingleThreadUpdateConsumer {
      * @return Actual command to bot.
      */
     private String mutate(final String string) {
-<<<<<<< HEAD
         if (bot.getCommandPrefix() != COMMAND_PREFIX && string.length() > 1
                 && string.charAt(0) == COMMAND_PREFIX) {
-=======
-        if (string.length() > 1 && string.charAt(0) == COMMAND_PREFIX) {
->>>>>>> feature-7
             return bot.getCommandPrefix() + string.substring(1);
         }
         return string;

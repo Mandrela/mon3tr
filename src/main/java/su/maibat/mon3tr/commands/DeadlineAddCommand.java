@@ -1,7 +1,6 @@
 package su.maibat.mon3tr.commands;
 
 import su.maibat.mon3tr.NumberedString;
-import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
@@ -20,7 +19,7 @@ import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
 
-public final class DeadlineAddCommand /*implements Command*/ {
+public final class DeadlineAddCommand implements Command {
 
     private final DataBaseLinker db;
 
@@ -42,11 +41,12 @@ public final class DeadlineAddCommand /*implements Command*/ {
             throws CommandException {
         try {
             if (currentState == null) {
-                return new State(0, new String[]{}, this);
+                return new State(0, new String[]{}, (Command) this);
             }
             if (db.getUserById(userId).getLimit() == 0) {
                 NumberedString answer = new NumberedString(userId, "You have used up all your "
-                        + "deadline cells, please close one or more deadlines before add a new one.");
+                        + "deadline cells, please close one or more deadlines before add a new"
+                        + " one.");
                 responseQueue.add(answer);
                 return null;
             }
@@ -76,8 +76,8 @@ public final class DeadlineAddCommand /*implements Command*/ {
         }
     }
 
-    private State nameCheck(int userId, String[] args, State currentState,
-                            BlockingQueue<NumberedString> responseQueue) {
+    private State nameCheck(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         if (isCorrectName(args[0])) {
             currentState.setMemory(new String[]{args[0], ""});
             return dateCheck(userId, args[1], currentState, responseQueue);
@@ -88,8 +88,8 @@ public final class DeadlineAddCommand /*implements Command*/ {
         }
     }
 
-    private State dateCheck(int userId, String arg, State currentState,
-                               BlockingQueue<NumberedString> responseQueue) {
+    private State dateCheck(final int userId, final String arg, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         if (isDate(arg)) {
             String[] outMem = currentState.getMemory();
             outMem[1] = arg;
@@ -103,8 +103,8 @@ public final class DeadlineAddCommand /*implements Command*/ {
 
     }
 
-    private State addDeadline(int userId, State currentState,
-                              BlockingQueue<NumberedString> responseQueue) {
+    private State addDeadline(final int userId, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) {
         try {
             DeadlineQuery inputQuery = new DeadlineQuery();
             String[] stateMemory = currentState.getMemory();

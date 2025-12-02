@@ -7,6 +7,9 @@ public class CommandException extends Exception {
         message = messageArg;
     }
 
+    /**
+     * @return kek
+     */
     @Override
     public String getMessage() {
         return message;

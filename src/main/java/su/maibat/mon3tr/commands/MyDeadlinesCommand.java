@@ -5,16 +5,13 @@ import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 
 import su.maibat.mon3tr.NumberedString;
-import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.DeadlineQuery;
-import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
-import su.maibat.mon3tr.db.exceptions.MalformedQuery;
-import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-public class MyDeadlinesCommand /* implements Command */ {
+
+public class MyDeadlinesCommand implements Command {
     private static final int OFFSET = 1000;
     private final DataBaseLinker db;
 
@@ -37,8 +34,15 @@ public class MyDeadlinesCommand /* implements Command */ {
     }
 
 
-    public State execute(int userId, String[] args, State currentState,
-                        BlockingQueue<NumberedString> responseQueue) throws CommandException {
+    /**
+     * @param userId kek.
+     * @param args kek.
+     * @param currentState kek.
+     * @param responseQueue kek.
+     * @return  kek.
+     */
+    public State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
         try {
             DeadlineQuery[] queryList = db.getDeadlinesForUser(userId);
             if (queryList.length == 0) {

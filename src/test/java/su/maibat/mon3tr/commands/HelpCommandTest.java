@@ -96,7 +96,7 @@ class HelpCommandTest {
     // static Stream<Arguments> helpArgs() {
     //     return Stream.of(
     //         Arguments.of(new String[]{"authors", "about"}, new Boolean[]{true, true}),
-    //         Arguments.of(new String[]{"LOL", "kek", "sabout"}, new Boolean[]{false, false, false}),
+//         Arguments.of(new String[]{"LOL", "kek", "sabout"}, new Boolean[]{false, false, false}),
     //         Arguments.of(new String[]{"kek", "", "help", "about"},
     //                     new Boolean[]{false, false, true, true})
     //     );
