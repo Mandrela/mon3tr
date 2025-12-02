@@ -1,139 +1,118 @@
 package su.maibat.mon3tr.bot;
 
-// import static su.maibat.mon3tr.Main.DEBUG;
+import static su.maibat.mon3tr.Main.ERROR;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+
+import su.maibat.mon3tr.NumberedString;
+import su.maibat.mon3tr.commands.Command;
+import su.maibat.mon3tr.commands.StatelessCommand;
+import su.maibat.mon3tr.commands.State;
+import su.maibat.mon3tr.commands.exceptions.CommandException;
+import su.maibat.mon3tr.db.DataBaseLinker;
 
 
+/** Super cool bot logic (<i>cannot buttons</i>). */
 public final class Bot implements BotBackend {
-    private static final char PREFIX = '/';
+    private static final char COMMAND_PREFIX = '/';
 
+    private final StatelessCommand defaultCommand;
+    private final StatelessCommand registerCommand;
+    private final Map<String, Command> commands;
+    /** Holds State objects for commands. Theoretically can be upgraded to SoftReferenceMap. */
+    private final Map<Integer, State> stateMap = new HashMap<>();
+
+    private final DataBaseLinker db;
+    private final BlockingQueue<NumberedString> responseQueue;
+
+
+    /**
+     * @param dataBase Source of relaxation.
+     * @param defaultCommandArg This command is called whenever dunno what to do.
+     * @param registerCommandArg This command is called whenever unregistered user (see process).
+     * @param commandsMap Map of all available commands. Key represents name of the command by
+     * which it will be called through value reference.
+     * @param responseQueueArg Will put result of the work in this queue.
+     * @throws IllegalArgumentException If one of the arguments is null. Won't tell ya which one
+     * of them though
+     * @see su.maibat.mon3tr.bot.Bot#process(int, String) process
+     */
+    public Bot(final DataBaseLinker dataBase,
+            final StatelessCommand defaultCommandArg, final StatelessCommand registerCommandArg,
+            final Map<String, Command> commandsMap,
+            final BlockingQueue<NumberedString> responseQueueArg
+    ) {
+        if (dataBase == null || defaultCommandArg == null || registerCommandArg == null
+            || commandsMap == null || responseQueueArg == null) {
+            throw new IllegalArgumentException("One of the arguments is null");
+        }
+        db = dataBase;
+        defaultCommand = defaultCommandArg;
+        registerCommand = registerCommandArg;
+        commands = Collections.unmodifiableMap(commandsMap);
+        responseQueue = responseQueueArg;
+    }
+
+
+    /**
+     * Processes commands.
+     * @param userId Integer representation of user. Bot assumes that users with id < 0
+     * are not registered yet without any additional checks in database. Be careful and use
+     * this mechanic only if you aren't drunk.
+     * @param commandString String containing command for execution with args.
+     * @throws BotException Currently not used.
+     */
+    public void process(final int userId, final String commandString) throws BotException {
+        if (userId < 0 || !db.checkUserExists(userId)) { // others
+            registerCommand.executeWithoutState(userId, commandString.split(" "), responseQueue);
+
+        } else { // all legitemate users that do exist in database
+            String[] tokens = commandString.split(" ");
+            if (tokens[0].charAt(0) == COMMAND_PREFIX) {
+
+                executeCommand(commands.getOrDefault(tokens[0].substring(1), defaultCommand),
+                    userId, Arrays.copyOfRange(tokens, 1, tokens.length), null);
+
+            } else {
+                State currentState = stateMap.get(userId);
+                if (currentState != null) {
+                    assert currentState.getOwner() != null : "Malformed state in map (null owner)";
+                    executeCommand(currentState.getOwner(), userId, tokens, currentState);
+                }
+                else {
+                    defaultCommand.executeWithoutState(userId, tokens, responseQueue);
+                }
+            }
+        }
+    }
+
+    /** Safely execute command, made for not repeating.
+     * @param commandToExecute Yes.
+     * @param userId Yes.
+     * @param arguments Yes.
+     * @param currentState Yes. Can be null.
+     */
+    private void executeCommand(final Command commandToExecute, final int userId,
+            final String[] arguments, final State currentState) {
+        try {
+            stateMap.put(userId, commandToExecute.execute(userId, arguments,
+                currentState, responseQueue));
+        } catch (CommandException e) {
+            System.err.println(ERROR + "Error in executable command "
+                + commandToExecute.getName() + " with message: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * @return Returns command identificator.
+     */
     public char getCommandPrefix() {
-        return PREFIX;
+        return COMMAND_PREFIX;
     }
-
-    public void process(final int userId, final String command) throws BotException {
-
-    }
-
-    // public static final String NAME = "mon3tr";
-    // private static final char PREFIX = '/';
-
-    // private static final int THREADS_CORE_POOL_SIZE = 2;
-    // private static final int THREADS_MAX_POOL_SIZE = 8;
-    // private static final int THREADS_QUEUE_SIZE = 2 * THREADS_MAX_POOL_SIZE;
-
-    // private static final long THREADS_IDLE_TIMEOUT = 2;
-    // private static final TimeUnit THREADS_TIME_UNIT = TimeUnit.MINUTES;
-
-
-    // private final BlockingQueue<Runnable> jobQueue = new ArrayBlockingQueue<>(THREADS_QUEUE_SIZE);
-    // private final ConcurrentHashMap<Long, MessageSink> sinkMap = new ConcurrentHashMap<>();
-    // private final TelegramClient telegramClient;
-    // private final Map<String, Command> commands;
-    // private final Command defaultCommand;
-    // private final Executor executor;
-
-    // /**
-    //  * @param token Telegram token -- KEEP SAFE, DO NOT SHARE IT.
-    //  * @param commandsArgument Map were key is a name of a command in bot's interface
-    //  * and value is an instance of Command implementing class.
-    //  * @param defaultCommandArgument The default command which will be executed if incorrect
-    //  * command supplied.
-    //  */
-    // public Bot(final String token, final Map<String, Command> commandsArgument,
-    //             /*final BlockingQueue<Pair<int, String>> responseQueue,*/
-    //             final Command defaultCommandArgument) {
-    //     telegramClient = new OkHttpTelegramClient(token);
-    //     commands = Collections.unmodifiableMap(commandsArgument);
-    //     defaultCommand = defaultCommandArgument;
-    //     executor = new ThreadPoolExecutor(THREADS_CORE_POOL_SIZE, THREADS_MAX_POOL_SIZE,
-    //         THREADS_IDLE_TIMEOUT, THREADS_TIME_UNIT, jobQueue);
-    // }
-
-    // // public Bot(final Map<String, Command> commandsArgument, final BlockingQueue<Pair<int,
-    // // String>> responseQueue,
-    // //     final Command defaultCommandArgument, final Command registerCommandArgument) {
-    // // }
-
-
-    // /**
-    //  * Parses string to array of arguments, where the first argument is a command itself without
-    //  * a prefix.
-    //  * @param textString Input String
-    //  * @return Array of arguments where the first one is a prefix-less command
-    //  */
-    // private static String[] parseCommand(final String textString) {
-    //     if (textString.charAt(0) == PREFIX) {
-    //         String[] result = textString.split(" ");
-    //         result[0] = result[0].substring(1);
-    //         return result;
-    //     }
-    //     return null;
-    // }
-
-    // public TelegramClient getTelegramClient() {
-    //     return telegramClient;
-    // }
-
-    // @Override
-    // public void consume(final Update update) {
-    //     Message message = update.getMessage();
-
-    //     if (message != null && message.hasText()) {
-    //         Long chatId = message.getChatId();
-    //         String[] arguments = parseCommand(message.getText());
-
-    //         if (arguments != null) {
-    //             System.out.println(DEBUG + "Initializing new command");
-    //             sinkMap.computeIfPresent(chatId,
-    //                 (key, value) -> {
-    //                     value.interrupt(); return null;
-    //                 });
-
-    //             TelegramChat telegramChat = new TelegramChat(chatId, telegramClient);
-    //             telegramChat.addMessages(Arrays.copyOfRange(arguments, 1,
-    // arguments.length));
-    //             telegramChat.freeze();
-    //             sinkMap.put(chatId, telegramChat);
-
-    //             Command commandToExecute = commands.getOrDefault(arguments[0].
-    // toLowerCase(),
-    //                 defaultCommand);
-
-    //             executor.execute(() -> {
-    //                 commandToExecute.execute(telegramChat);
-    //                 sinkMap.computeIfPresent(chatId, (key, value) -> {
-    //                     value.interrupt();
-    //                     return null;
-    //                 });
-    //             });
-    //         } else if (sinkMap.containsKey(chatId)) {
-    //             System.out.println(DEBUG + "Passing message");
-    //             sinkMap.get(chatId).addMessage(message.getText());
-    //         } else {
-    //             System.out.println(DEBUG + "Executing default command");
-    //             executor.execute(() ->
-    //                 defaultCommand.execute(new TelegramChat(chatId, telegramClient)));
-    //         }
-    //     }
-    // }
-
-    // Map<userId, State> map = HashMap<>();
-
-    // // State = {"command": Command pointer, "data": String[]}
-
-    // @Override
-    // public void process(final int userId, final String command) throws BotException {
-    //     if (userId <= 0) {
-    //         registerCommand.execute(userId, command.split(" "), null);
-    //     } else {
-    //         if (isCommand(command)) {
-    //             map.add((command or defaultCommand).execute(userId, command.split(" ")[1:],
-    // null));
-    //         } else if (map.has(userId)){
-    //             map.add(map[userId].command, command.split(" ")[1:], map[userId].data);
-    //         } else {
-    //             defaultCommand.execute(userId, null, null);
-    //         }
-    //     }
-    // }
+    // TODO Bot tests
 }

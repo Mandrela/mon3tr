@@ -58,7 +58,7 @@ public interface DataBaseLinker {
 
 
     // Groups
-    void addGroup(GroupQuery inputQuery) throws GroupNotFound, LinkerException;
+    void addGroup(GroupQuery inputQuery) throws MalformedQuery, LinkerException;
     void updateGroup(GroupQuery inputQuery) throws MalformedQuery, LinkerException;
     void removeGroup(int id) throws LinkerException;
 

@@ -12,7 +12,6 @@ import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 /** Wrapping for bot to recieve commands from telegram chats. */
 public class Gate implements LongPollingSingleThreadUpdateConsumer {
-    // same prefix
     private static final char COMMAND_PREFIX = '/';
 
     private final BotBackend bot;
@@ -68,7 +67,8 @@ public class Gate implements LongPollingSingleThreadUpdateConsumer {
      * @return Actual command to bot.
      */
     private String mutate(final String string) {
-        if (string.length() > 1 && string.charAt(0) == COMMAND_PREFIX) {
+        if (bot.getCommandPrefix() != COMMAND_PREFIX && string.length() > 1
+                && string.charAt(0) == COMMAND_PREFIX) {
             return bot.getCommandPrefix() + string.substring(1);
         }
         return string;

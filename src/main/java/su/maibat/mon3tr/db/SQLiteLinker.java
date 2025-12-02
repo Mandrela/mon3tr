@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import static su.maibat.mon3tr.Main.INFO;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
@@ -22,12 +23,14 @@ import su.maibat.mon3tr.db.exceptions.UserNotFound;
 public final class SQLiteLinker extends AbstractDataBaseLinker implements Closeable {
     private static final String URLPREFIX = "jdbc:sqlite:";
 
-    private static final String USER_SELECT_BY_ID = "SELECT* FROM users WHERE id = ?";
+    private static final String USER_SELECT_BY_ID = "SELECT* FROM users WHERE id = ? AND "
+        + "active = 1";
     private static final String USER_SELECT_BY_CHAT_ID = "SELECT* FROM users WHERE chatID = ?";
     private static final String USER_SELECT_ALL = "SELECT* FROM users";
     private static final String USER_INSERT = "INSERT INTO users (chatId) VALUES (?)";
-    private static final String USER_UPDATE = "UPDATE users SET chatId = ?, queryLimit = ?, "
-        + "hpsfwn = ? WHERE id = ?";
+    private static final String USER_UPDATE = "UPDATE users SET chatId = ?, limit = ?, "
+        + "hpsfwn = ?, strat = ?, news = ?, leader = ?, burned = ?, completed = ?, "
+        + "name = ?, groups = ? WHERE id = ?";
     private static final String USER_UPDATE_ACTIVE = "UPDATE users SET active = 0 WHERE id = ?";
 
 
@@ -35,13 +38,28 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         + "active = 1";
     private static final String DEADLINE_SELECT_BY_USER_ID = "SELECT* FROM deadlines WHERE "
         + "userId = ? AND active = 1";
+    private static final String DEADLINE_SELECT_FOR_GROUP = "SELECT* FROM deadlines WHERE "
+        + "instr(groups, \':?:\') > 0";
     private static final String DEADLINE_SELECT_ALL = "SELECT* FROM deadlines WHERE active = 1";
     private static final String DEADLINE_INSERT = "INSERT INTO deadlines (name, burns, "
-        + "offsetValue, userId, notified) VALUES (?, ?, ?, ?, ?)";
+        + "offsetValue, userId) VALUES (?, ?, ?, ?)";
     private static final String DEADLINE_UPDATE = "UPDATE deadlines SET name = ?, burns = ?, "
-        + "offsetValue = ?, userId = ?, notified = ? WHERE id = ?";
+        + "offsetValue = ?, userId = ?, groups = ?, notified = ?, state = ?, notifCounter = ? "
+        + " WHERE id = ?";
     private static final String DEADLINE_UPDATE_ACTIVE = "UPDATE deadlines SET active = 0 "
         + "WHERE id = ?";
+
+
+    private static final String GROUP_SELECT_BY_ID = "SELECT* FROM groups WHERE id = ? AND "
+        + "ocflag = 0";
+    private static final String GROUP_SELECT_BY_OWNER_ID = "SELECT* FROM groups WHERE owner = ?";
+    private static final String GROUP_SELECT_BY_TOKEN = "SELECT* FROM groups WHERE token = ?";
+    private static final String GROUP_INSERT = "INSERT INTO groups (name, uid) VALUES "
+        + "(?, ?)";
+    private static final String GROUP_UPDATE = "UPDATE groups SET name = ?, owner = ?, token = ?, "
+        + "WHERE id = ?";
+    private static final String GROUP_UPDATE_ACTIVE = "UPDATE groups SET ocflag = -1 WHERE "
+        + "id = ?";
 
 
     private final String dbName;
@@ -55,10 +73,18 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
     private final PreparedStatement deadline_get_by_id;
     private final PreparedStatement deadline_get_by_user_id;
+    private final PreparedStatement deadline_get_by_group_id;
     private final PreparedStatement deadline_get_all;
     private final PreparedStatement deadline_add;
     private final PreparedStatement deadline_update;
     private final PreparedStatement deadline_remove;
+
+    private final PreparedStatement group_get_by_id;
+    private final PreparedStatement group_get_by_owner_id;
+    private final PreparedStatement group_get_by_token;
+    private final PreparedStatement group_add;
+    private final PreparedStatement group_update;
+    private final PreparedStatement group_remove;
 
     private Connection conn = null;
 
@@ -90,16 +116,23 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
             String create_deadlines = "CREATE TABLE IF NOT EXISTS deadlines "
                 + "(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, "
-                + "burns INTEGER NOT NULL, offsetValue INTEGER DEFAULT 10000, "
-                + "userId INTEGER NOT NULL, groupId INTEGER, active INTEGER DEFAULT 1, "
-                + "notified INTEGER DEFAULT 0);";
+                + "burns INTEGER NOT NULL, offsetValue INTEGER NOT NULL, "
+                + "userId INTEGER NOT NULL, groups TEXT, notified INTEGER DEFAULT 0, "
+                + "state INTEGER DEFAULT 0, event INTEGER DEFAULT 0, notifCounter INTEGER "
+                + " DEFAULT 0);";
             String create_users = "CREATE TABLE IF NOT EXISTS users "
-                + "(id INTEGER PRIMARY KEY AUTOINCREMENT, chatId REAL NOT NULL, "
-                + "queryLimit INTEGER DEFAULT 32, hpsfwn INTEGER DEFAULT 0, "
-                + "active INTEGER DEFAULT 1);";
+                + "(id INTEGER PRIMARY KEY AUTOINCREMENT, chatId INTEGER NOT NULL, "
+                + "limit INTEGER DEFAULT 32, hpsfwn INTEGER DEFAULT 0, "
+                + "strat INTEGER DEFAULT 0, news INTEGER DEFAULT 1, leader INTEGER DEFAULT 0, "
+                + "burned INTEGER DEFAULT 0, completed INTEGER DEFAULT 0, name TEXT, groups "
+                + "TEXT, active INTEGER DEFAULT 1);";
+            String create_groups = "CREATE TABLE IF NOT EXISTS groups "
+                + "(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, owner INTEGER, "
+                + "token TEXT, ocflag INTEGER DEFAULT 0);";
             Statement statement = conn.createStatement();
             statement.execute(create_deadlines);
             statement.execute(create_users);
+            statement.execute(create_groups);
 
             user_get_by_id = conn.prepareStatement(USER_SELECT_BY_ID);
             user_get_by_chat_id = conn.prepareStatement(USER_SELECT_BY_CHAT_ID);
@@ -110,14 +143,41 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
             deadline_get_by_id = conn.prepareStatement(DEADLINE_SELECT_BY_ID);
             deadline_get_by_user_id = conn.prepareStatement(DEADLINE_SELECT_BY_USER_ID);
+            deadline_get_by_group_id = conn.prepareStatement(DEADLINE_SELECT_FOR_GROUP);
             deadline_get_all = conn.prepareStatement(DEADLINE_SELECT_ALL);
             deadline_add = conn.prepareStatement(DEADLINE_INSERT);
             deadline_update = conn.prepareStatement(DEADLINE_UPDATE);
             deadline_remove = conn.prepareStatement(DEADLINE_UPDATE_ACTIVE);
+
+            group_get_by_id = conn.prepareStatement(GROUP_SELECT_BY_ID);
+            group_get_by_owner_id = conn.prepareStatement(GROUP_SELECT_BY_OWNER_ID);
+            group_get_by_token = conn.prepareStatement(GROUP_SELECT_BY_TOKEN);
+            group_add = conn.prepareStatement(GROUP_INSERT);
+            group_update = conn.prepareStatement(GROUP_UPDATE);
+            group_remove = conn.prepareStatement(GROUP_UPDATE_ACTIVE);
         } catch (SQLException e) {
             throw new LinkerException(collectInfo("constr") + e.getMessage());
         }
     }
+
+
+    public static String arrayToString(int[] array) {
+        String string = ":";
+		for (int i : array) {
+            string = string + String.valueOf(i) + ":";
+        }
+        return string;
+	}
+
+    public static int[] stringToArray(String string) {
+        int[] array = new int[string.length()];
+        int i = 0;
+        for (String number : string.split(":")) {
+            array[i++] = Integer.valueOf(number);
+        }
+        return Arrays.copyOfRange(array, 0, i);
+    }
+
 
     private synchronized String collectInfo(final String methodName) {
         String connState = "null";
@@ -216,7 +276,14 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 user_update.setLong(1, inputQuery.getChatId());
                 user_update.setInt(2, inputQuery.getLimit());
                 user_update.setBoolean(3, inputQuery.isHasPaidSubscribeForWeatherNews());
-                user_update.setInt(4, inputQuery.getId());
+                user_update.setInt(4, 0);
+                user_update.setInt(5, 1);
+                user_update.setInt(6, 0);
+                user_update.setInt(7, 0);
+                user_update.setInt(8, 0);
+                user_update.setString(9, "kekname");
+                user_update.setString(10, arrayToString(inputQuery.getMembership()));
+                user_update.setInt(11, inputQuery.getId());
                 synchronized (conn) {
                     user_update.executeUpdate();
                 }
@@ -227,7 +294,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     }
 
 
-    /**
+	/**
      * @param result Result set, assuming not toched
      * @return UserQuery parsed from result, @throws UserNotFound if result is empty
      */
@@ -236,7 +303,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         if (!result.next()) {
             throw new UserNotFound(0); // Ment to be rethrowed
         }
-        return new UserQuery(result.getInt("id"), result.getLong("chatId"));
+        return new UserQuery(result.getInt("id"), result.getLong("chatId"), stringToArray(
+            result.getString("groups")));
     }
 
 
@@ -295,6 +363,23 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         }
     }
 
+    public long getChatIdByUserId(final int id) throws UserNotFound, LinkerException {
+        return getUserById(id).getChatId();
+    }
+
+    public int getUserIdByChatId(final long chatId) throws UserNotFound, LinkerException {
+        return getUserByChatId(chatId).getId();
+    }
+
+    public boolean checkUserExists(final int id) throws LinkerException {
+        try {
+            getUserById(id);
+            return true;
+        } catch (UserNotFound e) {
+            return false;
+        }
+    }
+
 
     // Deadline
     @Override
@@ -307,7 +392,6 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 deadline_add.setLong(2, inputQuery.getExpireTime());
                 deadline_add.setLong(3, inputQuery.getRemindOffset());
                 deadline_add.setInt(4, inputQuery.getOwnerId());
-                deadline_add.setBoolean(5, inputQuery.isNotified());
                 synchronized (conn) {
                     deadline_add.executeUpdate();
                 }
@@ -341,8 +425,11 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
                 deadline_update.setLong(2, inputQuery.getExpireTime());
                 deadline_update.setLong(3, inputQuery.getRemindOffset());
                 deadline_update.setInt(4, inputQuery.getOwnerId());
-                deadline_update.setBoolean(5, inputQuery.isNotified());
-                deadline_update.setInt(6, inputQuery.getId());
+                deadline_update.setString(5, arrayToString(inputQuery.getAssignedGroups()));
+                deadline_update.setBoolean(6, inputQuery.isNotified());
+                deadline_update.setInt(7, inputQuery.getState());
+                deadline_update.setInt(8, 0);
+                deadline_update.setInt(9, inputQuery.getId());
                 synchronized (conn) {
                     deadline_update.executeUpdate();
                 }
@@ -352,11 +439,12 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         }
     }
 
-    private synchronized DeadlineQuery parseDeadlineFromResult(final ResultSet result)
+    private DeadlineQuery parseDeadlineFromResult(final ResultSet result)
             throws SQLException {
         return new DeadlineQuery(result.getInt("id"), result.getString("name"),
             result.getLong("burns"), result.getLong("offsetValue"), result.getInt("userId"),
-            result.getBoolean("notified"));
+            stringToArray(result.getString("groups")), result.getBoolean("notified"),
+            result.getInt("state"));
     }
 
     @Override
@@ -403,11 +491,37 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
             return deadlineQuerys.toArray(DeadlineQuery[]::new);
         } catch (SQLException e) {
-            throw new LinkerException(collectInfo("getDeadlines") + "User id: " + userId + "\n"
-                + e.getMessage());
+            throw new LinkerException(collectInfo("getDeadlinesForUser") + "User id: " + userId
+                + ": "+ e.getMessage());
         }
     }
 
+    @Override
+    public DeadlineQuery[] getGroupsDeadlines(final int[] groupsId)
+            throws GroupNotFound, LinkerException {
+        try {
+            java.util.ArrayList<DeadlineQuery> deadlineQuerys = new java.util.ArrayList<>();
+            for (int groupId : groupsId) {
+                ResultSet result;
+                synchronized (deadline_get_by_group_id) {
+                    deadline_get_by_group_id.setInt(1, groupId);
+                    synchronized (conn) {
+                        result = deadline_get_by_group_id.executeQuery();
+                    }
+                }
+
+                while(result.next()) {
+                    deadlineQuerys.add(parseDeadlineFromResult(result));
+                }
+            }
+
+            return deadlineQuerys.toArray(DeadlineQuery[]::new);
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("getGroupDeadlines") + ": " + e.getMessage());
+        }
+    }
+
+    @Override
     public DeadlineQuery[] getAllDeadlines() throws LinkerException {
         try {
             ResultSet result;
@@ -426,76 +540,147 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         }
     }
 
-    public static void main(final String[] args) {
-        System.out.println("Hello");
+
+    // Group
+    public void addGroup(final GroupQuery inputQuery) throws LinkerException {
         try {
-            SQLiteLinker db = new SQLiteLinker("kek");
-
-            long start_e = System.currentTimeMillis();
-            for (int i = 1; i <= 1000; i++) {
-                db.getDeadlinesForUser(i);
+            synchronized (group_add) {
+                group_add.setString(1, inputQuery.getName());
+                group_add.setInt(2, inputQuery.getOwnerId());
+                synchronized (conn) {
+                    group_add.executeUpdate();
+                }
             }
-            long end_e = System.currentTimeMillis();
-
-            double time_e = end_e - start_e;
-            System.out.println(time_e / 1000 + " seconds to execute devastating thing, "
-                + Math.round(time_e / 1000) + " ms on item");
-
-
-            db.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("addGroup") + e.getMessage());
         }
     }
 
+    public void updateGroup(final GroupQuery inputQuery) throws MalformedQuery, LinkerException {
+        try {
+            synchronized (group_update) {
+                group_update.setString(1, inputQuery.getName());
+                group_update.setInt(2, inputQuery.getOwnerId());
+                group_update.setString(3, inputQuery.getToken());
+                group_update.setInt(4, inputQuery.getId());
+                synchronized (conn) {
+                    group_update.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("updateGroup") + e.getMessage());
+        }
+    }
+
+    public void removeGroup(final int id) throws LinkerException {
+        try {
+            synchronized (group_remove) {
+                group_remove.setInt(1, id);
+                synchronized (conn) {
+                    group_remove.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("removeGroup") + e.getMessage());
+        }
+    }
+
+    private GroupQuery parseGroupFromResult(final ResultSet result)
+            throws SQLException {
+        return new GroupQuery(result.getInt("id"), result.getString("name"),
+            result.getInt("owner"), result.getString("token"));
+    }
+
+    public GroupQuery[] getGroups(final int[] groupsId) throws GroupNotFound, LinkerException {
+        try {
+            java.util.ArrayList<GroupQuery> groupQuerys = new java.util.ArrayList<>();
+            for (int groupId : groupsId) {
+                ResultSet result;
+                synchronized (group_get_by_id) {
+                    group_get_by_id.setInt(1, groupId);
+                    synchronized (conn) {
+                        result = group_get_by_id.executeQuery();
+                    }
+                }
+
+                while(result.next()) {
+                    groupQuerys.add(parseGroupFromResult(result));
+                }
+            }
+
+            return groupQuerys.toArray(GroupQuery[]::new);
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("getGroups") + e.getMessage());
+        }
+    }
+
+    public GroupQuery[] getOwnedGroups(final int userId) throws UserNotFound, LinkerException {
+        try {
+            ResultSet result;
+            synchronized (group_get_by_owner_id) {
+                group_get_by_owner_id.setInt(1, userId);
+                synchronized (conn) {
+                    result = group_get_by_owner_id.executeQuery();
+                }
+            }
+            java.util.ArrayList<GroupQuery> groupQuerys = new java.util.ArrayList<>();
+            while(result.next()) {
+                groupQuerys.add(parseGroupFromResult(result));
+            }
+
+            return groupQuerys.toArray(GroupQuery[]::new);
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("getOwnedGroups") + e.getMessage());
+        }
+    }
+
+    public String[] getGroupNamesForDeadline(final int deadlineId)
+            throws DeadlineNotFound, LinkerException {
+        try {
+            GroupQuery[] a = getGroups(getDeadline(deadlineId).getAssignedGroups());
+            String[] answer = new String[a.length];
+
+            for (int i = 0; i < answer.length; ++i) {
+                answer[i] = a[i].getName();
+            }
+
+            return answer;
+        } catch (Exception e) {
+            throw new LinkerException(collectInfo("getGroupNamesForDeadline") + e.getMessage());
+        }
+    }
+
+    public GroupQuery tryFindToken(final String token) throws TokenNotFound, LinkerException {
+        try {
+            ResultSet result;
+            synchronized (group_get_by_token) {
+                    group_get_by_token.setString(1, token);
+                synchronized (conn) {
+                    result = group_get_by_token.executeQuery();
+                }
+            }
+
+            if (!result.next()) {
+                throw new TokenNotFound(token);
+            }
+
+            GroupQuery answer = parseGroupFromResult(result);
+
+            if (result.next()) { // ambigious token
+                throw new TokenNotFound(token);
+            }
+            return answer;
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("tryFindToken") + e.getMessage());
+        }
+    }
+
+    // User Settings
     public boolean toggleNews(final int userId) throws UserNotFound, LinkerException {
         return true;
     }
 
     public boolean toggleLeaderboard(final int userId) throws UserNotFound, LinkerException {
         return true;
-    }
-
-
-    public void addGroup(final GroupQuery inputQuery) throws GroupNotFound, LinkerException {
-
-    }
-
-    public void updateGroup(final GroupQuery inputQuery) throws MalformedQuery, LinkerException {
-
-    }
-
-    public void removeGroup(final int id) throws LinkerException {
-
-    }
-
-    public GroupQuery[] getGroups(final int[] groupsId) throws GroupNotFound, LinkerException {
-        return new GroupQuery[0];
-    }
-
-    public GroupQuery[] getOwnedGroups(final int userId) throws UserNotFound, LinkerException {
-        return new GroupQuery[0];
-    }
-
-    public String[] getGroupNamesForDeadline(final int deadlineId)
-            throws DeadlineNotFound, LinkerException {
-        return new String[0];
-    }
-
-    public GroupQuery tryFindToken(final String token) throws TokenNotFound, LinkerException {
-        return new GroupQuery();
-    }
-
-    public DeadlineQuery[] getGroupsDeadlines(final int[] groupsId)
-            throws GroupNotFound, LinkerException {
-        return new DeadlineQuery[0];
-    }
-
-    public long getChatIdByUserId(final int id) throws UserNotFound, LinkerException {
-        return 0L;
-    }
-
-    public int getUserIdByChatId(final long chatId) throws UserNotFound, LinkerException {
-        return 0;
     }
 }

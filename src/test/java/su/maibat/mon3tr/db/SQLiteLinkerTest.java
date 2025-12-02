@@ -54,7 +54,7 @@ public class SQLiteLinkerTest {
             assertThrows(UserNotFound.class, () -> linker.getUserById(100000));
             assertThrows(UserNotFound.class, () -> linker.getUserByChatId(200202020));
 
-            UserQuery query = new UserQuery(-1, 1238388182L);
+            UserQuery query = new UserQuery(-1, 1238388182L, null);
             assertDoesNotThrow(() -> linker.addUser(query));
 
             int id = 0;
@@ -91,7 +91,8 @@ public class SQLiteLinkerTest {
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadline(100000));
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadlinesForUser(12345678));
 
-            DeadlineQuery query = new DeadlineQuery(-1, "testname", 123, 123, 2020, false);
+            DeadlineQuery query = new DeadlineQuery(-1, "testname", 123, 123, 2020, null,
+                false, 0);
             assertDoesNotThrow(() -> linker.addDeadline(query));
 
             int id = 0;
@@ -121,7 +122,8 @@ public class SQLiteLinkerTest {
             }
 
             try {
-                DeadlineQuery query2 = new DeadlineQuery(-1, "testname 2", 133, 23, 2020, false);
+                DeadlineQuery query2 = new DeadlineQuery(-1, "testname 2", 133, 23, 2020,
+                    null, false, id);
                 assertDoesNotThrow(() -> linker.addDeadline(query2));
 
                 DeadlineQuery[] output = linker.getDeadlinesForUser(2020);

@@ -11,7 +11,7 @@ import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
-public class MyDeadlinesCommand implements Command {
+public class MyDeadlinesCommand /* implements Command */ {
     private static final int OFFSET = 1000;
     private final DataBaseLinker linker;
 

@@ -34,15 +34,16 @@ public final class DeadlineQuery extends DBQuery {
      * @param state
      */
     public DeadlineQuery(final int idArg, final String deadlineName, final long burnAtTime,
-            final long triggerOffset, final int ownerUserId, final boolean isNotifiedAbout,
-            final int stateArg) {
+            final long triggerOffset, final int ownerUserId, final int[] groups,
+            final boolean isNotifiedAbout, final int currentState) {
         super(idArg);
         name = deadlineName;
         expireTime = burnAtTime;
         remindOffset = triggerOffset;
         ownerId = ownerUserId;
+        assignedGroups = groups;
         notified = isNotifiedAbout;
-        state = stateArg;
+        state = currentState;
     }
 
     public String getName() {
@@ -75,6 +76,10 @@ public final class DeadlineQuery extends DBQuery {
         notified = false;
     }
 
+
+    public int getState() {
+        return state;
+    }
 
     public boolean isBurning() {
         return state == 1;
