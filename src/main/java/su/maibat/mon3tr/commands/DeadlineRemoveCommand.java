@@ -31,6 +31,9 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
     public final State execute(final int userId, final String[] args, final State currentState,
                                final BlockingQueue<NumberedString> responseQueue)
             throws CommandException {
+        if (currentState == null) {
+            return (new State(0, new String[]{}, this));
+        }
         switch (currentState.getStateId()) {
             case(0):
                 return deadlineTable(userId, args, currentState, responseQueue);

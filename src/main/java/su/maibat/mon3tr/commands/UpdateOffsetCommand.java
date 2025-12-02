@@ -1,14 +1,10 @@
 package su.maibat.mon3tr.commands;
 
 import su.maibat.mon3tr.NumberedString;
-import su.maibat.mon3tr.chat.Chat;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
-import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
-import su.maibat.mon3tr.db.exceptions.MalformedQuery;
-import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -35,21 +31,24 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
     public final State execute(final int userId, final String[] args, final State currentState,
                                final BlockingQueue<NumberedString> responseQueue)
             throws CommandException {
-
-            switch (currentState.getStateId()) {
-                case(0):
-                    return deadlineTable(userId, args, currentState, responseQueue);
-                case (1):
-                    return selectIndex(userId, args, currentState, responseQueue);
-                case (2):
-                    return selectOffset(userId, args[0], currentState, responseQueue);
-                default:
-                    System.out.println("Out state");
-                    NumberedString answer = new NumberedString(userId, "Something went wrong");
-                    responseQueue.add(answer);
-                    return currentState;
-            }
+        if (currentState == null) {
+            return (new State(0, new String[]{}, this));
         }
+
+        switch (currentState.getStateId()) {
+            case(0):
+                return deadlineTable(userId, args, currentState, responseQueue);
+            case (1):
+                return selectIndex(userId, args, currentState, responseQueue);
+            case (2):
+                return selectOffset(userId, args[0], currentState, responseQueue);
+            default:
+                System.out.println("Out state");
+                NumberedString answer = new NumberedString(userId, "Something went wrong");
+                responseQueue.add(answer);
+                return currentState;
+        }
+    }
 
 
         private State deadlineTable(final int userId, final String[] args, final State currentState,
