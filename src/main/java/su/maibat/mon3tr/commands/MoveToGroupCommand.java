@@ -27,10 +27,13 @@ public final class MoveToGroupCommand implements Command {
         return "This command link your deadline to group";
     }
 
-    public State execute(final int userId, final String[] args, final State currentState,
+    public State execute(final int userId, final String[] args, final State state,
             final BlockingQueue<NumberedString> responseQueue) throws CommandException {
-        if (currentState == null) {
-            return (new State(0, new String[]{}, this));
+        State currentState;
+        if (state == null) {
+            currentState = new State(0, new String[]{}, (Command) this);
+        } else {
+            currentState = state;
         }
         switch (currentState.getStateId()) {
             case(0):
@@ -131,7 +134,7 @@ public final class MoveToGroupCommand implements Command {
 
     private State selectDeadlineIndex(final int userId, final String[] args,
             final State currentState, final BlockingQueue<NumberedString> responseQueue) {
-        if (isValid(args[0], currentState.getMemory().length)) {
+        if (args.length != 0 && isValid(args[0], currentState.getMemory().length)) {
             try {
                 int deadlineId = Integer.parseInt(args[0]);
 

@@ -36,14 +36,17 @@ public class ListGroupTaskCommand implements Command {
     /**
      * @param userId kek.
      * @param args kek.
-     * @param currentState kek.
+     * @param state kek.
      * @param responseQueue kek.
      * @return  kek.
      */
-    public State execute(final int userId, final String[] args, final State currentState,
+    public State execute(final int userId, final String[] args, final State state,
             final BlockingQueue<NumberedString> responseQueue) throws CommandException {
-        if (currentState == null) {
-            return (new State(0, new String[]{}, this));
+        State currentState;
+        if (state == null) {
+            currentState = new State(0, new String[]{}, (Command) this);
+        } else {
+            currentState = state;
         }
         switch (currentState.getStateId()) {
             case (0):
@@ -125,7 +128,7 @@ public class ListGroupTaskCommand implements Command {
     }
 
 
-    private State showDeadlines(final int userId, final String[] args, final State currentState,
+    protected State showDeadlines(final int userId, final String[] args, final State currentState,
             final BlockingQueue<NumberedString> responseQueue) {
         try {
             int groupId = Integer.parseInt(currentState.getMemory()[0]);
@@ -180,7 +183,7 @@ public class ListGroupTaskCommand implements Command {
         return answer;
     }
 
-    private String printGroupTable(final GroupQuery[] groupList) {
+    protected String printGroupTable(final GroupQuery[] groupList) {
         String answer = "Your own groups: \n\n";
         for (int i = 0; i < groupList.length; i++) {
             answer = answer.concat((i + 1) + " : " + groupList[i].getName());

@@ -24,10 +24,13 @@ public final class RemoveFromGroupCommand extends ListGroupTaskCommand {
         return "This command unlink your deadline from group";
     }
 
-    public State execute(final int userId, final String[] args, final State currentState,
+    public State execute(final int userId, final String[] args, final State state,
             final BlockingQueue<NumberedString> responseQueue) throws CommandException {
-        if (currentState == null) {
-            return (new State(0, new String[]{}, this));
+        State currentState;
+        if (state == null) {
+            currentState = new State(0, new String[]{}, (Command) this);
+        } else {
+            currentState = state;
         }
         switch (currentState.getStateId()) {
             case (0):
@@ -41,9 +44,9 @@ public final class RemoveFromGroupCommand extends ListGroupTaskCommand {
                 return currentState;
         }
     }
-
-    private State showDeadlines(final int userId, final String[] args, final State currentState,
-            final BlockingQueue<NumberedString> responseQueue) {
+    @Override
+    protected State showDeadlines(final int userId, final String[] args, final State currentState,
+                                  final BlockingQueue<NumberedString> responseQueue) {
         try {
             int groupId = Integer.parseInt(currentState.getMemory()[0]);
 
@@ -75,7 +78,7 @@ public final class RemoveFromGroupCommand extends ListGroupTaskCommand {
 
     private State selectDeadlineIndex(final int userId, final String[] args,
             final State currentState, final BlockingQueue<NumberedString> responseQueue) {
-        if (super.isValid(args[0], currentState.getMemory().length)) {
+        if (args.length != 0 && super.isValid(args[0], currentState.getMemory().length)) {
             try {
                 int deadlineId = Integer.parseInt(args[0]);
 
