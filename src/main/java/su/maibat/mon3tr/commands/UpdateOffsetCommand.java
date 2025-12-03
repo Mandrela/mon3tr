@@ -28,11 +28,14 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
     }
 
 
-    public final State execute(final int userId, final String[] args, final State currentState,
+    public final State execute(final int userId, final String[] args, final State state,
                                final BlockingQueue<NumberedString> responseQueue)
             throws CommandException {
-        if (currentState == null) {
-            return new State(0, new String[]{}, (Command) this);
+        State currentState;
+        if (state == null) {
+            currentState = new State(0, new String[]{}, (Command) this);
+        } else {
+            currentState = state;
         }
 
         switch (currentState.getStateId()) {
@@ -41,6 +44,9 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
             case (1):
                 return selectIndex(userId, args, currentState, responseQueue);
             case (2):
+                if (args.length == 0) {
+                    return selectOffset(userId, "", currentState, responseQueue);
+                }
                 return selectOffset(userId, args[0], currentState, responseQueue);
             default:
                 System.out.println("Out state");
@@ -81,12 +87,14 @@ public class UpdateOffsetCommand extends MyDeadlinesCommand {
 
         private State selectIndex(final int userId, final String[] args, final State currentState,
         final BlockingQueue<NumberedString> responseQueue) {
-            if (isValidId(args[0], currentState.getMemory().length)) {
+            if (args.length != 0 && isValidId(args[0], currentState.getMemory().length)) {
                 int updateId = Integer.parseInt(args[0]) - 1;
                 String updateQueryId = currentState.getMemory()[updateId];
                 currentState.setMemory(new String[]{updateQueryId});
-                return selectOffset(userId, args[1], currentState, responseQueue);
-
+                if (args.length > 1) {
+                    return selectOffset(userId, args[1], currentState, responseQueue);
+                }
+                return selectOffset(userId, "", currentState, responseQueue);
 
             } else {
                 NumberedString answer = new NumberedString(userId,

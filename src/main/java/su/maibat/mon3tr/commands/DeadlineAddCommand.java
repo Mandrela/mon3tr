@@ -36,12 +36,15 @@ public final class DeadlineAddCommand implements Command {
     }
 
 
-    public State execute(final int userId, final String[] args, final State currentState,
+    public State execute(final int userId, final String[] args, final State state,
                          final BlockingQueue<NumberedString> responseQueue)
             throws CommandException {
         try {
-            if (currentState == null) {
-                return new State(0, new String[]{}, (Command) this);
+            State currentState;
+            if (state == null) {
+                currentState = new State(0, new String[]{}, (Command) this);
+            } else {
+                currentState = state;
             }
             if (db.getUserById(userId).getLimit() == 0) {
                 NumberedString answer = new NumberedString(userId, "You have used up all your "
@@ -56,6 +59,9 @@ public final class DeadlineAddCommand implements Command {
                     return nameCheck(userId, args, currentState, responseQueue);
 
                 case (1):
+                    if (args.length == 0) {
+                        return dateCheck(userId, "", currentState, responseQueue);
+                    }
                     return dateCheck(userId, args[0], currentState, responseQueue);
 
                 case (2):
@@ -78,12 +84,16 @@ public final class DeadlineAddCommand implements Command {
 
     private State nameCheck(final int userId, final String[] args, final State currentState,
             final BlockingQueue<NumberedString> responseQueue) {
-        if (isCorrectName(args[0])) {
+        if (args.length != 0 && isCorrectName(args[0])) {
             currentState.setMemory(new String[]{args[0], ""});
+            if (args.length < 2) {
+                return dateCheck(userId, "", currentState, responseQueue);
+            }
             return dateCheck(userId, args[1], currentState, responseQueue);
         } else {
             NumberedString answer = new NumberedString(userId, "Please, enter a valid name");
             responseQueue.add(answer);
+            currentState.setStateId(0);
             return currentState;
         }
     }
@@ -98,6 +108,7 @@ public final class DeadlineAddCommand implements Command {
         } else {
             NumberedString answer = new NumberedString(userId, "Please, enter a valid date");
             responseQueue.add(answer);
+            currentState.setStateId(1);
             return currentState;
         }
 

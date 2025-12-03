@@ -28,11 +28,14 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
     }
 
 
-    public final State execute(final int userId, final String[] args, final State currentState,
+    public final State execute(final int userId, final String[] args, final State state,
                                final BlockingQueue<NumberedString> responseQueue)
             throws CommandException {
-        if (currentState == null) {
-            return (new State(0, new String[]{}, (Command) this));
+        State currentState;
+        if (state == null) {
+            currentState = new State(0, new String[]{}, (Command) this);
+        } else {
+            currentState = state;
         }
         switch (currentState.getStateId()) {
             case(0):
@@ -77,7 +80,7 @@ public class DeadlineRemoveCommand extends MyDeadlinesCommand {
 
     private State selectIndex(final int userId, final String[] args, final State currentState,
                               final BlockingQueue<NumberedString> responseQueue) {
-        if (isValid(args[0], currentState.getMemory().length)) {
+        if (args.length != 0 && isValid(args[0], currentState.getMemory().length)) {
             try {
                 int removeId = Integer.parseInt(args[0]) - 1;
 
