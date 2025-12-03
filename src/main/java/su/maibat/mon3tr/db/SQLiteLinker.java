@@ -51,9 +51,11 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
 
     private static final String GROUP_SELECT_BY_ID = "SELECT* FROM groups WHERE id = ? AND "
-        + "ocflag = 0";
-    private static final String GROUP_SELECT_BY_OWNER_ID = "SELECT* FROM groups WHERE owner = ?";
-    private static final String GROUP_SELECT_BY_TOKEN = "SELECT* FROM groups WHERE token = ?";
+        + "ocflag != -1";
+    private static final String GROUP_SELECT_BY_OWNER_ID = "SELECT* FROM groups WHERE owner = ?"
+        + "AND ocflag != -1";
+    private static final String GROUP_SELECT_BY_TOKEN = "SELECT* FROM groups WHERE token = ? AND "
+        + "ocflag != -1";
     private static final String GROUP_INSERT = "INSERT INTO groups (name, owner) VALUES "
         + "(?, ?)";
     private static final String GROUP_UPDATE = "UPDATE groups SET name = ?, owner = ?, token = ? "

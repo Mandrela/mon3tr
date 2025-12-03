@@ -24,13 +24,11 @@ public final class GroupCreateCommand implements Command {
 
     public State execute(final int userId, final String[] args, final State currentState,
             final BlockingQueue<NumberedString> responseQueue) throws CommandException {
-        if (currentState == null) {
-            return (new State(0, new String[]{}, this));
-        }
-        if (args.length < 1 || args[0].isEmpty() || args[0].length() > MAX_GROUP_NAME_LENGTH) {
+        if (currentState == null || args.length < 1 || args[0].isEmpty()
+                || args[0].length() > MAX_GROUP_NAME_LENGTH) {
             NumberedString answer = new NumberedString(userId, "Enter group name");
             responseQueue.add(answer);
-            return currentState;
+            return new State(0, new String[]{}, this);
         } else {
             String name = args[0];
             GroupQuery group = new GroupQuery(name, userId);
@@ -40,6 +38,5 @@ public final class GroupCreateCommand implements Command {
             responseQueue.add(answer);
             return null;
         }
-
     }
 }

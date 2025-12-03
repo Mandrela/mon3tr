@@ -61,7 +61,7 @@ public class OwnedGroupsCommand implements Command {
     protected final String printTable(final GroupQuery[] groupList) {
         String answer = "Your own groups: \n\n";
         for (int i = 0; i < groupList.length; i++) {
-            answer = answer.concat((i + 1) + " : " + groupList[i].getName());
+            answer = answer.concat((i + 1) + " : " + groupList[i].getName()) + "\n";
         }
         return answer;
     }

@@ -24,13 +24,10 @@ public final class GroupJoinCommand implements Command {
 
     public State execute(final int userId, final String[] args, final State currentState,
             final BlockingQueue<NumberedString> responseQueue) throws CommandException {
-        if (currentState == null) {
-            return (new State(0, new String[]{}, this));
-        }
-        if (args.length == 0 || !(isCorrectToken(args[0]))) {
+        if (currentState == null && (args.length == 0 || !(isCorrectToken(args[0])))) {
             NumberedString answer = new NumberedString(userId, "Enter group token");
             responseQueue.add(answer);
-            return currentState;
+            return new State(0, new String[]{}, this);
         }
         return null;
     }
