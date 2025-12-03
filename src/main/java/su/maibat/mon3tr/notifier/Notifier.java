@@ -12,7 +12,7 @@ import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 
 
-public final class Notifier implements Runnable {
+public final class Notifier implements Runnable, Reactor {
     private final DataBaseLinker db;
     private final BlockingQueue<NumberedString> queue;
 
@@ -54,5 +54,10 @@ public final class Notifier implements Runnable {
                     + ") with message: " + e.getMessage());
             }
         }
+    }
+
+    @Override
+    public void trigger(final int id) {
+        runOnce();
     }
 }

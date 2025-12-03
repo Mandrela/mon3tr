@@ -7,6 +7,7 @@ import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.UserQuery;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
+import su.maibat.mon3tr.notifier.Reactor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,11 +21,12 @@ import java.util.regex.Pattern;
 import static java.util.regex.Pattern.compile;
 
 public final class DeadlineAddCommand implements Command {
-
     private final DataBaseLinker db;
+    private final Reactor reactor;
 
-    public DeadlineAddCommand(final DataBaseLinker inputLinker) {
+    public DeadlineAddCommand(final DataBaseLinker inputLinker, final Reactor reactorArg) {
         this.db = inputLinker;
+        this.reactor = reactorArg;
     }
 
     public String getName() {
@@ -127,6 +129,7 @@ public final class DeadlineAddCommand implements Command {
             inputQuery.setOwnerId(userId);
 
             db.addDeadline(inputQuery);
+            reactor.trigger(0);
 
             UserQuery user = db.getUserById(userId);
             user.setLimit(user.getLimit() - 1);

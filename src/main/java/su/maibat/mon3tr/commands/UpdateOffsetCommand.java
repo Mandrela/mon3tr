@@ -5,17 +5,19 @@ import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+import su.maibat.mon3tr.notifier.Reactor;
 
 import java.util.concurrent.BlockingQueue;
 
 public class UpdateOffsetCommand extends MyDeadlinesCommand {
-
+    private final Reactor reactor;
     private final SQLiteLinker db;
     private static final int SECONDS_IN_DAY = 86400;
 
-    public UpdateOffsetCommand(final SQLiteLinker inputLinker) {
+    public UpdateOffsetCommand(final SQLiteLinker inputLinker, final Reactor reactorArg) {
         super(inputLinker);
         this.db = inputLinker;
+        this.reactor = reactorArg;
     }
 
     public final String getName() {

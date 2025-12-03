@@ -107,10 +107,13 @@ public final class Main {
             System.out.println(INFO + "Using custom authors info.");
         }
 
-        DeadlineAddCommand deadlineAddCommand = new DeadlineAddCommand(dataBase);
+        BlockingQueue<NumberedString> queue = new ArrayBlockingQueue<NumberedString>(queueCapacity);
+        Notifier notifier = new Notifier(dataBase, queue);
+
+        DeadlineAddCommand deadlineAddCommand = new DeadlineAddCommand(dataBase, notifier);
         MyDeadlinesCommand deadlineGetCommand = new MyDeadlinesCommand(dataBase);
         DeadlineRemoveCommand deadlineRemoveCommand = new DeadlineRemoveCommand(dataBase);
-        UpdateOffsetCommand updateOffsetCommand = new UpdateOffsetCommand(dataBase);
+        UpdateOffsetCommand updateOffsetCommand = new UpdateOffsetCommand(dataBase, notifier);
 
         GroupCreateCommand groupCreateCommand = new GroupCreateCommand(dataBase);
         OwnedGroupsCommand ownedGroupsCommand = new OwnedGroupsCommand(dataBase);
@@ -137,9 +140,6 @@ public final class Main {
 
 
         // Workers
-        BlockingQueue<NumberedString> queue = new ArrayBlockingQueue<NumberedString>(queueCapacity);
-
-
         BotBackend bot = new Bot(dataBase, help, register, commandMap, queue);
 
         Responder responder = new Responder(telegramClient, queue, dataBase, uidMap);
@@ -148,7 +148,6 @@ public final class Main {
 
         Gate gate = new Gate(bot, dataBase, uidMap);
 
-        Notifier notifier = new Notifier(dataBase, queue);
         Thread notifierThread = new Thread(notifier);
         notifierThread.setDaemon(true);
         notifierThread.start();

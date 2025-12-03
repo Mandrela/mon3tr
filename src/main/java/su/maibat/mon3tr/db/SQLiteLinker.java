@@ -39,7 +39,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     private static final String DEADLINE_SELECT_BY_USER_ID = "SELECT* FROM deadlines WHERE "
         + "userId = ? AND state != -1";
     private static final String DEADLINE_SELECT_FOR_GROUP = "SELECT* FROM deadlines WHERE "
-        + "instr(groups, \':?:\') > 0 AND state != -1";
+        + "instr(groups, ?) > 0 AND state != -1";
     private static final String DEADLINE_SELECT_ALL = "SELECT* FROM deadlines WHERE state != -1";
     private static final String DEADLINE_INSERT = "INSERT INTO deadlines (name, burns, "
         + "offsetValue, userId) VALUES (?, ?, ?, ?)";
@@ -512,7 +512,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             for (int groupId : groupsId) {
                 ResultSet result;
                 synchronized (deadline_get_by_group_id) {
-                    deadline_get_by_group_id.setInt(1, groupId);
+                    deadline_get_by_group_id.setString(1, "\':" + groupId + ":\'");
                     synchronized (conn) {
                         result = deadline_get_by_group_id.executeQuery();
                     }
