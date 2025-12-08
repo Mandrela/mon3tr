@@ -128,6 +128,13 @@ public class ListGroupTaskCommand implements Command {
     }
 
 
+    /**
+     * @param userId
+     * @param args
+     * @param currentState
+     * @param responseQueue
+     * @return kek
+     */
     protected State showDeadlines(final int userId, final String[] args, final State currentState,
             final BlockingQueue<NumberedString> responseQueue) {
         try {
@@ -183,6 +190,10 @@ public class ListGroupTaskCommand implements Command {
         return answer;
     }
 
+    /**
+     * @param groupList
+     * @return kek.
+     */
     protected String printGroupTable(final GroupQuery[] groupList) {
         String answer = "Your own groups: \n\n";
         for (int i = 0; i < groupList.length; i++) {
