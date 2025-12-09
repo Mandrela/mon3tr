@@ -4,7 +4,6 @@ import java.util.concurrent.BlockingQueue;
 
 import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
-import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 
 public interface Command {
@@ -12,5 +11,5 @@ public interface Command {
     String getHelp();
 
     State execute(int userId, String[] args, State currentState,
-        BlockingQueue<NumberedString> responseQueue) throws CommandException, UserNotFound;
+        BlockingQueue<NumberedString> responseQueue) throws CommandException;
 }

@@ -1,6 +1,7 @@
 package su.maibat.mon3tr.db;
 
 public final class GroupQuery extends DBQuery {
+    private static int SALT = 0;
     private String name;
     private int ownerId;
     private String token;
@@ -51,6 +52,6 @@ public final class GroupQuery extends DBQuery {
     }
 
     public String generateToken() {
-        return "hui";
+        return String.valueOf((name.hashCode() << 15) + (ownerId << 4) + SALT++);
     }
 }
