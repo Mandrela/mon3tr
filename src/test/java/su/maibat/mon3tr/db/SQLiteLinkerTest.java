@@ -12,6 +12,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+import su.maibat.mon3tr.db.exceptions.GroupNotFound;
+import su.maibat.mon3tr.db.exceptions.TokenNotFound;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 
@@ -26,7 +28,6 @@ public class SQLiteLinkerTest {
         new File(coolName + ".db.db").delete();
         new File("dir.db").delete();
 
-        @SuppressWarnings("unused")
         SQLiteLinker linker = new SQLiteLinker(coolName);
 
         try {
@@ -50,6 +51,7 @@ public class SQLiteLinkerTest {
     @Test
     @DisplayName("User interactions test")
     void userInteractionsTest() throws FileAlreadyExistsException {
+        new File("user-test.db").delete();
         try (SQLiteLinker linker = new SQLiteLinker("user-test")) {
             assertThrows(UserNotFound.class, () -> linker.getUserById(100000));
             assertThrows(UserNotFound.class, () -> linker.getUserByChatId(200202020));
@@ -85,9 +87,6 @@ public class SQLiteLinkerTest {
     void deadlineInteractionsTest() throws FileAlreadyExistsException {
         new File("deadline-test.db").delete();
         try (SQLiteLinker linker = new SQLiteLinker("deadline-test")) {
-            assertThrows(UserNotFound.class, () -> linker.getUserById(100000));
-            assertThrows(UserNotFound.class, () -> linker.getUserByChatId(200202020));
-
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadline(100000));
             assertThrows(DeadlineNotFound.class, () -> linker.getDeadlinesForUser(12345678));
 
@@ -137,5 +136,91 @@ public class SQLiteLinkerTest {
                 assertTrue(false, "Should find deadlines");
             }
         }
+    }
+
+    @Test
+    @DisplayName("Group interactions test")
+    void groupIneractionTest() throws Exception {
+        new File("group-test.db").delete();
+        try (SQLiteLinker linker = new SQLiteLinker("group-test")) {
+            linker.addGroup(new GroupQuery("name", 1));
+
+            // assertThrows(UserNotFound.class, () -> linker.getOwnedGroups(2));
+            GroupQuery[] groupQueries = linker.getOwnedGroups(1);
+            assertEquals(1, groupQueries.length);
+
+            GroupQuery retakenGroup = linker.getGroups(new int[]{groupQueries[0].getId()})[0];
+            assertEquals(groupQueries[0].getName(), retakenGroup.getName());
+            assertEquals(groupQueries[0].getOwnerId(), retakenGroup.getOwnerId());
+            assertEquals(groupQueries[0].getId(), retakenGroup.getId());
+
+            retakenGroup.setName("new name");
+            retakenGroup.setToken("kokrush");
+            linker.updateGroup(retakenGroup);
+            assertEquals(
+                "new name",
+                linker.getGroups(new int[]{retakenGroup.getId()})[0].getName()
+            );
+
+            assertThrows(TokenNotFound.class, () -> linker.tryFindToken("lol"));
+            assertEquals(
+                retakenGroup.getId(),
+                linker.tryFindToken(retakenGroup.getToken()).getId()
+            );
+
+            int id = retakenGroup.getId();
+            assertThrows(
+                GroupNotFound.class,
+                () -> linker.getGroups(new int[]{id, 2})
+            );
+            linker.removeGroup(id);
+            assertThrows(
+                GroupNotFound.class,
+                () -> linker.getGroups(new int[]{id})
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("Group + Deadline test")
+    void groupDeadlineTest() throws Exception {
+        new File("gd-test.db").delete();
+        try (SQLiteLinker linker = new SQLiteLinker("gd-test")) {
+            linker.addGroup(new GroupQuery("group1", 1));
+            linker.addGroup(new GroupQuery("group2", 1));
+            int[] groupIds = new int[2];
+            int i = 0;
+            for (GroupQuery query : linker.getOwnedGroups(1)) {
+                groupIds[i++] = query.getId();
+            }
+
+            linker.addDeadline(new DeadlineQuery(-1, "dead1", 1024, 1024, 1,
+                null, false, 0));
+            linker.addDeadline(new DeadlineQuery(-1, "dead2", 1024, 1024, 1,
+                null, false, 0));
+            int[] deadlineIds = new int[2];
+            DeadlineQuery[] deadlines = linker.getDeadlinesForUser(1);
+            i = 0;
+            for (DeadlineQuery query : deadlines) {
+                deadlineIds[i++] = query.getId();
+            }
+            deadlines[0].setAssignedGroups(groupIds);
+            deadlines[1].setAssignedGroups(new int[]{groupIds[0]});
+            linker.updateDeadline(deadlines[0]);
+            linker.updateDeadline(deadlines[1]);
+
+
+
+            String[] names = linker.getGroupNamesForDeadline(deadlineIds[0]);
+            assertEquals("group1", names[0]);
+            assertEquals("group2", names[1]);
+
+            DeadlineQuery[] deadlineslinker = linker.getGroupsDeadlines(new int[]{groupIds[1]});
+            assertEquals(1, deadlineslinker.length);
+            assertEquals(deadlineIds[0], deadlineslinker[0].getId());
+
+            assertEquals(3, linker.getGroupsDeadlines(groupIds).length);
+        }
+
     }
 }
