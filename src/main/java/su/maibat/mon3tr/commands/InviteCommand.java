@@ -4,6 +4,7 @@ import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.db.GroupQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.GroupNotFound;
+import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 import java.util.concurrent.BlockingQueue;
@@ -79,6 +80,9 @@ public class InviteCommand extends OwnedGroupsCommand {
 
                 int groupQueryId = Integer.parseInt(currentState.getMemory()[selectId]);
                 GroupQuery[] selectGroup = db.getGroups(new int[]{groupQueryId});
+                String token = selectGroup[0].generateToken();
+                selectGroup[0].setToken(token);
+                db.updateGroup(selectGroup[0]);
                 NumberedString answer = new NumberedString(userId, selectGroup[0].generateToken());
                 responseQueue.add(answer);
                 return null;
@@ -88,6 +92,8 @@ public class InviteCommand extends OwnedGroupsCommand {
                 responseQueue.add(answer);
                 currentState.setStateId(1);
                 return currentState;
+            } catch (MalformedQuery e) {
+                throw new RuntimeException(e);
             }
         } else {
             NumberedString answer = new NumberedString(userId,
