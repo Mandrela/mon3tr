@@ -1,142 +1,170 @@
 package su.maibat.mon3tr.commands;
 
-// import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.DisplayName;
-// //import org.junit.jupiter.api.Test;
-// import org.mockito.ArgumentCaptor;
-// import org.mockito.Mockito;
+import java.util.concurrent.BlockingQueue;
+import java.util.stream.Stream;
 
-// import su.maibat.mon3tr.chat.Chat;
-// import su.maibat.mon3tr.db.DeadlineQuery;
-// import su.maibat.mon3tr.db.SQLiteLinker;
-// import su.maibat.mon3tr.db.UserQuery;
-// import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
-// import su.maibat.mon3tr.db.exceptions.UserNotFound;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import su.maibat.mon3tr.NumberedString;
+import su.maibat.mon3tr.commands.exceptions.CommandException;
+import su.maibat.mon3tr.db.DeadlineQuery;
+import su.maibat.mon3tr.db.SQLiteLinker;
+import su.maibat.mon3tr.db.UserQuery;
+import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 public final class RemoveCommandTest {
-    // private final Chat chat = Mockito.mock(Chat.class);
-    // private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
-    // private final DeadlineRemoveCommand remove = new DeadlineRemoveCommand(linker);
+    private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
+    private final DeadlineRemoveCommand remove = new DeadlineRemoveCommand(linker);
+    private final BlockingQueue<NumberedString> responseQueue =
+            (BlockingQueue<NumberedString>) Mockito.mock(BlockingQueue.class);
 
-    // //Все аргументы верные
-    // //Неверный id (нет такого дедлайна)
-    // //Неверный id (нет такого дедлайна у данного пользователя)
-    // //Неверный пользователь (нет пользователя) - X
-    // //Неверный ввод
-    // //Отсутствие аргументов
-
-    // @BeforeEach
-    // void setUp() throws UserNotFound, DeadlineNotFound {
-
-    //     long chatId = 1234;
-    //     Mockito.when(chat.getChatId()).thenReturn(chatId);
-
-    //     UserQuery user = new UserQuery(1, 1234);
-    //     Mockito.when(linker.getUserByChatId(1234)).thenReturn(user);
-    //     Mockito.when(linker.getUserById(1)).thenReturn(user);
-
-    //     String[] data = {"4"};
-    //     Mockito.when(chat.getAllMessages()).thenReturn(data);
-
-    //     long burnTime = 18082011;
-
-    //     DeadlineQuery dl1 = new DeadlineQuery();
-    //     dl1.setName("first");
-    //     dl1.setExpireTime(burnTime);
-    //     dl1.setOwnerId(0);
-
-    //     DeadlineQuery dl2 = new DeadlineQuery();
-    //     dl2.setName("second");
-    //     dl2.setExpireTime(burnTime);
-    //     dl2.setOwnerId(0);
-
-    //     DeadlineQuery dl3 = new DeadlineQuery();
-    //     dl3.setName("third");
-    //     dl3.setExpireTime(burnTime);
-    //     dl3.setOwnerId(0);
-
-    //     DeadlineQuery dl4 = new DeadlineQuery();
-    //     dl4.setName("chotyri");
-    //     dl4.setExpireTime(burnTime);
-    //     dl4.setOwnerId(0);
-
-    //     DeadlineQuery[] deadlinesForUser = {dl1, dl2, dl3, dl4};
-
-    //     Mockito.when(linker.getDeadlinesForUser(1)).thenReturn(deadlinesForUser);
-    // }
+    @BeforeEach
+    void setUp() throws UserNotFound, DeadlineNotFound {
 
 
-    // //@Test
-    // @DisplayName("Remove with correct arguments")
-    // void correctRemoveTest() throws DeadlineNotFound {
+        UserQuery user = new UserQuery(1, 1234, new int[]{});
+        Mockito.when(linker.getUserById(1)).thenReturn(user);
 
-    //     DeadlineQuery deadline = new DeadlineQuery();
-    //     deadline.setOwnerId(1);
+        long burnTime = 18082011;
 
-    //     assertDoesNotThrow(() -> remove.execute(chat));
+        DeadlineQuery dl1 = new DeadlineQuery(1, "first", burnTime,
+                0, 1, new int[]{}, false, 0);
 
-    //     Mockito.verify(chat, Mockito.times(1)).getAllMessages();
-    //     Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(1);
+        DeadlineQuery dl2 = new DeadlineQuery(2, "second", burnTime,
+                0, 1, new int[]{}, false, 0);
 
-    //     Mockito.verify(linker, Mockito.times(1)).removeDeadline(3);
+        DeadlineQuery dl3 = new DeadlineQuery(3, "third", burnTime,
+                0, 1, new int[]{}, false, 0);
 
-    //     ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
-    //     Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
-
-    //     assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
-    //     String answer = answerCaptor.getValue();
-
-    //     assertEquals("You have closed this gestalt!!!", answer);
-
-    // }
-
-    // //@Test
-    // @DisplayName("Remove with illegal arguments")
-    // void illegalArgumentsTest() throws InterruptedException, DeadlineNotFound {
-    //     String[] data = {"abracadabra"};
-    //     Mockito.when(chat.getAllMessages()).thenReturn(data);
-    //     Mockito.when(chat.getMessage()).thenReturn("4");
-
-    //     assertDoesNotThrow(() -> remove.execute(chat));
+        DeadlineQuery dl4 = new DeadlineQuery(4, "chotyri", burnTime,
+                0, 1, new int[]{}, false, 0);
 
 
-    //     Mockito.verify(chat, Mockito.times(1)).getAllMessages();
-    //     Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(1);
+        DeadlineQuery[] deadlinesForUser = {dl1, dl2, dl3, dl4};
 
-    //     Mockito.verify(linker, Mockito.times(1)).removeDeadline(3);
+        Mockito.when(linker.getDeadlinesForUser(1)).thenReturn(deadlinesForUser);
+    }
 
-    //     ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
-    //     Mockito.verify(chat, Mockito.times(2)).sendAnswer(answerCaptor.capture());
+    @ParameterizedTest(name = "Empty set")
+    @MethodSource("emptyArgs")
+    @DisplayName("Add without arguments")
+    void withoutTest(final int inStateId, final int outStateId, final String answerText)
+            throws CommandException, DeadlineNotFound {
 
-    //     assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
-    //     String answer = answerCaptor.getValue();
+        State state = new State(inStateId, new String[]{}, remove);
+        State resultState = remove.execute(1, new String[]{}, state, responseQueue);
 
-    //     assertEquals("Please enter a valid deadline id (number)", answer);
-    // }
+        ArgumentCaptor<NumberedString> answerCaptor = ArgumentCaptor.forClass(NumberedString.class);
+        if (inStateId == 0) {
+            Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(1);
+            Mockito.verify(responseQueue, Mockito.times(2)).add(answerCaptor.capture());
+        } else {
+            Mockito.verify(responseQueue, Mockito.times(1)).add(answerCaptor.capture());
+        }
+        NumberedString answer = answerCaptor.getValue();
+        assertEquals(1, answer.getNumber());
+        assertEquals(answerText, answer.getString());
 
-    // //@Test
-    // @DisplayName("Remove without arguments")
-    // void emptyArgumentsTest() throws InterruptedException, DeadlineNotFound {
-    //     String[] data = {};
-    //     Mockito.when(chat.getAllMessages()).thenReturn(data);
-    //     Mockito.when(chat.getMessage()).thenReturn("4");
+        assertEquals(outStateId, resultState.getStateId());
+        assertEquals(state.getOwner(), resultState.getOwner());
+    }
 
-    //     assertDoesNotThrow(() -> remove.execute(chat));
-    //     Mockito.verify(chat, Mockito.times(1)).getAllMessages();
-    //     Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(1);
+    static Stream<Arguments> emptyArgs() {
+        return Stream.of(
+                Arguments.of(0, 1, "Please enter a valid deadline id (number)"),
+                Arguments.of(1, 1, "Please enter a valid deadline id (number)")
+        );
+    }
 
-    //     Mockito.verify(linker, Mockito.times(1)).removeDeadline(3);
+    @ParameterizedTest(name = "Args set")
+    @MethodSource("someArgs")
+    @DisplayName("Add with arguments")
+    void withArgsTest(final int inStateId, final String answerText)
+            throws CommandException, DeadlineNotFound {
 
-    //     ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
-    //     Mockito.verify(chat, Mockito.times(2)).sendAnswer(answerCaptor.capture());
+        State state = new State(inStateId, new String[]{}, remove);
+        if (inStateId == 1) {
+            state.setMemory(new String[]{"1", "2", "3", "4"});
+        }
+        State resultState = remove.execute(1, new String[]{"1"}, state, responseQueue);
 
-    //     assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
-    //     String answer = answerCaptor.getValue();
+        ArgumentCaptor<NumberedString> answerCaptor = ArgumentCaptor.forClass(NumberedString.class);
+        if (inStateId == 0) {
+            Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(1);
+            Mockito.verify(responseQueue, Mockito.times(2)).add(answerCaptor.capture());
+        } else {
+            Mockito.verify(responseQueue, Mockito.times(1)).add(answerCaptor.capture());
+        }
+        NumberedString answer = answerCaptor.getValue();
+        assertEquals(1, answer.getNumber());
+        assertEquals(answerText, answer.getString());
 
-    //     assertEquals("Something went wrong, try again with input some arguments", answer);
-    // }
+        assertNull(resultState);
+    }
 
+    static Stream<Arguments> someArgs() {
+        return Stream.of(
+                Arguments.of(0, "You have closed this gestalt!!!"),
+                Arguments.of(1, "You have closed this gestalt!!!")
+        );
+    }
 
+    @Test
+    @DisplayName("Empty deadline Test")
+    void emptyDlTest() throws CommandException, DeadlineNotFound {
+        DeadlineQuery[] queryList = new DeadlineQuery[]{};
+        Mockito.when(linker.getDeadlinesForUser(1)).thenReturn(queryList);
+
+        State resultState = remove.execute(1, new String[]{"1"}, null,
+                responseQueue);
+        Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(1);
+
+        ArgumentCaptor<NumberedString> answerCaptor = ArgumentCaptor.forClass(NumberedString.class);
+        Mockito.verify(responseQueue, Mockito.times(1)).add(answerCaptor.capture());
+
+        NumberedString answer = answerCaptor.getValue();
+
+        assertEquals(1, answer.getNumber());
+        assertEquals("You have not any deadlines", answer.getString());
+        assertNull(resultState);
+    }
+
+    @ParameterizedTest(name = "Illegal Args set")
+    @MethodSource("illegalArgs")
+    @DisplayName("Add with arguments")
+    void illegalArgsTest(final String arg, final boolean valid)
+            throws CommandException, DeadlineNotFound {
+
+        State state = new State(1, new String[]{"1", "2", "3", "4"}, remove);
+
+        State resultState = remove.execute(1, new String[]{arg}, state, responseQueue);
+
+        ArgumentCaptor<NumberedString> answerCaptor = ArgumentCaptor.forClass(NumberedString.class);
+        Mockito.verify(responseQueue, Mockito.times(1)).add(answerCaptor.capture());
+
+        NumberedString answer = answerCaptor.getValue();
+        assertEquals(1, answer.getNumber());
+        assertEquals(valid, answer.getString().equals("You have closed this gestalt!!!"));
+        assertEquals(valid, resultState == null);
+    }
+
+    static Stream<Arguments> illegalArgs() {
+        return Stream.of(
+                Arguments.of("3", true),
+                Arguments.of("0", false),
+                Arguments.of("42", false)
+        );
+    }
 }
