@@ -36,7 +36,8 @@ public class OwnedGroupsCommand implements Command {
      * @return  kek.
      */
     public State execute(final int userId, final String[] args, final State currentState,
-            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
+            final BlockingQueue<NumberedString> responseQueue)
+            throws CommandException, UserNotFound {
         try {
             GroupQuery[] groupList = db.getOwnedGroups(userId);
             if (groupList.length == 0) {
