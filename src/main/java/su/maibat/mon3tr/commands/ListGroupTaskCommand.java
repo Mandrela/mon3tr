@@ -194,7 +194,7 @@ public class ListGroupTaskCommand implements Command {
      * @param groupList
      * @return kek.
      */
-    protected String printGroupTable(final GroupQuery[] groupList) {
+    private String printGroupTable(final GroupQuery[] groupList) {
         String answer = "Your own groups: \n\n";
         for (int i = 0; i < groupList.length; i++) {
             answer = answer.concat((i + 1) + " : " + groupList[i].getName());
