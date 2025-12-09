@@ -13,14 +13,14 @@ public class JoinCommand {
     public JoinCommand(final SQLiteLinker linker) {
                this.db = linker;
     }
-    public String getName() {
+    public final String getName() {
         return "join";
     }
-    public String getHelp() {
+    public final String getHelp() {
         return "By this command you can connect to someone's group with using token of this group";
     }
 
-    public State execute(final int userId, final String[] args, final State state,
+    public final State execute(final int userId, final String[] args, final State state,
                          final BlockingQueue<NumberedString> responseQueue) {
         State currentState;
         if (state == null) {

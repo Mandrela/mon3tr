@@ -1,10 +1,12 @@
 package su.maibat.mon3tr.db;
 
 public final class GroupQuery extends DBQuery {
-    private static int SALT = 0;
+    private static int salt = 0;
     private String name;
     private int ownerId;
     private String token;
+    private static final int MAGIC_NUMBER_4 = 4;
+    private static final int MAGIC_NUMBER_15 = 15;
 
 
     public GroupQuery() {
@@ -52,6 +54,7 @@ public final class GroupQuery extends DBQuery {
     }
 
     public String generateToken() {
-        return String.valueOf((name.hashCode() << 15) + (ownerId << 4) + SALT++);
+        return String.valueOf((name.hashCode() << MAGIC_NUMBER_15)
+                + (ownerId << MAGIC_NUMBER_4) + salt++);
     }
 }

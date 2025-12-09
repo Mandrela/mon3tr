@@ -15,14 +15,16 @@ public class InviteCommand extends OwnedGroupsCommand {
         this.db = linker;
     }
 
-    public String getName() {return "invite";}
+    public final String getName() {
+        return "invite";
+    }
 
-    public String getHelp() {
+    public final String getHelp() {
         return "This command generate token"
             + " that allows users connect to your groups";
     }
 
-    public State execute(final int userId, final String[] args, final State state,
+    public final State execute(final int userId, final String[] args, final State state,
                          final BlockingQueue<NumberedString> responseQueue) {
         State currentState;
         if (state == null) {
