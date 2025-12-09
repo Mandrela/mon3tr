@@ -22,6 +22,7 @@ import su.maibat.mon3tr.commands.GroupCreateCommand;
 import su.maibat.mon3tr.commands.GroupDeleteCommand;
 import su.maibat.mon3tr.commands.GroupJoinCommand;
 import su.maibat.mon3tr.commands.HelpCommand;
+import su.maibat.mon3tr.commands.InviteCommand;
 import su.maibat.mon3tr.commands.ListGroupTaskCommand;
 import su.maibat.mon3tr.commands.MoveToGroupCommand;
 import su.maibat.mon3tr.commands.MyDeadlinesCommand;
@@ -120,6 +121,8 @@ public final class Main {
         GroupDeleteCommand groupDeleteCommand = new GroupDeleteCommand(dataBase);
 
         GroupJoinCommand groupJoinCommand = new GroupJoinCommand(dataBase);
+        InviteCommand groupInviteCommand = new InviteCommand(dataBase);
+
 
         MoveToGroupCommand moveToGroupCommand = new MoveToGroupCommand(dataBase);
         ListGroupTaskCommand listGroupTaskCommand = new ListGroupTaskCommand(dataBase);
@@ -129,8 +132,8 @@ public final class Main {
         Command[] commands = {help, register, new AboutCommand(), authors,
                 deadlineAddCommand, deadlineGetCommand, deadlineRemoveCommand,
                 updateOffsetCommand, groupCreateCommand, ownedGroupsCommand,
-                groupDeleteCommand, groupJoinCommand, moveToGroupCommand,
-                listGroupTaskCommand, removeFromGroupCommand};
+                groupDeleteCommand, groupJoinCommand, groupInviteCommand,
+                moveToGroupCommand, listGroupTaskCommand, removeFromGroupCommand};
 
         LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
         for (Command command : commands) {

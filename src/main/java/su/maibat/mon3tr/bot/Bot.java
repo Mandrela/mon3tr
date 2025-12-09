@@ -113,5 +113,4 @@ public final class Bot implements BotBackend {
     public char getCommandPrefix() {
         return COMMAND_PREFIX;
     }
-    // TODO Bot tests
 }
