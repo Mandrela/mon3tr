@@ -49,4 +49,8 @@ public final class GroupQuery extends DBQuery {
     public void setToken(final String newToken) {
         token = newToken;
     }
+
+    public String generateToken() {
+        return "hui";
+    }
 }
