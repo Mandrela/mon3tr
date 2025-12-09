@@ -1,127 +1,87 @@
 package su.maibat.mon3tr.commands;
 
-// import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertTrue;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.ArgumentCaptor;
-// import org.mockito.Mockito;
+import java.util.concurrent.BlockingQueue;
 
-// import su.maibat.mon3tr.chat.Chat;
-// import su.maibat.mon3tr.db.DeadlineQuery;
-// import su.maibat.mon3tr.db.SQLiteLinker;
-// import su.maibat.mon3tr.db.UserQuery;
-// import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
-// import su.maibat.mon3tr.db.exceptions.UserNotFound;
-// import static org.mockito.ArgumentMatchers.anyInt;
+import org.junit.jupiter.api.DisplayName;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import su.maibat.mon3tr.NumberedString;
+import su.maibat.mon3tr.db.DeadlineQuery;
+import su.maibat.mon3tr.db.SQLiteLinker;
+import su.maibat.mon3tr.db.UserQuery;
+import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public final class MyDeadlinesCommandTest {
-    // private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
-    // private final Chat chat = Mockito.mock(Chat.class);
-    // private final MyDeadlinesCommand show = new MyDeadlinesCommand(linker);
+    private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
+    private final MyDeadlinesCommand show = new MyDeadlinesCommand(linker);
+    private final BlockingQueue<NumberedString> responseQueue =
+            (BlockingQueue<NumberedString>) Mockito.mock(BlockingQueue.class);
 
-    // @Test
-    // @DisplayName("Shows for user with deadlines")
-    // void correctShowTest() throws UserNotFound, DeadlineNotFound {
-    //     long chatId = 1234;
-    //     Mockito.when(chat.getChatId()).thenReturn(chatId);
+    @Test
+    @DisplayName("Shows for user with deadlines")
+    void correctShowTest() throws DeadlineNotFound {
+        UserQuery user = new UserQuery(0, 1234, new int[]{});
 
-    //     UserQuery user = new UserQuery(0, chatId);
-    //     Mockito.when(linker.getUserByChatId(chatId)).thenReturn(user);
-
-    //     long burnTime = 18082011;
+        long burnTime = 18082011;
 
 
-    //     DeadlineQuery dl1 = new DeadlineQuery();
-    //     dl1.setName("first");
-    //     dl1.setExpireTime(burnTime);
-    //     dl1.setOwnerId(0);
+        DeadlineQuery dl1 = new DeadlineQuery(1, "first", burnTime,
+                0, 1, new int[]{}, false, 0);
 
-    //     DeadlineQuery dl2 = new DeadlineQuery();
-    //     dl2.setName("second");
-    //     dl2.setExpireTime(burnTime);
-    //     dl2.setOwnerId(0);
+        DeadlineQuery dl2 = new DeadlineQuery(2, "second", burnTime,
+                0, 1, new int[]{}, false, 0);
 
-    //     DeadlineQuery dl3 = new DeadlineQuery();
-    //     dl3.setName("third");
-    //     dl3.setExpireTime(burnTime);
-    //     dl3.setOwnerId(0);
+        DeadlineQuery dl3 = new DeadlineQuery(3, "third", burnTime,
+                0, 1, new int[]{}, false, 0);
 
-    //     DeadlineQuery dl4 = new DeadlineQuery();
-    //     dl4.setName("chotyri");
-    //     dl4.setExpireTime(burnTime);
-    //     dl4.setOwnerId(0);
-
-    //     DeadlineQuery[] deadlinesForUser = {dl1, dl2, dl3, dl4};
-
-    //     Mockito.when(linker.getDeadlinesForUser(0)).thenReturn(deadlinesForUser);
+        DeadlineQuery dl4 = new DeadlineQuery(4, "chotyri", burnTime,
+                0, 1, new int[]{}, false, 0);
 
 
-    //     assertDoesNotThrow(() -> show.execute(chat), "Should not throw");
+        DeadlineQuery[] deadlinesForUser = {dl1, dl2, dl3, dl4};
 
-    //     Mockito.verify(chat, Mockito.times(1)).getChatId();
-    //     Mockito.verify(linker, Mockito.times(1)).getUserByChatId(chatId);
-    //     Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(0);
+        Mockito.when(linker.getDeadlinesForUser(0)).thenReturn(deadlinesForUser);
 
-    //     ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
-    //     Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
+        assertDoesNotThrow(() -> show.execute(0, new String[]{}, null, responseQueue),
+                "Should not throw");
 
-    //     assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
-    //     String answer = answerCaptor.getValue();
+        Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(0);
 
-    //     for (int i = 0; i < 4; i++) {
-    //         assertTrue(answer.contains(deadlinesForUser[i].getName()),
-    //                 "Text contains all deadlines");
-    //     }
-    // }
+        ArgumentCaptor<NumberedString> answerCaptor = ArgumentCaptor.forClass(NumberedString.class);
+        Mockito.verify(responseQueue, Mockito.times(1)).add(answerCaptor.capture());
 
-    // @Test
-    // @DisplayName("Shows for user without deadlines")
-    // void emptyUserTest() throws UserNotFound, DeadlineNotFound {
-    //     long chatId = 12345;
-    //     Mockito.when(chat.getChatId()).thenReturn(chatId);
+        assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
+        NumberedString answer = answerCaptor.getValue();
 
-    //     UserQuery user = new UserQuery(1, chatId);
-    //     Mockito.when(linker.getUserByChatId(chatId)).thenReturn(user);
+        for (int i = 0; i < 4; i++) {
+            assertTrue(answer.getString().contains(deadlinesForUser[i].getName()),
+                    "Text contains all deadlines");
+        }
+    }
 
-    //     Mockito.when(linker.getDeadlinesForUser(1)).thenThrow(DeadlineNotFound.class);
+    @Test
+    @DisplayName("Shows for user without deadlines")
+    void emptyUserTest() throws DeadlineNotFound {
+        DeadlineQuery[] deadlinesForUser = new DeadlineQuery[]{};
+        Mockito.when(linker.getDeadlinesForUser(0)).thenReturn(deadlinesForUser);
 
-    //     assertDoesNotThrow(() -> show.execute(chat), "Should not throw");
+        assertDoesNotThrow(() -> show.execute(0, new String[]{}, null, responseQueue),
+                "Should not throw");
 
-    //     Mockito.verify(chat, Mockito.times(1)).getChatId();
-    //     Mockito.verify(linker, Mockito.times(1)).getUserByChatId(chatId);
-    //     Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(1);
+        Mockito.verify(linker, Mockito.times(1)).getDeadlinesForUser(0);
 
-    //     ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
-    //     Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
+        ArgumentCaptor<NumberedString> answerCaptor = ArgumentCaptor.forClass(NumberedString.class);
+        Mockito.verify(responseQueue, Mockito.times(1)).add(answerCaptor.capture());
 
-    //     assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
-    //     String answer = answerCaptor.getValue();
+        assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
+        NumberedString answer = answerCaptor.getValue();
 
-    //     assertEquals("You have not any deadlines", answer);
-    // }
-
-    // @Test
-    // @DisplayName("Shows for new user")
-    // void userNotFoundTest() throws UserNotFound, DeadlineNotFound {
-    //     long chatId = 4444;
-    //     Mockito.when(chat.getChatId()).thenReturn(chatId);
-
-    //     Mockito.when(linker.getUserByChatId(chatId)).thenThrow(UserNotFound.class);
-
-    //     assertDoesNotThrow(() -> show.execute(chat), "Should not throw");
-
-    //     Mockito.verify(chat, Mockito.times(2)).getChatId();
-    //     Mockito.verify(linker, Mockito.times(1)).getUserByChatId(chatId);
-    //     Mockito.verify(linker, Mockito.never()).getDeadlinesForUser(anyInt());
-
-    //     ArgumentCaptor<String> answerCaptor = ArgumentCaptor.forClass(String.class);
-    //     Mockito.verify(chat, Mockito.times(1)).sendAnswer(answerCaptor.capture());
-
-    //     assertEquals(1, answerCaptor.getAllValues().size(), "Should answer only once");
-    //     String answer = answerCaptor.getValue();
-
-    //     assertEquals("You have not any deadlines", answer);
-    // }
+        assertEquals("You have not any deadlines", answer.getString());
+    }
 }
