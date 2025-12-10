@@ -83,14 +83,11 @@ public class LeaveCommand extends MembershipListCommand {
                 int groupQueryId = Integer.parseInt(currentState.getMemory()[selectId]);
                 UserQuery user = db.getUserById(userId);
                 int[] groupIdList = user.getMembership();
-                int[] newGroupIdList = new int[groupIdList.length];
+                int[] newGroupIdList = new int[groupIdList.length - 1];
 
-                for (int i = 0, j = 0; i < groupIdList.length; i++) {
-                    if (groupIdList[i] != groupQueryId) {
-                        newGroupIdList[j] = groupIdList[i];
-                        j++;
-                    }
-                }
+                System.arraycopy(groupIdList, 0, newGroupIdList, 0, groupQueryId);
+                System.arraycopy(groupIdList, groupQueryId + 1, newGroupIdList,
+                        groupQueryId, groupIdList.length - groupQueryId - 1);
 
 
                 user.setMembership(newGroupIdList);
