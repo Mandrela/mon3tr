@@ -42,7 +42,7 @@ public class ListMembershipTaskCommand implements Command {
      * @return  kek.
      */
     public State execute(final int userId, final String[] args, final State state,
-                         final BlockingQueue<NumberedString> responseQueue) throws CommandException {
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
         State currentState;
         if (state == null) {
             currentState = new State(0, new String[]{}, (Command) this);
