@@ -81,9 +81,9 @@ public class InviteCommand extends OwnedGroupsCommand {
                 int groupQueryId = Integer.parseInt(currentState.getMemory()[selectId]);
                 GroupQuery[] selectGroup = db.getGroups(new int[]{groupQueryId});
                 String token = selectGroup[0].generateToken();
-                selectGroup[0].setToken(token);
+                // selectGroup[0].setToken(token);
                 db.updateGroup(selectGroup[0]);
-                NumberedString answer = new NumberedString(userId, selectGroup[0].generateToken());
+                NumberedString answer = new NumberedString(userId, token);
                 responseQueue.add(answer);
                 return null;
             } catch (GroupNotFound | NumberFormatException e) {

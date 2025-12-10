@@ -16,13 +16,27 @@ public class MembershipListCommand implements Command {
         this.db = linker;
     }
 
+    /**
+     * @return Yes.
+     */
     public String getName() {
         return "membership";
     }
+
+    /**
+     * @return Yes.
+     */
     public String getHelp() {
         return "This command show your memberships";
     }
 
+    /**
+     * @param userId kek.
+     * @param args kek.
+     * @param currentState kek.
+     * @param responseQueue kek.
+     * @return  kek.
+     */
     public State execute(final int userId, final String[] args, final State currentState,
                          final BlockingQueue<NumberedString> responseQueue)
             throws CommandException {

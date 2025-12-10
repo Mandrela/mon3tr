@@ -20,10 +20,12 @@ import su.maibat.mon3tr.commands.DeadlineAddCommand;
 import su.maibat.mon3tr.commands.DeadlineRemoveCommand;
 import su.maibat.mon3tr.commands.GroupCreateCommand;
 import su.maibat.mon3tr.commands.GroupDeleteCommand;
-import su.maibat.mon3tr.commands.GroupJoinCommand;
 import su.maibat.mon3tr.commands.HelpCommand;
 import su.maibat.mon3tr.commands.InviteCommand;
+import su.maibat.mon3tr.commands.JoinCommand;
+import su.maibat.mon3tr.commands.LeaveCommand;
 import su.maibat.mon3tr.commands.ListGroupTaskCommand;
+import su.maibat.mon3tr.commands.MembershipListCommand;
 import su.maibat.mon3tr.commands.MoveToGroupCommand;
 import su.maibat.mon3tr.commands.MyDeadlinesCommand;
 import su.maibat.mon3tr.commands.OwnedGroupsCommand;
@@ -120,20 +122,40 @@ public final class Main {
         OwnedGroupsCommand ownedGroupsCommand = new OwnedGroupsCommand(dataBase);
         GroupDeleteCommand groupDeleteCommand = new GroupDeleteCommand(dataBase);
 
-        GroupJoinCommand groupJoinCommand = new GroupJoinCommand(dataBase);
+        JoinCommand groupJoinCommand = new JoinCommand(dataBase);
         InviteCommand groupInviteCommand = new InviteCommand(dataBase);
-
+        MembershipListCommand groupMembershipCommand = new MembershipListCommand(dataBase);
+        LeaveCommand groupLeaveCommand = new LeaveCommand(dataBase);
 
         MoveToGroupCommand moveToGroupCommand = new MoveToGroupCommand(dataBase);
         ListGroupTaskCommand listGroupTaskCommand = new ListGroupTaskCommand(dataBase);
         RemoveFromGroupCommand removeFromGroupCommand = new RemoveFromGroupCommand(dataBase);
 
 
-        Command[] commands = {help, register, new AboutCommand(), authors,
-                deadlineAddCommand, deadlineGetCommand, deadlineRemoveCommand,
-                updateOffsetCommand, groupCreateCommand, ownedGroupsCommand,
-                groupDeleteCommand, groupJoinCommand, groupInviteCommand,
-                moveToGroupCommand, listGroupTaskCommand, removeFromGroupCommand};
+        Command[] commands = {
+            help,
+            register,
+            new AboutCommand(),
+            authors,
+
+            deadlineAddCommand,
+            deadlineGetCommand,
+            deadlineRemoveCommand,
+            updateOffsetCommand,
+
+            groupCreateCommand,
+            ownedGroupsCommand,
+            groupDeleteCommand,
+
+            groupJoinCommand,
+            groupInviteCommand,
+            groupMembershipCommand,
+            groupLeaveCommand,
+
+            moveToGroupCommand,
+            listGroupTaskCommand,
+            removeFromGroupCommand
+        };
 
         LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
         for (Command command : commands) {

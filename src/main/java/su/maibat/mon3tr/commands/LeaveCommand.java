@@ -11,18 +11,18 @@ import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 import java.util.concurrent.BlockingQueue;
 
-public class LeaveCommand extends MembershipListCommand {
+public final class LeaveCommand extends MembershipListCommand {
     private final SQLiteLinker db;
     public LeaveCommand(final SQLiteLinker linker) {
         super(linker);
         this.db = linker;
     }
 
-    public final String getName() {
+    public String getName() {
         return "leave";
     }
 
-    public final String getHelp() {
+    public String getHelp() {
         return "This command let you leave from group";
     }
 
@@ -85,14 +85,14 @@ public class LeaveCommand extends MembershipListCommand {
                 int[] groupIdList = user.getMembership();
                 int[] newGroupIdList = new int[groupIdList.length - 1];
 
-                System.arraycopy(groupIdList, 0, newGroupIdList, 0, groupQueryId);
-                System.arraycopy(groupIdList, groupQueryId + 1, newGroupIdList,
-                        groupQueryId, groupIdList.length - groupQueryId - 1);
-
+                System.arraycopy(groupIdList, 0, newGroupIdList, 0, selectId);
+                System.arraycopy(groupIdList, selectId + 1, newGroupIdList,
+                        selectId, groupIdList.length - 1);
 
                 user.setMembership(newGroupIdList);
+                db.updateUser(user);
 
-                NumberedString answer = new NumberedString(userId,"nothing" );
+                NumberedString answer = new NumberedString(userId, "nothing");
                 responseQueue.add(answer);
                 return null;
             } catch (NumberFormatException e) {
@@ -103,6 +103,8 @@ public class LeaveCommand extends MembershipListCommand {
                 return currentState;
             } catch (UserNotFound e) {
                 throw new RuntimeException(e);
+            } catch (MalformedQuery e) {
+                throw new RuntimeException();
             }
         } else {
             NumberedString answer = new NumberedString(userId,
