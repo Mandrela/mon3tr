@@ -25,6 +25,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     private static final String USER_SELECT_BY_ID = "SELECT* FROM users WHERE id = ? AND "
         + "active = 1";
     private static final String USER_SELECT_BY_CHAT_ID = "SELECT* FROM users WHERE chatId = ?";
+    private static final String USER_SELECT_FOR_GROUP = "SELECT* FROM users WHERE instr(groups, ?)"
+        + " AND active = 1";
     private static final String USER_SELECT_ALL = "SELECT* FROM users";
     private static final String USER_INSERT = "INSERT INTO users (chatId) VALUES (?)";
     private static final String USER_UPDATE = "UPDATE users SET chatId = ?, dlimit = ?, "
@@ -39,6 +41,8 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         + "userId = ? AND state != -1";
     private static final String DEADLINE_SELECT_FOR_GROUP = "SELECT* FROM deadlines WHERE "
         + "instr(groups, ?) AND state != -1";
+    private static final String DEADLINE_SELECT_BURNING = "SELECT* FROM deadlines WHERE "
+        + "burns - unixepoch('now') < offsetValue AND (state = 0 OR state = 1)";
     private static final String DEADLINE_SELECT_ALL = "SELECT* FROM deadlines WHERE state != -1";
     private static final String DEADLINE_INSERT = "INSERT INTO deadlines (name, burns, "
         + "offsetValue, userId) VALUES (?, ?, ?, ?)";
@@ -67,6 +71,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
     private final PreparedStatement user_get_by_id;
     private final PreparedStatement user_get_by_chat_id;
+    private final PreparedStatement user_get_for_group;
     private final PreparedStatement user_get_all;
     private final PreparedStatement user_add;
     private final PreparedStatement user_update;
@@ -75,6 +80,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
     private final PreparedStatement deadline_get_by_id;
     private final PreparedStatement deadline_get_by_user_id;
     private final PreparedStatement deadline_get_by_group_id;
+    private final PreparedStatement deadline_get_burning;
     private final PreparedStatement deadline_get_all;
     private final PreparedStatement deadline_add;
     private final PreparedStatement deadline_update;
@@ -137,6 +143,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
             user_get_by_id = conn.prepareStatement(USER_SELECT_BY_ID);
             user_get_by_chat_id = conn.prepareStatement(USER_SELECT_BY_CHAT_ID);
+            user_get_for_group = conn.prepareStatement(USER_SELECT_FOR_GROUP);
             user_get_all = conn.prepareStatement(USER_SELECT_ALL);
             user_add = conn.prepareStatement(USER_INSERT);
             user_update = conn.prepareStatement(USER_UPDATE);
@@ -145,6 +152,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             deadline_get_by_id = conn.prepareStatement(DEADLINE_SELECT_BY_ID);
             deadline_get_by_user_id = conn.prepareStatement(DEADLINE_SELECT_BY_USER_ID);
             deadline_get_by_group_id = conn.prepareStatement(DEADLINE_SELECT_FOR_GROUP);
+            deadline_get_burning = conn.prepareStatement(DEADLINE_SELECT_BURNING);
             deadline_get_all = conn.prepareStatement(DEADLINE_SELECT_ALL);
             deadline_add = conn.prepareStatement(DEADLINE_INSERT);
             deadline_update = conn.prepareStatement(DEADLINE_UPDATE);
@@ -326,6 +334,33 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
         }
     }
 
+    @Override
+    public UserQuery[] getUsersForGroups(final int[] groupsId) throws LinkerException {
+        try {
+            java.util.ArrayList<UserQuery> userQuerys = new java.util.ArrayList<>();
+            for (int groupId : groupsId) {
+                ResultSet result;
+                synchronized (user_get_for_group) {
+                    user_get_for_group.setString(1, ":" + groupId + ":");
+                    synchronized (conn) {
+                        result = user_get_for_group.executeQuery();
+                    }
+                }
+
+                try {
+                    while (true) {
+                        userQuerys.add(parseUserFromResult(result));
+                    }
+                } catch (UserNotFound e) {
+                }
+            }
+
+            return userQuerys.toArray(UserQuery[]::new);
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("getGroupDeadlines") + ": " + e.getMessage());
+        }
+    }
+
     public UserQuery[] getAllUsers() throws LinkerException {
         try {
             ResultSet result;
@@ -502,6 +537,25 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             return deadlineQuerys.toArray(DeadlineQuery[]::new);
         } catch (SQLException e) {
             throw new LinkerException(collectInfo("getGroupDeadlines") + ": " + e.getMessage());
+        }
+    }
+
+    @Override
+    public DeadlineQuery[] getBurningDeadlines() throws LinkerException {
+        try {
+            ResultSet result;
+            synchronized (conn) {
+                result = deadline_get_burning.executeQuery();
+            }
+
+            java.util.ArrayList<DeadlineQuery> deadlineQuerys = new java.util.ArrayList<>();
+            while (result.next()) {
+                deadlineQuerys.add(parseDeadlineFromResult(result));
+            }
+
+            return deadlineQuerys.toArray(DeadlineQuery[]::new);
+        } catch (SQLException e) {
+            throw new LinkerException(collectInfo("getBurningDeadlines") + e.getMessage());
         }
     }
 

@@ -82,6 +82,10 @@ public final class DeadlineQuery extends DBQuery {
         return state;
     }
 
+    public void setState(final int arg) {
+        state = arg;
+    }
+
 
     public boolean isBurning() {
         return state == 1;
@@ -100,8 +104,8 @@ public final class DeadlineQuery extends DBQuery {
         return notified;
     }
 
-    public void setNotified() {
-        notified = true;
+    public void setNotified(final boolean arg) {
+        notified = arg;
     }
 
 

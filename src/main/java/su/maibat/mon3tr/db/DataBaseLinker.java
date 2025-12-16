@@ -28,6 +28,7 @@ public interface DataBaseLinker {
     long getChatIdByUserId(int id) throws UserNotFound, LinkerException;
     UserQuery getUserById(int id) throws UserNotFound, LinkerException;
     UserQuery getUserByChatId(long chatId) throws UserNotFound, LinkerException;
+    UserQuery[] getUsersForGroups(int[] id) throws LinkerException;
     UserQuery[] getAllUsers() throws LinkerException;
 
 
@@ -49,6 +50,7 @@ public interface DataBaseLinker {
     DeadlineQuery getDeadline(int id) throws DeadlineNotFound, LinkerException;
     DeadlineQuery[] getDeadlinesForUser(int userId) throws DeadlineNotFound, LinkerException;
     DeadlineQuery[] getGroupsDeadlines(int[] groupsId) throws GroupNotFound, LinkerException;
+    DeadlineQuery[] getBurningDeadlines() throws LinkerException;
     DeadlineQuery[] getAllDeadlines() throws LinkerException;
 
 
