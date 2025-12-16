@@ -110,7 +110,7 @@ public final class GroupDeleteCommandTest {
 
     @Test
     @DisplayName("Empty group Test")
-    void emptyDlTest() throws CommandException, DeadlineNotFound, UserNotFound {
+    void emptyGroupTest() throws CommandException, DeadlineNotFound, UserNotFound {
         GroupQuery[] queryList = new GroupQuery[]{};
         Mockito.when(linker.getOwnedGroups(1)).thenReturn(queryList);
 
