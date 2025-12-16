@@ -1,0 +1,88 @@
+package su.maibat.mon3tr.commands.task;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.BlockingQueue;
+
+import su.maibat.mon3tr.NumberedString;
+import su.maibat.mon3tr.commands.Command;
+import su.maibat.mon3tr.commands.State;
+import su.maibat.mon3tr.commands.exceptions.CommandException;
+import su.maibat.mon3tr.db.DataBaseLinker;
+import su.maibat.mon3tr.db.DeadlineQuery;
+import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
+
+
+public class ListPersonalTasks implements Command {
+    private static final int OFFSET = 1000;
+    private final DataBaseLinker db;
+
+
+    public ListPersonalTasks(final DataBaseLinker inputLinker) {
+        this.db = inputLinker;
+    }
+
+
+    /**
+     * @return Command name
+     */
+    public String getName() {
+        return "listPersonalTasks";
+    }
+
+    /**
+     * @return Help info about command
+     */
+    public String getHelp() {
+        return "Lists tasks created by you";
+    }
+
+
+    /**
+     * @param userId kek.
+     * @param args kek.
+     * @param currentState kek.
+     * @param responseQueue kek.
+     * @return  kek.
+     */
+    public State execute(final int userId, final String[] args, final State currentState,
+            final BlockingQueue<NumberedString> responseQueue) throws CommandException {
+        try {
+            DeadlineQuery[] queryList = db.getDeadlinesForUser(userId);
+            if (queryList.length == 0) {
+                NumberedString answer = new NumberedString(userId, "You have no tasks");
+                responseQueue.add(answer);
+                return null;
+            }
+            NumberedString answer = new NumberedString(userId, printTable(queryList));
+            responseQueue.add(answer);
+            return null;
+        } catch (DeadlineNotFound dnf) {
+            NumberedString answer = new NumberedString(userId, "You have no tasks");
+            responseQueue.add(answer);
+            return null;
+        }
+
+    }
+
+    protected final String printTable(final DeadlineQuery[] queryList) {
+        String answer = "";
+        String answerFragment = "";
+        for (int i = 0; i < queryList.length; i++) {
+            answerFragment = answerFragment.concat((i + 1) + " : " + queryList[i].getName() + " : "
+                    + new SimpleDateFormat("dd/MM/yyyy").
+                    format(new Date(queryList[i].getExpireTime() * OFFSET)));
+            if (queryList[i].isBurning()) {
+                answerFragment = answerFragment + "\uD83D\uDD25";
+            } else if (queryList[i].isDead()) {
+                answerFragment = answerFragment + "\uD83D\uDC80";
+            } else if (queryList[i].isCompleted()) {
+                answerFragment = answerFragment + "\u2713";
+            }
+            answer = answer.concat(answerFragment + "\n");
+            answerFragment = "";
+
+        }
+        return answer;
+    }
+}

@@ -58,6 +58,6 @@ public final class Notifier implements Runnable, Reactor {
 
     @Override
     public void trigger(final int id) {
-        runOnce();
+        runOnce(); // TODO: think
     }
 }

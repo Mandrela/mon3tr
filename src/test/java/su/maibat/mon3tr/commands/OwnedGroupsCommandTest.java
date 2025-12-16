@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
+import su.maibat.mon3tr.commands.group.ListGroups;
 import su.maibat.mon3tr.db.GroupQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OwnedGroupsCommandTest {
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
-    private final OwnedGroupsCommand owned = new OwnedGroupsCommand(linker);
+    private final ListGroups owned = new ListGroups(linker);
     private final BlockingQueue<NumberedString> responseQueue =
             (BlockingQueue<NumberedString>) Mockito.mock(BlockingQueue.class);
 

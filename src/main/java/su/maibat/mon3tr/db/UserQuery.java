@@ -10,12 +10,18 @@ public final class UserQuery extends DBQuery {
 
     // For future use
     private boolean hasPaidSubscribeForWeatherNews = false;
+    @SuppressWarnings("unused")
     private boolean sendNews;
+    @SuppressWarnings("unused")
     private int remindStrategy;
 
+    @SuppressWarnings("unused")
     private boolean concurrent;
+    @SuppressWarnings("unused")
     private int burnedDeadlines;
+    @SuppressWarnings("unused")
     private int completedDeadlines;
+    @SuppressWarnings("unused")
     private String name;
 
     private int[] membership;

@@ -13,26 +13,27 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import su.maibat.mon3tr.bot.Bot;
 import su.maibat.mon3tr.bot.BotBackend;
-import su.maibat.mon3tr.commands.AboutCommand;
-import su.maibat.mon3tr.commands.AuthorsCommand;
 import su.maibat.mon3tr.commands.Command;
-import su.maibat.mon3tr.commands.DeadlineAddCommand;
-import su.maibat.mon3tr.commands.DeadlineRemoveCommand;
-import su.maibat.mon3tr.commands.GroupCreateCommand;
-import su.maibat.mon3tr.commands.GroupDeleteCommand;
-import su.maibat.mon3tr.commands.HelpCommand;
-import su.maibat.mon3tr.commands.InviteCommand;
-import su.maibat.mon3tr.commands.JoinCommand;
-import su.maibat.mon3tr.commands.LeaveCommand;
-import su.maibat.mon3tr.commands.ListGroupTaskCommand;
-import su.maibat.mon3tr.commands.ListMembershipTaskCommand;
-import su.maibat.mon3tr.commands.MembershipListCommand;
-import su.maibat.mon3tr.commands.MoveToGroupCommand;
-import su.maibat.mon3tr.commands.MyDeadlinesCommand;
-import su.maibat.mon3tr.commands.OwnedGroupsCommand;
-import su.maibat.mon3tr.commands.RegisterCommand;
-import su.maibat.mon3tr.commands.RemoveFromGroupCommand;
-import su.maibat.mon3tr.commands.UpdateOffsetCommand;
+import su.maibat.mon3tr.commands.InfoStub;
+import su.maibat.mon3tr.commands.general.About;
+import su.maibat.mon3tr.commands.general.Authors;
+import su.maibat.mon3tr.commands.general.Help;
+import su.maibat.mon3tr.commands.general.Register;
+import su.maibat.mon3tr.commands.group.CreateGroup;
+import su.maibat.mon3tr.commands.group.DeleteGroup;
+import su.maibat.mon3tr.commands.group.Invite;
+import su.maibat.mon3tr.commands.group.Join;
+import su.maibat.mon3tr.commands.group.Leave;
+import su.maibat.mon3tr.commands.group.Membership;
+import su.maibat.mon3tr.commands.group.ListGroups;
+import su.maibat.mon3tr.commands.task.AddTask;
+import su.maibat.mon3tr.commands.task.RemoveTask;
+import su.maibat.mon3tr.commands.task.ListAssignedTasks;
+import su.maibat.mon3tr.commands.task.ListMembershipTasks;
+import su.maibat.mon3tr.commands.task.Assign;
+import su.maibat.mon3tr.commands.task.ListPersonalTasks;
+import su.maibat.mon3tr.commands.task.Resign;
+import su.maibat.mon3tr.commands.task.Postpone;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.LinkerException;
 import su.maibat.mon3tr.notifier.Notifier;
@@ -77,7 +78,6 @@ public final class Main {
         if (dbName == null) {
             dbName = "mon3tr-database.db";
         }
-
         String customAuthors = System.getenv("AUTHORS");
 
 
@@ -101,11 +101,11 @@ public final class Main {
 
         // Commands
         WeakHashMap<Integer, Long> uidMap = new WeakHashMap<>();
-        RegisterCommand register = new RegisterCommand(dataBase, uidMap);
+        Register register = new Register(dataBase, uidMap);
 
-        HelpCommand help = new HelpCommand();
+        Help help = new Help();
 
-        AuthorsCommand authors = new AuthorsCommand();
+        Authors authors = new Authors();
         if (customAuthors != null) {
             authors.setInfo(customAuthors);
             System.out.println(INFO + "Using custom authors info.");
@@ -114,50 +114,51 @@ public final class Main {
         BlockingQueue<NumberedString> queue = new ArrayBlockingQueue<NumberedString>(queueCapacity);
         Notifier notifier = new Notifier(dataBase, queue);
 
-        DeadlineAddCommand deadlineAddCommand = new DeadlineAddCommand(dataBase, notifier);
-        MyDeadlinesCommand deadlineGetCommand = new MyDeadlinesCommand(dataBase);
-        DeadlineRemoveCommand deadlineRemoveCommand = new DeadlineRemoveCommand(dataBase);
-        UpdateOffsetCommand updateOffsetCommand = new UpdateOffsetCommand(dataBase, notifier);
+        AddTask taskAdd = new AddTask(dataBase, notifier);
+        ListPersonalTasks taskList = new ListPersonalTasks(dataBase);
+        RemoveTask taskRemove = new RemoveTask(dataBase);
+        Postpone postpone = new Postpone(dataBase, notifier);
 
-        GroupCreateCommand groupCreateCommand = new GroupCreateCommand(dataBase);
-        OwnedGroupsCommand ownedGroupsCommand = new OwnedGroupsCommand(dataBase);
-        GroupDeleteCommand groupDeleteCommand = new GroupDeleteCommand(dataBase);
+        CreateGroup groupCreate = new CreateGroup(dataBase);
+        ListGroups groupList = new ListGroups(dataBase);
+        DeleteGroup groupDelete = new DeleteGroup(dataBase);
 
-        JoinCommand groupJoinCommand = new JoinCommand(dataBase);
-        InviteCommand groupInviteCommand = new InviteCommand(dataBase);
-        MembershipListCommand groupMembershipCommand = new MembershipListCommand(dataBase);
-        LeaveCommand groupLeaveCommand = new LeaveCommand(dataBase);
+        Join join = new Join(dataBase);
+        Invite invite = new Invite(dataBase);
+        Membership membership = new Membership(dataBase);
+        Leave leave = new Leave(dataBase);
 
-        MoveToGroupCommand moveToGroupCommand = new MoveToGroupCommand(dataBase);
-        ListGroupTaskCommand listGroupTaskCommand = new ListGroupTaskCommand(dataBase);
-        RemoveFromGroupCommand removeFromGroupCommand = new RemoveFromGroupCommand(dataBase);
-        ListMembershipTaskCommand listMembershipTask = new ListMembershipTaskCommand(dataBase);
+        Assign assign = new Assign(dataBase);
+        ListAssignedTasks taskListAssigned = new ListAssignedTasks(dataBase);
+        Resign resign = new Resign(dataBase);
+        ListMembershipTasks taskListMembershiped = new ListMembershipTasks(dataBase);
 
 
         Command[] commands = {
+            new InfoStub("\nGeneral:"),
             help,
             register,
-            new AboutCommand(),
+            new About(),
             authors,
-
-            deadlineAddCommand,
-            deadlineGetCommand,
-            deadlineRemoveCommand,
-            updateOffsetCommand,
-
-            groupCreateCommand,
-            ownedGroupsCommand,
-            groupDeleteCommand,
-
-            groupJoinCommand,
-            groupInviteCommand,
-            groupMembershipCommand,
-            groupLeaveCommand,
-
-            moveToGroupCommand,
-            listGroupTaskCommand,
-            removeFromGroupCommand,
-            listMembershipTask
+            new InfoStub("\nTasks:"),
+            taskAdd,
+            taskList,
+            taskRemove,
+            postpone,
+            new InfoStub(""),
+            assign,
+            taskListAssigned,
+            resign,
+            new InfoStub("\nGroups:"),
+            groupCreate,
+            groupList,
+            groupDelete,
+            invite,
+            new InfoStub("\nMembership:"),
+            join,
+            membership,
+            leave,
+            taskListMembershiped,
         };
 
         LinkedHashMap<String, Command> commandMap = new LinkedHashMap<>();
