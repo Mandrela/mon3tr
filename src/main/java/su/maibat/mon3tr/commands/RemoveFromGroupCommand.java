@@ -37,6 +37,10 @@ public final class RemoveFromGroupCommand extends ListGroupTaskCommand {
                 return super.showGroups(userId, args, currentState, responseQueue);
             case (1):
                 return super.selectGroup(userId, args, currentState, responseQueue);
+            case (2):
+                return showDeadlines(userId, args, currentState, responseQueue);
+            case (2 + 1):
+                return selectDeadlineIndex(userId, args[0], currentState, responseQueue);
             default:
                 System.out.println("Out state");
                 NumberedString answer = new NumberedString(userId, "Something went wrong");
@@ -60,14 +64,20 @@ public final class RemoveFromGroupCommand extends ListGroupTaskCommand {
             NumberedString answer = new NumberedString(userId, printDeadlineTable(queryList));
             responseQueue.add(answer);
 
+            System.out.println(queryList[0].getId());
+            System.out.println(currentState.getMemory()[0]);
+
             String[] idList = new String[queryList.length + 1];
             idList[0] = currentState.getMemory()[0];
-            for (int i = 1; i < queryList.length; i++) {
-                idList[i] = Integer.toString(queryList[i].getId());
+            for (int i = 1; i < queryList.length + 1; i++) {
+                idList[i] = Integer.toString(queryList[i - 1].getId());
             }
-            currentState.setMemory(idList);
 
-            return selectDeadlineIndex(userId, args, currentState, responseQueue);
+            currentState.setMemory(idList);
+            if (args.length == 1) {
+                return selectDeadlineIndex(userId, "", currentState, responseQueue);
+            }
+            return selectDeadlineIndex(userId, args[1], currentState, responseQueue);
 
         } catch (GroupNotFound e) {
             NumberedString answer = new NumberedString(userId, "You have not any deadlines");
@@ -76,13 +86,14 @@ public final class RemoveFromGroupCommand extends ListGroupTaskCommand {
         }
     }
 
-    private State selectDeadlineIndex(final int userId, final String[] args,
+    private State selectDeadlineIndex(final int userId, final String arg,
             final State currentState, final BlockingQueue<NumberedString> responseQueue) {
-        if (args.length != 0 && super.isValid(args[0], currentState.getMemory().length)) {
+        if (!(arg.isEmpty()) && (arg != "")
+                && super.isValid(arg, currentState.getMemory().length)) {
             try {
-                int deadlineId = Integer.parseInt(args[0]);
-
+                int deadlineId = Integer.parseInt(arg);
                 int deadlineQueryId = Integer.parseInt(currentState.getMemory()[deadlineId]);
+
                 int groupQueryId = Integer.parseInt(currentState.getMemory()[0]);
 
                 DeadlineQuery deadline = db.getDeadline(deadlineQueryId);
