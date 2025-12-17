@@ -82,22 +82,6 @@ public final class Notifier implements Runnable, Reactor {
                 deadline.setNotified(true);
                 db.updateDeadline(deadline);
             }
-
-            // if (deadline.isBurning() && !deadline.isNotified()) {
-            // System.out.println(DEBUG + "[notif]: Found burning deadline " + deadline.getName());
-            //     try {
-            //         queue.put(new NumberedString(
-            //             deadline.getOwnerId(),
-            //             String.format(OWN_TASK_BURN, deadline.getName())
-            //         ));
-            //         deadline.setNotified(true);
-            //         db.updateDeadline(deadline);
-            //     } catch (MalformedQuery e) {
-            //         System.out.println(ERROR + "Impossible happened, wasn't able to update "
-            //             + "deadline " + deadline.getName() + " with id " + deadline.getId());
-            //     } catch (InterruptedException e) {
-            //     }
-            // }
         }
     }
 
