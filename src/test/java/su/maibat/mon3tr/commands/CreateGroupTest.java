@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
+import su.maibat.mon3tr.commands.group.CreateGroup;
 import su.maibat.mon3tr.db.SQLiteLinker;
 
 import java.util.concurrent.BlockingQueue;
@@ -15,11 +16,11 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class GroupCreateCommandTest {
+public final class CreateGroupTest {
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
     private final BlockingQueue<NumberedString> responseQueue =
             (BlockingQueue<NumberedString>) Mockito.mock(BlockingQueue.class);
-    private final GroupCreateCommand create = new GroupCreateCommand(linker);
+    private final CreateGroup create = new CreateGroup(linker);
 
     @ParameterizedTest(name = "Name set")
     @MethodSource("nameArgs")
@@ -36,7 +37,7 @@ public final class GroupCreateCommandTest {
 
         NumberedString answer = answerCaptor.getValue();
         assertEquals(1, answer.getNumber());
-        assertEquals(answer.getString().equals("Your group has been successfully created!"), valid);
+        assertEquals(answer.getString().equals("Group created"), valid);
         assertEquals(answer.getString().equals("Enter group name"), !valid);
         assertEquals(resultState == null, valid);
 

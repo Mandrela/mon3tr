@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import su.maibat.mon3tr.NumberedString;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
+import su.maibat.mon3tr.commands.task.ListAssignedTasks;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.GroupQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
@@ -22,9 +23,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public final class ListGroupTaskTest {
+public final class ListAssignedTasksTest {
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
-    private final ListGroupTaskCommand list = new ListGroupTaskCommand(linker);
+    private final ListAssignedTasks list = new ListAssignedTasks(linker);
     private final BlockingQueue<NumberedString> responseQueue =
             (BlockingQueue<NumberedString>) Mockito.mock(BlockingQueue.class);
 
@@ -99,8 +100,8 @@ public final class ListGroupTaskTest {
 
     static Stream<Arguments> emptyArgs() {
         return Stream.of(
-                Arguments.of(0, 1, "Please enter a valid group id (number)"),
-                Arguments.of(1, 1, "Please enter a valid group id (number)"),
+                Arguments.of(0, 1, "Please enter a valid group id"),
+                Arguments.of(1, 1, "Please enter a valid group id"),
                 Arguments.of(2, -1, "")
         );
     }
@@ -156,7 +157,7 @@ public final class ListGroupTaskTest {
         NumberedString answer = answerCaptor.getValue();
 
         assertEquals(1, answer.getNumber());
-        assertEquals("You have not any groups", answer.getString());
+        assertEquals("You have no groups", answer.getString());
         assertNull(resultState);
     }
 
@@ -175,7 +176,7 @@ public final class ListGroupTaskTest {
         NumberedString answer = answerCaptor.getValue();
 
         assertEquals(1, answer.getNumber());
-        assertEquals("You have not any deadlines", answer.getString());
+        assertEquals("You have no tasks", answer.getString());
         assertNull(resultState);
     }
 
@@ -194,7 +195,7 @@ public final class ListGroupTaskTest {
         Mockito.verify(responseQueue, Mockito.times(1)).add(answerCaptor.capture());
         NumberedString answer = answerCaptor.getValue();
         assertEquals(1, answer.getNumber());
-        assertEquals(invalid, answer.getString().equals("Please enter a valid group id (number)"));
+        assertEquals(invalid, answer.getString().equals("Please enter a valid group id"));
         assertEquals(invalid, resultState != null);
     }
 

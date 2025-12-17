@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import su.maibat.mon3tr.NumberedString;
+import su.maibat.mon3tr.commands.group.Join;
 import su.maibat.mon3tr.db.GroupQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;
@@ -19,9 +20,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class JoinCommandTest {
+public final class JoinTest {
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
-    private final JoinCommand join = new JoinCommand(linker);
+    private final Join join = new Join(linker);
     private final BlockingQueue<NumberedString> responseQueue =
             (BlockingQueue<NumberedString>) Mockito.mock(BlockingQueue.class);
 
@@ -59,10 +60,10 @@ public final class JoinCommandTest {
 
     static Stream<Arguments> nameArgs() {
         return Stream.of(
-                Arguments.of("1234Test", "You are new member now", true),
-                Arguments.of("12355555Test", "This token is not valid, please enter again", false),
-                Arguments.of("27.12.25", "This token is not valid, please enter again", false),
-                Arguments.of("", "This token is not valid, please enter again", false)
+                Arguments.of("1234Test", "Membership aquired", true),
+                Arguments.of("12355555Test", "Token is not valid", false),
+                Arguments.of("27.12.25", "Token is not valid", false),
+                Arguments.of("", "Token is not valid", false)
         );
     }
 }

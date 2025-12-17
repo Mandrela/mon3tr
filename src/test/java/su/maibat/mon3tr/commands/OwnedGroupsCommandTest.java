@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class OwnedGroupsCommandTest {
     private final SQLiteLinker linker = Mockito.mock(SQLiteLinker.class);
     private final ListGroups owned = new ListGroups(linker);
+    @SuppressWarnings("unused")
+    private UserQuery user;
     private final BlockingQueue<NumberedString> responseQueue =
             (BlockingQueue<NumberedString>) Mockito.mock(BlockingQueue.class);
 
@@ -27,7 +29,7 @@ public class OwnedGroupsCommandTest {
     final void setUp() throws UserNotFound {
         long chatId = 1234;
         int[] groups = {1, 2, 3};
-        UserQuery user = new UserQuery(1, chatId, groups);
+        user = new UserQuery(1, chatId, groups);
 
     }
 
@@ -39,7 +41,7 @@ public class OwnedGroupsCommandTest {
         GroupQuery[] groupList = {group1, group2, group3};
         Mockito.when(linker.getOwnedGroups(1)).thenReturn(groupList);
 
-        State result = owned.execute(1, new String[]{}, null, responseQueue);
+        owned.execute(1, new String[]{}, null, responseQueue);
 
         ArgumentCaptor<NumberedString> answerCaptor = ArgumentCaptor.forClass(NumberedString.class);
         Mockito.verify(responseQueue, Mockito.times(1)).add(answerCaptor.capture());
