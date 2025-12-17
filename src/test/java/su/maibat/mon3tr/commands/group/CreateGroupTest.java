@@ -1,4 +1,4 @@
-package su.maibat.mon3tr.commands;
+package su.maibat.mon3tr.commands.group;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,8 +7,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import su.maibat.mon3tr.NumberedString;
+import su.maibat.mon3tr.commands.State;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
-import su.maibat.mon3tr.commands.group.CreateGroup;
 import su.maibat.mon3tr.db.SQLiteLinker;
 
 import java.util.concurrent.BlockingQueue;

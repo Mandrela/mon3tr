@@ -1,4 +1,4 @@
-package su.maibat.mon3tr.commands;
+package su.maibat.mon3tr.commands.task;
 
 
 import java.util.concurrent.BlockingQueue;
@@ -19,8 +19,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import su.maibat.mon3tr.NumberedString;
+import su.maibat.mon3tr.commands.State;
 import su.maibat.mon3tr.commands.exceptions.CommandException;
-import su.maibat.mon3tr.commands.task.AddTask;
 import su.maibat.mon3tr.db.DataBaseLinker;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;

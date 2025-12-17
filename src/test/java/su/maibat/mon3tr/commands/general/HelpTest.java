@@ -1,4 +1,4 @@
-package su.maibat.mon3tr.commands;
+package su.maibat.mon3tr.commands.general;
 
 // import java.util.LinkedHashMap;
 // import java.util.stream.Stream;

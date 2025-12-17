@@ -1,4 +1,4 @@
-package su.maibat.mon3tr.commands;
+package su.maibat.mon3tr.commands.task;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -9,7 +9,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import su.maibat.mon3tr.NumberedString;
-import su.maibat.mon3tr.commands.task.ListPersonalTasks;
 import su.maibat.mon3tr.db.DeadlineQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.exceptions.DeadlineNotFound;
