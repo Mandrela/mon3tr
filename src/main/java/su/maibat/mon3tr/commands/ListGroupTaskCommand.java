@@ -53,6 +53,8 @@ public class ListGroupTaskCommand implements Command {
                 return showGroups(userId, args, currentState, responseQueue);
             case (1):
                 return selectGroup(userId, args, currentState, responseQueue);
+            case(2):
+                return showDeadlines(userId, args, currentState, responseQueue);
             default:
                 System.out.println("Out state");
                 NumberedString answer = new NumberedString(userId, "Something went wrong");
@@ -110,6 +112,7 @@ public class ListGroupTaskCommand implements Command {
                 int reqId = Integer.parseInt(args[0]) - 1;
                 String reqGroup = currentState.getMemory()[reqId];
                 currentState.setMemory(new String[]{reqGroup});
+                currentState.setStateId(2);
                 return showDeadlines(userId, args, currentState, responseQueue);
             } else {
                 NumberedString answer = new NumberedString(userId, "Please enter a"
