@@ -7,7 +7,6 @@ import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.GroupQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;
-import su.maibat.mon3tr.db.exceptions.GroupNotFound;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
 import java.util.concurrent.BlockingQueue;
@@ -50,6 +49,7 @@ public class Membership implements Command {
         try {
             UserQuery user = db.getUserById(userId);
             int[] groupIdList = user.getMembership();
+            // System.out.println(groupIdList.length);
             if (groupIdList.length == 0) {
                 NumberedString answer = new NumberedString(userId, "You have no memberships");
                 responseQueue.add(answer);
@@ -59,7 +59,7 @@ public class Membership implements Command {
             NumberedString answer = new NumberedString(userId, printTable(groupList));
             responseQueue.add(answer);
             return null;
-        } catch (GroupNotFound | UserNotFound nf) {
+        } catch (UserNotFound nf) {
             NumberedString answer = new NumberedString(userId, "You have no memberships");
             responseQueue.add(answer);
             return null;

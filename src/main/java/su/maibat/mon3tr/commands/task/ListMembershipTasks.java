@@ -98,7 +98,7 @@ public class ListMembershipTasks implements Command {
             currentState.setMemory(idList);
             return selectGroup(userId, args, currentState, responseQueue);
 
-        } catch (UserNotFound | GroupNotFound unf) {
+        } catch (UserNotFound unf) {
             NumberedString answer = new NumberedString(userId, "You have no memberships");
             responseQueue.add(answer);
             return null;

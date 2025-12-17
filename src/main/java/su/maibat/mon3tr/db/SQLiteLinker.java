@@ -629,7 +629,7 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
             result.getInt("owner"), result.getString("token"));
     }
 
-    public GroupQuery[] getGroups(final int[] groupsId) throws GroupNotFound, LinkerException {
+    public GroupQuery[] getGroups(final int[] groupsId) throws LinkerException {
         try {
             java.util.ArrayList<GroupQuery> groupQuerys = new java.util.ArrayList<>();
             for (int groupId : groupsId) {
@@ -643,8 +643,6 @@ public final class SQLiteLinker extends AbstractDataBaseLinker implements Closea
 
                 if (result.next()) {
                     groupQuerys.add(parseGroupFromResult(result));
-                } else {
-                    throw new GroupNotFound(groupId);
                 }
             }
 

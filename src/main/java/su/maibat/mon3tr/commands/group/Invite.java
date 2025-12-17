@@ -5,7 +5,6 @@ import su.maibat.mon3tr.commands.Command;
 import su.maibat.mon3tr.commands.State;
 import su.maibat.mon3tr.db.GroupQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
-import su.maibat.mon3tr.db.exceptions.GroupNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
@@ -92,7 +91,7 @@ public class Invite extends ListGroups {
                 NumberedString answer = new NumberedString(userId, token);
                 responseQueue.add(answer);
                 return null;
-            } catch (GroupNotFound | NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 NumberedString answer = new NumberedString(userId,
                         "Please enter a valid group id");
                 responseQueue.add(answer);

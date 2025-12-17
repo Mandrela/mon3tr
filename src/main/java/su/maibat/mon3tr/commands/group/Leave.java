@@ -7,7 +7,6 @@ import su.maibat.mon3tr.commands.exceptions.CommandException;
 import su.maibat.mon3tr.db.GroupQuery;
 import su.maibat.mon3tr.db.SQLiteLinker;
 import su.maibat.mon3tr.db.UserQuery;
-import su.maibat.mon3tr.db.exceptions.GroupNotFound;
 import su.maibat.mon3tr.db.exceptions.MalformedQuery;
 import su.maibat.mon3tr.db.exceptions.UserNotFound;
 
@@ -74,7 +73,7 @@ public final class Leave extends Membership {
             }
             state.setMemory(idList);
             return selectIndex(userId, args, state, responseQueue);
-        } catch (UserNotFound | GroupNotFound unf) {
+        } catch (UserNotFound unf) {
             NumberedString answer = new NumberedString(userId, "You have no groups");
             responseQueue.add(answer);
             return null;
