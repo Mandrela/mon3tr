@@ -34,7 +34,6 @@ public final class RemoveTaskTest {
     @BeforeEach
     void setUp() throws UserNotFound, DeadlineNotFound {
 
-
         UserQuery user = new UserQuery(1, 1234, new int[]{});
         Mockito.when(linker.getUserById(1)).thenReturn(user);
 
@@ -60,7 +59,7 @@ public final class RemoveTaskTest {
 
     @ParameterizedTest(name = "Empty set")
     @MethodSource("emptyArgs")
-    @DisplayName("Add without arguments")
+    @DisplayName("Remove without arguments")
     void withoutTest(final int inStateId, final int outStateId, final String answerText)
             throws CommandException, DeadlineNotFound {
 
@@ -91,7 +90,7 @@ public final class RemoveTaskTest {
 
     @ParameterizedTest(name = "Args set")
     @MethodSource("someArgs")
-    @DisplayName("Add with arguments")
+    @DisplayName("Remove with arguments")
     void withArgsTest(final int inStateId, final String answerText)
             throws CommandException, DeadlineNotFound {
 
@@ -144,7 +143,7 @@ public final class RemoveTaskTest {
 
     @ParameterizedTest(name = "Illegal Args set")
     @MethodSource("illegalArgs")
-    @DisplayName("Add with arguments")
+    @DisplayName("Remove with arguments")
     void illegalArgsTest(final String arg, final boolean valid)
             throws CommandException {
 
