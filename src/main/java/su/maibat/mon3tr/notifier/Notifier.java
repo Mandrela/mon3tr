@@ -42,7 +42,7 @@ public final class Notifier implements Runnable, Reactor {
 
     public void runOnDeadlines(final DeadlineQuery[] deadlines, final boolean fastExec)
                 throws MalformedQuery, InterruptedException {
-        System.out.println("Begun run for " + deadlines.length);
+        // System.out.println("Begun run for " + deadlines.length);
         for (DeadlineQuery deadline: deadlines) {
             long timeDiff = deadline.getExpireTime()
                 - System.currentTimeMillis() / DateUtils.MILLIS_IN_SEC;

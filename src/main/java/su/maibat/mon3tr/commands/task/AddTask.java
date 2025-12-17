@@ -25,6 +25,7 @@ import static java.util.regex.Pattern.compile;
 
 public final class AddTask implements Command {
     private final DataBaseLinker db;
+    @SuppressWarnings("unused")
     private final Reactor reactor;
 
 
@@ -131,7 +132,6 @@ public final class AddTask implements Command {
             inputQuery.setOwnerId(userId);
 
             db.addDeadline(inputQuery);
-            reactor.trigger(0);
 
             UserQuery user = db.getUserById(userId);
             user.setLimit(user.getLimit() - 1);
@@ -139,6 +139,8 @@ public final class AddTask implements Command {
 
             NumberedString answer = new NumberedString(userId, "Task added");
             responseQueue.add(answer);
+
+            // reactor.trigger(userId);
             return null;
         } catch (MalformedQuery mq) {
             currentState.setStateId(2);

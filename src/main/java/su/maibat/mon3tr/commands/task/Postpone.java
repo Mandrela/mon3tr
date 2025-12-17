@@ -118,13 +118,14 @@ public class Postpone extends ListPersonalTasks {
 
                     DeadlineQuery deadline = db.getDeadline(updateId);
                     deadline.setRemindOffset(Long.parseLong(arg) * SECONDS_IN_DAY);
+                    deadline.setNotified(false);
                     db.updateDeadline(deadline);
-
-                    reactor.trigger(deadline.getId());
 
                     NumberedString answer = new NumberedString(userId,
                             "Task postponed");
                     responseQueue.add(answer);
+
+                    reactor.trigger(deadline.getId());
                     return null;
                 } catch (DeadlineNotFound e) {
                     NumberedString answer = new NumberedString(userId,
